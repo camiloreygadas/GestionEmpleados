@@ -39,7 +39,7 @@ app.secret_key = os.environ.get('FLASK_SECRET_KEY', secrets.token_hex(32))
 
 # Configuración de base de datos
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(basedir, "asistencia.db")}'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////data/asistencia.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Configuración de archivos
