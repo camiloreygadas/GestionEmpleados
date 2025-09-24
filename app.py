@@ -27,6 +27,7 @@ import threading
 import time
 from math import ceil
 from collections import defaultdict
+from itertools import cycle
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
@@ -467,57 +468,57 @@ def get_comunas_por_region(region_id):
         return jsonify({'error': 'Error interno del servidor'}), 500
     
 
+# EN app.py, REEMPLAZA TU FUNCIÓN agregar_empleado CON ESTA:
+
 @app.route('/agregar', methods=['POST'])
 def agregar_empleado():
     form_data = request.form.to_dict()
 
-    # ▼▼▼ ¡NUEVA VALIDACIÓN CLAVE! ▼▼▼
-    # 1. Definimos los campos que son obligatorios en la base de datos (NOT NULL)
+    # Validación de campos obligatorios
     campos_obligatorios = {
-        'rut': 'RUT',
-        'nombre_completo': 'Nombre Completo',
-        'fecha_ingreso': 'Fecha de Ingreso',
-        'cargo_id': 'Cargo',
-        'turno_id': 'Turno',
-        'status_id': 'Status'
-        # Puedes añadir más campos aquí si también son obligatorios
+        'rut': 'RUT', 'nombre_completo': 'Nombre Completo', 'fecha_ingreso': 'Fecha de Ingreso'
     }
-
-    # 2. Verificamos que ninguno de estos campos venga vacío del formulario
     for campo_db, nombre_humano in campos_obligatorios.items():
-        if not form_data.get(campo_db): # .get() es más seguro
-            # Si un campo obligatorio está vacío, detenemos todo y enviamos un error claro.
-            flash(f'Error: El campo "{nombre_humano}" es obligatorio. Por favor, completa toda la información.', 'danger')
-            return redirect(url_for('index'))
-    # ▲▲▲ FIN DE LA VALIDACIÓN ▲▲▲
+        if not form_data.get(campo_db):
+            return jsonify({'success': False, 'message': f'Error: El campo "{nombre_humano}" es obligatorio.'}), 400
 
-    # --- El resto de tu código original y funcional ---
-    if 'edad_calculada' in form_data: 
-        del form_data['edad_calculada']
-    
-    if 'fecha_vencimiento_contrato' in form_data and not form_data['fecha_vencimiento_contrato']:
-        form_data['fecha_vencimiento_contrato'] = None
-        
-    conn = get_db_connection()  
+    conn = get_db_connection()
     try:
+        # Verificación de RUT duplicado
+        rut_normalizado = normalizar_rut(form_data.get('rut'))
+        cursor_check = conn.execute(
+            "SELECT id FROM empleados WHERE REPLACE(REPLACE(REPLACE(rut, '.', ''), '-', ''), ' ', '') = ?",
+            (rut_normalizado,)
+        )
+        if cursor_check.fetchone():
+            conn.close()
+            return jsonify({'success': False, 'message': 'Error: Ya existe un empleado con ese RUT.'}), 409
+
+        # Procesar valores vacíos para que no den error en la BD
+        for key, value in form_data.items():
+            if value == '' or value == 'None':
+                form_data[key] = None
+        
+        # Inserción en la base de datos
         columns = ', '.join(form_data.keys())
         placeholders = ', '.join(['?'] * len(form_data))
         sql = f'INSERT INTO empleados ({columns}) VALUES ({placeholders})'
         
-        cursor = conn.execute(sql, list(form_data.values()))
-        
-        nuevo_empleado_id = cursor.lastrowid
-        
+        conn.execute(sql, list(form_data.values()))
         conn.commit()
-      
-        flash('Empleado agregado con éxito.', 'success')
         
+        # Respuesta JSON de éxito
+        return jsonify({'success': True, 'message': 'Empleado agregado con éxito.'})
+
+    except sqlite3.Error as e:
+        conn.rollback()
+        return jsonify({'success': False, 'message': f'Error en la base de datos: {str(e)}'}), 500
     except Exception as e:
-        flash(f'Error al agregar empleado: {e}', 'danger')
+        conn.rollback()
+        return jsonify({'success': False, 'message': f'Error inesperado: {str(e)}'}), 500
     finally:
-        conn.close()
-        
-    return redirect(url_for('index', active_modules='registrar_empleado,empleados_registrados'))
+        if conn:
+            conn.close()
  
 @app.route('/api/server-time')
 def get_server_time_unique():
@@ -4674,120 +4675,77 @@ def eliminar_turno(turno_id):
 
 # Agregar estas rutas al final de app.py, antes de if __name__ == '__main__':
 
-@app.route('/api/buscar_empleados')
-def api_buscar_empleados():
-    """API para búsqueda AJAX en tiempo real"""
-    query = request.args.get('query', '').strip()
-    limit = request.args.get('limit', 20, type=int)
+@app.route('/buscar_empleados', methods=['POST']) 
+def buscar_empleados_ajax(): # Le cambiamos el nombre para evitar confusión
+    """
+    API para búsqueda AJAX que ahora responde al formulario principal.
+    """
+    # CAMBIO 2: Lee los datos de request.form en lugar de request.args
+    query = request.form.get('query', '').strip()
+    search_by = request.form.get('search_by', 'rut')
     
-    if len(query) < 2:
-        return jsonify({'empleados': [], 'total': 0, 'message': 'Ingrese al menos 2 caracteres'})
+    # Si no hay texto en la búsqueda, devolvemos un resultado vacío.
+    if not query:
+        return jsonify({'empleados': [], 'count': 0})
     
     conn = get_db_connection()
     
-    # Búsqueda inteligente en múltiples campos
-    sql = '''
-        SELECT e.id, e.rut, e.nombre_completo, e.id_sap_local, e.id_sap_global,
-               e.fecha_ingreso, e.fecha_egreso, e.telefono, e.email,
-               c.nombre as cargo, a.nombre as area, t.nombre as turno,
-               s.nombre as status
-        FROM empleados e
+    # Consulta base para obtener los datos que la tabla necesita mostrar
+    base_query = """
+        SELECT e.id, e.rut, e.nombre_completo, e.id_sap_local, e.telefono, 
+               c.nombre as cargo_nombre, a.nombre as area_nombre, s.nombre as status_nombre
+        FROM empleados e 
         LEFT JOIN cargos c ON e.cargo_id = c.id
-        LEFT JOIN areas a ON e.area_id = a.id  
-        LEFT JOIN turnos t ON e.turno_id = t.id
+        LEFT JOIN areas a ON e.area_id = a.id
         LEFT JOIN status_empleado s ON e.status_id = s.id
-        WHERE (
-            LOWER(e.nombre_completo) LIKE LOWER(?) OR
-            e.rut LIKE ? OR
-            LOWER(e.id_sap_local) LIKE LOWER(?) OR
-            LOWER(e.id_sap_global) LIKE LOWER(?) OR
-            LOWER(c.nombre) LIKE LOWER(?) OR
-            LOWER(a.nombre) LIKE LOWER(?) OR
-            LOWER(t.nombre) LIKE LOWER(?)
-        )
-        ORDER BY 
-            CASE WHEN e.rut LIKE ? THEN 1 ELSE 2 END,
-            CASE WHEN LOWER(e.nombre_completo) LIKE LOWER(?) THEN 1 ELSE 2 END,
-            e.nombre_completo
-        LIMIT ?
-    '''
+    """
     
-    search_param = f'%{query}%'
-    exact_rut = f'{query}%'
-    exact_name = f'{query}%'
+    where_conditions = []
+    params = []
     
-    empleados_raw = conn.execute(sql, (
-        search_param, search_param, search_param, search_param,
-        search_param, search_param, search_param,
-        exact_rut, exact_name, limit
-    )).fetchall()
-    
-    # Contar total (para paginación futura)
-    count_sql = '''
-        SELECT COUNT(*) as total
-        FROM empleados e
-        LEFT JOIN cargos c ON e.cargo_id = c.id
-        LEFT JOIN areas a ON e.area_id = a.id  
-        LEFT JOIN turnos t ON e.turno_id = t.id
-        WHERE (
-            LOWER(e.nombre_completo) LIKE LOWER(?) OR
-            e.rut LIKE ? OR
-            LOWER(e.id_sap_local) LIKE LOWER(?) OR
-            LOWER(e.id_sap_global) LIKE LOWER(?) OR
-            LOWER(c.nombre) LIKE LOWER(?) OR
-            LOWER(a.nombre) LIKE LOWER(?) OR
-            LOWER(t.nombre) LIKE LOWER(?)
-        )
-    '''
-    
-    total = conn.execute(count_sql, (
-        search_param, search_param, search_param, search_param,
-        search_param, search_param, search_param
-    )).fetchone()['total']
-    
+    # Dividimos la consulta por si el usuario pega una lista de RUTs o IDs
+    terminos_busqueda = [term.strip() for term in re.split(r'[,\n\r\s]+', query) if term.strip()]
+
+    if not terminos_busqueda:
+        conn.close()
+        return jsonify({'empleados': [], 'count': 0})
+
+    # CAMBIO 3: La lógica de búsqueda ahora respeta la selección del usuario (RUT o ID SAP)
+    if search_by == 'rut':
+        # Crea una condición por cada RUT pegado en el formulario
+        condiciones = []
+        for term in terminos_busqueda:
+            rut_limpio = normalizar_rut(term) # Usa la función que ya tienes para limpiar el RUT
+            condiciones.append("REPLACE(REPLACE(REPLACE(e.rut, '.', ''), '-', ''), ' ', '') LIKE ?")
+            params.append(f"%{rut_limpio}%")
+        where_clause = " WHERE (" + " OR ".join(condiciones) + ")"
+   
+    elif search_by == 'id_sap_local':
+        # Crea una condición por cada ID SAP pegado
+        placeholders = ', '.join(['?'] * len(terminos_busqueda))
+        where_clause = f" WHERE e.id_sap_local IN ({placeholders})"
+        params = terminos_busqueda
+
+    else: # Por si acaso, una búsqueda por nombre si el campo no es RUT o ID
+        condiciones = []
+        for term in terminos_busqueda:
+            condiciones.append("e.nombre_completo LIKE ?")
+            params.append(f"%{term}%")
+        where_clause = " WHERE (" + " OR ".join(condiciones) + ")"
+
+    # Unimos todo y ejecutamos la consulta
+    final_query = base_query + where_clause + " ORDER BY e.nombre_completo"
+    empleados_raw = conn.execute(final_query, params).fetchall()
+    empleados = [dict(row) for row in empleados_raw]
+
     conn.close()
     
-    # Convertir a diccionarios y agregar campos calculados
-    empleados = []
-    for emp in empleados_raw:
-        emp_dict = dict(emp)
-        
-        # Calcular edad si hay fecha de nacimiento
-        if emp_dict.get('fecha_nacimiento'):
-            try:
-                from datetime import date
-                birth_date = datetime.strptime(emp_dict['fecha_nacimiento'], '%Y-%m-%d').date()
-                today = date.today()
-                emp_dict['edad'] = today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
-            except:
-                emp_dict['edad'] = None
-                
-        # Estado del empleado (activo/egresado)
-        emp_dict['esta_activo'] = not emp_dict.get('fecha_egreso')
-        
-        # Highlighting de términos encontrados
-        emp_dict['match_fields'] = []
-        query_lower = query.lower()
-        
-        if query_lower in emp_dict['nombre_completo'].lower():
-            emp_dict['match_fields'].append('nombre')
-        if query in emp_dict.get('rut', ''):
-            emp_dict['match_fields'].append('rut')
-        if emp_dict.get('cargo') and query_lower in emp_dict['cargo'].lower():
-            emp_dict['match_fields'].append('cargo')
-        if emp_dict.get('area') and query_lower in emp_dict['area'].lower():
-            emp_dict['match_fields'].append('area')
-            
-        empleados.append(emp_dict)
-    
+    # Devolvemos el JSON que el frontend espera
     return jsonify({
         'empleados': empleados,
-        'total': total,
-        'query': query,
-        'limit': limit,
-        'has_more': total > limit
+        'count': len(empleados)
     })
-
+    
 @app.route('/api/filtros_avanzados')
 def api_filtros_avanzados():
     """API para obtener opciones de filtros dinámicamente"""
@@ -5775,66 +5733,81 @@ def api_search_employees():
 
 @app.before_request
 def log_requests():
-    if request.endpoint and 'empleado' in request.endpoint:
+     if request.endpoint and 'empleado' in request.endpoint:
         print(f"RUTA LLAMADA: {request.method} {request.path} -> {request.endpoint}")
         
+def limpiar_rut(rut):
+    """Limpia un RUT quitando puntos, guiones y lo pasa a minúsculas."""
+    if not isinstance(rut, str):
+        return ''
+    return rut.replace('.', '').replace('-', '').lower()
+
 # 3. AGREGAR validación de RUT mejorada (el frontend la necesita):
 
 @app.route('/api/validate-rut', methods=['POST'])
 def api_validate_rut():
-    """Validar RUT chileno"""
-    data = request.get_json()
-    rut = data.get('rut', '').strip()
-    
-    if not rut:
-        return jsonify({'valid': False, 'message': 'RUT requerido'})
-    
+    """
+    Valida el formato y la unicidad de un RUT en tiempo real. CORREGIDO.
+    """
     try:
-        # Limpiar RUT
-        clean_rut = rut.replace('.', '').replace('-', '').replace(' ', '').upper()
-        
-        if len(clean_rut) < 8 or len(clean_rut) > 9:
-            return jsonify({'valid': False, 'message': 'RUT debe tener 8 o 9 caracteres'})
-        
-        # Separar dígitos y verificador
+        data = request.get_json()
+        rut_a_validar = data.get('rut', '').strip()
+
+        if not rut_a_validar:
+            return jsonify({'valid': False, 'message': 'El RUT no puede estar vacío.'}), 400
+
+        # 1. Validar el formato del RUT
+        clean_rut = rut_a_validar.replace('.', '').replace('-', '').upper()
+        if len(clean_rut) < 2:
+            return jsonify({'valid': False, 'message': 'RUT demasiado corto.'})
+             
         rut_digits = clean_rut[:-1]
         check_digit = clean_rut[-1]
         
-        # Algoritmo de validación
-        multiplier = 2
-        sum_total = 0
+        # Algoritmo de validación del dígito verificador (Módulo 11) - CORREGIDO
+        if not rut_digits.isdigit():
+            return jsonify({'valid': False, 'message': 'El cuerpo del RUT debe contener solo números.'})
+
+        reversed_digits = map(int, reversed(rut_digits))
+        factors = cycle(range(2, 8))
+        s = sum(d * f for d, f in zip(reversed_digits, factors))
+        calculated_check_num = (11 - (s % 11)) % 11
         
-        for digit in reversed(rut_digits):
-            sum_total += int(digit) * multiplier
-            multiplier = 7 if multiplier == 7 else multiplier + 1
-            if multiplier > 7:
-                multiplier = 2
-        
-        remainder = sum_total % 11
-        calculated_check = '0' if remainder == 0 else 'K' if remainder == 1 else str(11 - remainder)
-        
-        is_valid = check_digit == calculated_check
-        
-        if is_valid:
-            # Verificar si ya existe en la BD
-            conn = get_db_connection()
-            existing = conn.execute('SELECT id, nombre_completo FROM empleados WHERE rut = ?', (rut,)).fetchone()
-            conn.close()
-            
-            if existing:
-                return jsonify({
-                    'valid': True, 
-                    'exists': True,
-                    'message': f'RUT válido pero ya existe: {existing["nombre_completo"]}',
-                    'employee_id': existing['id']
-                })
-            else:
-                return jsonify({'valid': True, 'exists': False, 'message': 'RUT válido y disponible'})
+        if calculated_check_num == 10:
+            calculated_check_str = 'K'
         else:
-            return jsonify({'valid': False, 'message': 'RUT inválido - dígito verificador incorrecto'})
-            
+            calculated_check_str = str(calculated_check_num)
+
+        is_valid_format = (check_digit == calculated_check_str)
+
+        if not is_valid_format:
+            return jsonify({'valid': False, 'message': 'RUT inválido - dígito verificador incorrecto.'})
+
+        # 2. Si el formato es válido, verificar si ya existe en la base de datos
+        conn = get_db_connection()
+        rut_limpio_busqueda = limpiar_rut(rut_a_validar) # Usar helper para búsqueda consistente
+        
+        existente = conn.execute(
+            "SELECT id, nombre_completo FROM empleados WHERE lower(replace(replace(rut, '.', ''), '-', '')) = ?",
+            (rut_limpio_busqueda,)
+        ).fetchone()
+        conn.close()
+
+        if existente:
+            return jsonify({
+                'valid': False, # No es válido para ser USADO, aunque el formato sea correcto
+                'exists': True,
+                'message': f'RUT ya registrado para: {existente["nombre_completo"]}.'
+            })
+        else:
+            return jsonify({
+                'valid': True,
+                'exists': False,
+                'message': 'RUT válido y disponible.'
+            })
+
     except Exception as e:
-        return jsonify({'valid': False, 'message': f'Error validando RUT: {str(e)}'})
+        return jsonify({'valid': False, 'message': f'Error en el servidor: {str(e)}'}), 500
 
 # 4. MEJORAR el endpoint de empleado existente para incluir más campos:
 
