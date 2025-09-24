@@ -1,0 +1,1340 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Analytics{% endblock %}
+
+{% block content %}
+<style>
+/* ===================================================================== */
+/* CSS OPTIMIZADO PARA dashboard_analytics.html                         */
+/* ===================================================================== */
+
+/* VARIABLES CSS - TEMA CLARO Y OSCURO */
+:root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-tertiary: #e9ecef;
+    --text-primary: #212529;
+    --text-secondary: #6c757d;
+    --text-muted: #adb5bd;
+    --border-color: #dee2e6;
+    --accent-color: #0d6efd;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --warning-color: #fd7e14;
+    --info-color: #0dcaf0;
+    --shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+    --gradient-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --card-hover: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+[data-bs-theme="dark"] {
+    --bg-primary: #212529;
+    --bg-secondary: #343a40;
+    --bg-tertiary: #495057;
+    --text-primary: #ffffff;
+    --text-secondary: #adb5bd;
+    --text-muted: #6c757d;
+    --border-color: #495057;
+    --shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.5);
+    --gradient-bg: linear-gradient(135deg, #434343 0%, #000000 100%);
+    --card-hover: 0 0.5rem 1rem rgba(0, 0, 0, 0.5);
+}
+
+/* LAYOUT PRINCIPAL */
+.escape-container {
+    width: 100vw !important;
+    position: relative !important;
+    left: 50% !important;
+    right: 50% !important;
+    margin-left: -50vw !important;
+    margin-right: -50vw !important;
+    max-width: none !important;
+}
+
+.content-wrapper {
+    padding: 1rem 2rem;
+}
+
+@media (min-width: 768px) { .content-wrapper { padding: 1rem 4rem; } }
+@media (min-width: 1200px) { .content-wrapper { padding: 1rem 6rem; } }
+@media (min-width: 1400px) { .content-wrapper { padding: 1rem 8rem; } }
+
+/* ESTILOS BASE */
+body {
+    background: var(--bg-secondary) !important; 
+    color: var(--text-primary) !important; 
+}
+
+/* CARDS Y CONTENEDORES */
+.card {
+    margin-bottom: 2rem;
+    border-radius: 1rem;
+    box-shadow: var(--shadow-lg);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+}
+
+.card-body { 
+    padding: 2rem; 
+    color: var(--text-primary);
+}
+
+.card-header {
+    padding: 1.5rem 2rem;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    border-radius: 1rem 1rem 0 0;
+}
+
+.card-header h5 {
+    font-size: 1.25rem;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+/* HEADER CON GRADIENTE */
+.header-gradient {
+    background: var(--gradient-bg);
+    padding: 3rem 0;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+    width: 100vw;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+}
+
+.header-title {
+    color: white;
+    font-weight: 700;
+    font-size: 2.5rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    margin: 0;
+    text-align: center;
+}
+
+@media (max-width: 767px) {
+    .header-title { font-size: 1.8rem; }
+    .content-wrapper { padding: 1rem; }
+}
+
+/* TOGGLE DE TEMA */
+.ui-controls {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.theme-toggle {
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    border-radius: 50px;
+    padding: 0.75rem 1.25rem;
+    box-shadow: var(--shadow-lg);
+}
+
+.theme-toggle-btn {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 25px;
+}
+
+/* MODO ESPEJO */
+.mirror-mode .content-wrapper {
+    transform: scaleX(-1);
+}
+
+.mirror-mode .metric-card,
+.mirror-mode .chart-card,
+.mirror-mode .card-header h5,
+.mirror-mode .table,
+.mirror-mode .btn,
+.mirror-mode .form-control,
+.mirror-mode .form-select,
+.mirror-mode .header-title,
+.mirror-mode .modal-content {
+    transform: scaleX(-1);
+}
+
+/* FORMULARIOS */
+.form-control, .form-select {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.1);
+}
+
+.form-label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+/* BOTONES */
+.btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    border: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+}
+
+.nav-btn {
+    min-width: 250px;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--accent-color);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+    background: var(--accent-color);
+    color: white;
+    transform: translateY(-2px);
+    text-decoration: none;
+}
+
+/* MÉTRICAS */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.metric-card {
+    background: var(--bg-primary);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    border: 2px solid transparent; /* Borde para la transición */
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    text-align: center;
+}
+
+.metric-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.metric-card:hover {
+    box-shadow: var(--card-hover);
+    transform: translateY(-4px);
+    border-color: var(--accent-color);
+}
+
+.metric-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0; /* Ajustado para el nuevo layout */
+    font-size: 1.5rem;
+    color: white;
+}
+
+.metric-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    text-align: left;
+}
+
+.metric-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-align: left;
+}
+
+.metric-change {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-align: right;
+}
+
+.change-positive { color: var(--success-color); }
+.change-negative { color: var(--danger-color); }
+
+/* GRÁFICOS */
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+}
+
+.chart-card {
+    background: var(--bg-primary);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    border: 2px solid transparent; /* Borde para la transición */
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.chart-card:hover {
+    box-shadow: var(--card-hover);
+    transform: translateY(-4px);
+    border-color: var(--info-color);
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.chart-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.chart-container {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    min-height: 250px;
+    max-height: 350px;
+}
+
+/* TABLAS */
+.table-container {
+    background: var(--bg-primary);
+    border-radius: 1rem;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    margin-top: 2rem;
+    border: 1px solid var(--border-color);
+}
+
+.table {
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.table thead th {
+    background: linear-gradient(135deg, var(--accent-color) 0%, #0b5ed7 100%);
+    color: white;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    padding: 1.25rem 1rem;
+    border: none;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.table thead th:first-child { text-align: left; }
+.table thead th:nth-child(3) { text-align: left; }
+
+.table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.1);
+}
+
+.table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.table td:first-child,
+.table td:nth-child(3) {
+    text-align: left;
+    font-weight: 600;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(13, 110, 253, 0.03);
+}
+
+/* BADGES */
+.badge {
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-success {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    color: #065f46;
+}
+
+.badge-warning {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+}
+
+.badge-danger {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    color: #991b1b;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .container-fluid { padding: 1rem; }
+    .metrics-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+    .charts-grid { grid-template-columns: 1fr; }
+    .chart-container { height: 250px; }
+    .theme-toggle {
+        position: relative;
+        top: auto;
+        right: auto;
+        margin-bottom: 1rem;
+    }
+}
+
+/* ANIMACIONES */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.8s ease-out;
+}
+
+/* UTILIDADES */
+.icon-accent {
+    color: var(--accent-color);
+}
+
+.text-gradient {
+    background: linear-gradient(135deg, var(--accent-color), var(--info-color));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* SISTEMA DE NOTIFICACIONES TOAST */
+.toast-container {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 400px;
+    pointer-events: none;
+}
+
+.toast-notification {
+    background: var(--bg-primary);
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-lg);
+    border-left: 4px solid;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    animation: slideIn 0.4s ease forwards;
+    pointer-events: all;
+}
+
+.toast-notification.toast-success { border-left-color: var(--success-color); }
+.toast-notification.toast-error { border-left-color: var(--danger-color); }
+.toast-notification.toast-warning { border-left-color: var(--warning-color); }
+.toast-notification.toast-info { border-left-color: var(--accent-color); }
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+#employeeDetailModal .modal-dialog {
+    max-width: 900px;
+}
+
+#employeeDetailModal .table-sm td {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+#employeeDetailModal .table-sm th {
+    padding: 0.5rem;
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+#employeeDetailModal .badge {
+    font-size: 0.75rem;
+}
+
+.modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.table-responsive {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.toast-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+    opacity: 0.7;
+}
+
+.toast-close:hover {
+    opacity: 1;
+}
+
+.removing {
+    transform: translateX(100%);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+/* ============================================ */
+/* ===    ESTILOS MEJORADOS PARA EL MODAL   === */
+/* ============================================ */
+.modal-content {
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    border: none;
+}
+.modal-header {
+    background-color: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-color);
+}
+.modal-title {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+.modal-body h6 {
+    color: var(--accent-color);
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+.info-grid {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+.info-grid dt {
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+.info-grid dd {
+    margin: 0;
+    font-weight: 500;
+}
+</style>
+
+<div class="ui-controls">
+    <div class="theme-toggle">
+        <button class="theme-toggle-btn" onclick="toggleTheme()" title="Cambiar tema">
+            <i class="fas fa-moon" id="theme-icon"></i>
+        </button>
+    </div>
+    <div class="theme-toggle">
+        <button class="theme-toggle-btn" onclick="toggleMirrorMode()" title="Activar/Desactivar Modo Espejo">
+            <i class="fas fa-exchange-alt"></i>
+        </button>
+    </div>
+</div>
+
+<div class="content-wrapper">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header"><h5 class="mb-0">Buscar Empleado</h5></div>
+        <div class="card-body">
+            <form class="row g-3 align-items-end" id="searchForm">
+                <div class="col-md-3"><label for="search_rut" class="form-label">RUT</label><input type="text" class="form-control" id="search_rut"></div>
+                <div class="col-md-3"><label for="search_id_sap" class="form-label">ID SAP LOCAL</label><input type="text" class="form-control" id="search_id_sap"></div>
+                <div class="col-md-4"><label for="search_name" class="form-label">Nombre</label><input type="text" class="form-control" id="search_name"></div>
+                <div class="col-md-2"><button type="submit" class="btn btn-primary w-100">Buscar</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Métricas Generales del Sistema</h5>
+                <div>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="refreshDashboard()"><i class="fas fa-sync-alt me-1"></i>Actualizar</button>
+                    <div class="dropdown d-inline-block">
+                        <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown"><i class="fas fa-download me-1"></i>Exportar</button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="exportExcel()">Excel</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="exportPDF()">PDF</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="exportCSV()">CSV</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-icon" style="background: #3b82f6;"><i class="fas fa-users"></i></div>
+                        <div class="metric-change" id="total_empleados_change">...</div>
+                    </div>
+                    <div class="metric-value" id="total_empleados">0</div>
+                    <div class="metric-label">Total Empleados</div>
+                </div>
+                <div class="metric-card" onclick="filterEmployeesByChange('cargo_id')" style="cursor: pointer;" title="Ver empleados con promociones">
+                    <div class="metric-header">
+                        <div class="metric-icon" style="background: #10b981;"><i class="fas fa-arrow-up-right-dots"></i></div>
+                        <div class="metric-change" id="promociones_change">...</div>
+                    </div>
+                    <div class="metric-value" id="promociones">0</div>
+                    <div class="metric-label">Promociones</div>
+                </div>
+                <div class="metric-card" onclick="filterEmployeesByChange('fase_id')" style="cursor: pointer;" title="Ver empleados con cambio de fase">
+                    <div class="metric-header">
+                        <div class="metric-icon" style="background: #8b5cf6;"><i class="fas fa-project-diagram"></i></div>
+                        <div class="metric-change" id="cambios_fase_change">...</div>
+                    </div>
+                    <div class="metric-value" id="Cambio_de_Fase">0</div>
+                    <div class="metric-label">Cambios de Fase</div>
+                </div>
+                <div class="metric-card" onclick="filterEmployeesByChange('area_id')" style="cursor: pointer;" title="Ver empleados con cambio de área">
+                    <div class="metric-header">
+                        <div class="metric-icon" style="background: #f59e0b;"><i class="fas fa-exchange-alt"></i></div>
+                        <div class="metric-change" id="cambios_area_change">...</div>
+                    </div>
+                    <div class="metric-value" id="cambios_area">0</div>
+                    <div class="metric-label">Cambios de Área</div>
+                </div>
+                <div class="metric-card" onclick="filterEmployeesByChange('turno_id')" style="cursor: pointer;" title="Ver empleados con cambio de turno">
+                    <div class="metric-header">
+                        <div class="metric-icon" style="background: #e879f9;"><i class="fas fa-clock"></i></div>
+                        <div class="metric-change" id="cambios_turno_change">...</div>
+                    </div>
+                    <div class="metric-value" id="cambios_turno">0</div>
+                    <div class="metric-label">Cambios de Turno</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-icon" style="background: #38bdf8;"><i class="fas fa-dollar-sign"></i></div>
+                        <div class="metric-change" id="incremento_salarial_change">...</div>
+                    </div>
+                    <div class="metric-value" id="incremento_salarial">0%</div>
+                    <div class="metric-label">Incremento Salarial Promedio</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header"><h5 class="mb-0">Análisis y Tendencias</h5></div>
+        <div class="card-body">
+            <div class="charts-grid">
+                <div class="chart-card" style="grid-column: span 2;">
+                    <div class="chart-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="chart-title mb-0">Rotación de Personal (Ingresos vs. Egresos)</h6>
+                            <small class="text-muted">Últimos 12 meses</small>
+                        </div>
+                        <div id="turnover-chart-controls" class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn btn-outline-primary active" onclick="changeTurnoverChartType('bar')">
+                                <i class="fas fa-chart-bar"></i> Barras
+                            </button>
+                            <button type="button" class="btn btn-outline-primary" onclick="changeTurnoverChartType('line')">
+                                <i class="fas fa-chart-line"></i> Líneas
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="turnoverChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><h6 class="chart-title">Cambios por Turno</h6></div>
+                    <div class="chart-container"><canvas id="turnoChart"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><h6 class="chart-title">Incrementos Salariales</h6></div>
+                    <div class="chart-container"><canvas id="salaryChart"></canvas></div>
+                </div>
+                <div class="chart-card" style="grid-column: span 2;">
+                    <div class="chart-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="chart-title mb-0">Timeline de Cambios</h6>
+                            <small class="text-muted">Últimos 12 meses</small>
+                        </div>
+                        <div id="timeline-chart-controls" class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn btn-outline-primary active" onclick="changeTimelineChartType('line')">
+                                <i class="fas fa-chart-line"></i> Líneas
+                            </button>
+                            <button type="button" class="btn btn-outline-primary" onclick="changeTimelineChartType('bar')">
+                                <i class="fas fa-chart-bar"></i> Barras
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="timelineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center w-100">
+                <h5 class="mb-0">
+                    <i class="fas fa-table me-2"></i>
+                    <span id="employeeTableTitle">Empleados con Más Cambios Organizacionales</span>
+                </h5>
+                <button id="clearFilterBtn" class="btn btn-sm btn-outline-secondary d-none" onclick="clearEmployeeFilter()">
+                    <i class="fas fa-times me-1"></i>
+                    Mostrar Todos
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-container">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>RUT</th><th>Nombre</th><th>ID SAP</th><th>Total Cambios</th><th>Último Cambio</th>
+                                <th>Incremento Salarial</th><th>Estado</th><th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employeeTableBody"></tbody>
+                    </table>
+                </div>
+                <div id="emptyState" class="d-none text-center p-5">
+                    <p class="text-muted">No se encontraron resultados para la búsqueda.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="employeeDetailModal" tabindex="-1" aria-labelledby="employeeDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="employeeDetailModalLabel">
+                    <i class="fas fa-user-circle me-2"></i>
+                    Detalle del Empleado
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="employeeDetailContent">
+                <div class="text-center p-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 1050;"></div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// ===================================================================
+// === SCRIPT COMPLETO Y DEFINITIVO PARA DASHBOARD ANALYTICS ===
+// ===================================================================
+
+// --- VARIABLES GLOBALES Y CONFIGURACIÓN ---
+let salaryChart, timelineChart, turnoChart, turnoverChart;
+
+function getChartColors(theme) {
+    const isDark = theme === 'dark';
+    return {
+        // Colores base de la paleta
+        primary: '#3b82f6', success: '#369821', danger: '#ef4444', warning: '#f59e0b', info: '#38bdf8',
+        // Paleta extendida para gráficos
+        purple: '#8b5cf6', pink: '#ec4899', teal: '#14b8a6', orange: '#f97316',
+        // Colores de UI
+        text: isDark ? '#f4fcf1' : '#0c2b08',
+        grid: isDark ? '#2e771e' : '#e4f9df'
+    };
+}
+
+// --- INICIALIZACIÓN DEL SISTEMA ---
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.body.setAttribute('data-bs-theme', savedTheme);
+        const themeIcon = document.getElementById('theme-icon');
+        if (themeIcon) { themeIcon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon'; }
+        
+        initCharts();
+        
+        // Carga inicial de todos los datos
+        loadDashboardMetrics();
+        loadChartsDataCorrected();
+        loadTopChangedEmployeesCorrected();
+        
+        // Conectar buscador
+        const searchForm = document.getElementById('searchForm');
+        if(searchForm) {
+            searchForm.addEventListener('submit', e => e.preventDefault());
+            ['search_rut', 'search_id_sap', 'search_name'].forEach(id => {
+                const input = document.getElementById(id);
+                if (input) input.addEventListener('input', filterEmployeeTable);
+            });
+        }
+    } catch (error) { console.error('Error fatal en la inicialización del dashboard:', error); }
+});
+
+// --- FUNCIONES DE GRÁFICOS ---
+function initCharts() {
+    const theme = document.body.getAttribute('data-bs-theme') || 'light';
+    const colors = getChartColors(theme);
+
+    const turnoverCtx = document.getElementById('turnoverChart');
+    if (turnoverCtx) {
+        turnoverChart = new Chart(turnoverCtx, { type: 'bar', data: { labels: [], datasets: [ { label: 'Ingresos', data: [], backgroundColor: colors.success, borderRadius: 4 }, { label: 'Egresos', data: [], backgroundColor: colors.danger, borderRadius: 4 } ]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { color: colors.text } } }, scales: { y: { beginAtZero: true, grid: { color: colors.grid }, ticks: { color: colors.text } }, x: { grid: { display: false }, ticks: { color: colors.text } } } } });
+    }
+
+    const turnoCtx = document.getElementById('turnoChart');
+    if (turnoCtx) {
+        turnoChart = new Chart(turnoCtx, { type: 'doughnut', data: { labels: [], datasets: [{ data: [], backgroundColor: [colors.primary, colors.info, colors.purple, colors.pink, colors.orange] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: colors.text, usePointStyle: true } } } } });
+    }
+
+    const salaryCtx = document.getElementById('salaryChart');
+    if (salaryCtx) {
+        salaryChart = new Chart(salaryCtx, { type: 'bar', data: { labels: [], datasets: [{ label: 'Incremento %', data: [], backgroundColor: colors.warning, borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: colors.grid }, ticks: { color: colors.text, callback: (v) => v + '%' } }, x: { grid: { display: false }, ticks: { color: colors.text } } } } });
+    }
+
+    const timelineCtx = document.getElementById('timelineChart');
+    if (timelineCtx) {
+        timelineChart = new Chart(timelineCtx, { type: 'line', data: { labels: [], datasets: [ { label: 'Promociones', data: [], borderColor: colors.teal, backgroundColor: colors.teal + '33', fill: true, tension: 0.4 }, { label: 'Cambios de Área', data: [], borderColor: colors.primary, backgroundColor: colors.primary + '33', fill: true, tension: 0.4 } ]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { color: colors.text, usePointStyle: true } } }, scales: { y: { beginAtZero: true, grid: { color: colors.grid }, ticks: { color: colors.text } }, x: { grid: { color: colors.grid }, ticks: { color: colors.text } } } } });
+    }
+}
+
+// ==========================================================
+// === NUEVA FUNCIÓN PARA CAMBIAR VISTA DE GRÁFICO ROTACIÓN ===
+// ==========================================================
+function changeTurnoverChartType(newType) {
+    if (!turnoverChart) return;
+
+    // Actualizar el estado 'active' de los botones
+    const btnContainer = document.getElementById('turnover-chart-controls');
+    if(btnContainer) {
+        const buttons = btnContainer.querySelectorAll('button');
+        buttons.forEach(button => {
+            button.classList.remove('active');
+            if (button.textContent.toLowerCase().includes(newType)) {
+                button.classList.add('active');
+            }
+        });
+    }
+
+    // Cambiar la configuración para que las líneas se vean bien
+    if (newType === 'line') {
+        turnoverChart.data.datasets.forEach(dataset => {
+            // Hacemos la línea visible y el área de fondo semitransparente
+            dataset.tension = 0.4;
+            dataset.fill = true;
+            if (dataset.label === 'Ingresos') {
+                dataset.borderColor = getChartColors().success;
+                dataset.backgroundColor = getChartColors().success + '33'; // 20% de opacidad
+            } else {
+                dataset.borderColor = getChartColors().danger;
+                dataset.backgroundColor = getChartColors().danger + '33';
+            }
+        });
+    } else { // Para 'bar'
+        turnoverChart.data.datasets.forEach(dataset => {
+            // Revertimos a colores sólidos para las barras
+            dataset.fill = false;
+            if (dataset.label === 'Ingresos') {
+                dataset.backgroundColor = getChartColors().success;
+            } else {
+                dataset.backgroundColor = getChartColors().danger;
+            }
+        });
+    }
+    
+    // Cambiar el tipo de gráfico y actualizarlo
+    turnoverChart.config.type = newType;
+    turnoverChart.update();
+}
+
+function changeTimelineChartType(type) {
+    if (timelineChart) {
+        const data = timelineChart.data;
+        timelineChart.destroy();
+        const timelineCtx = document.getElementById('timelineChart');
+        const theme = document.body.getAttribute('data-bs-theme') || 'light';
+        const colors = getChartColors(theme);
+        timelineChart = new Chart(timelineCtx, {
+            type: type,
+            data: data,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { color: colors.text, usePointStyle: true }
+                    }
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: colors.grid }, ticks: { color: colors.text } },
+                    x: { grid: { color: colors.grid }, ticks: { color: colors.text } }
+                }
+            }
+        });
+        document.querySelectorAll('#timeline-chart-controls .btn').forEach(btn => btn.classList.remove('active'));
+        const activeButton = document.querySelector(`#timeline-chart-controls button[onclick="changeTimelineChartType('${type}')"]`);
+        if (activeButton) { activeButton.classList.add('active'); }
+    }
+}
+
+function clearEmployeeFilter() {
+    // Recarga la lista original de empleados con más cambios
+    loadTopChangedEmployeesCorrected();
+
+    // Restablece el título de la tabla
+    const tableTitle = document.getElementById('employeeTableTitle');
+    if (tableTitle) {
+        tableTitle.textContent = 'Empleados con Más Cambios Organizacionales';
+    }
+
+    // Oculta el botón de limpiar filtro
+    const clearBtn = document.getElementById('clearFilterBtn');
+    if (clearBtn) {
+        clearBtn.classList.add('d-none');
+    }
+}
+
+// ============================================
+// === NUEVA FUNCIÓN PARA CAMBIAR TIPO DE GRÁFICO ===
+// ============================================
+function changeTimelineChartType(newType) {
+    if (!timelineChart) return;
+
+    // Actualizar el estado 'active' de los botones
+    const btnGroup = document.querySelector('.btn-group');
+    if(btnGroup) {
+        const buttons = btnGroup.querySelectorAll('button');
+        buttons.forEach(button => {
+            button.classList.remove('active');
+            if (button.textContent.toLowerCase().includes(newType)) {
+                button.classList.add('active');
+            }
+        });
+    }
+
+    // Cambiar el tipo de gráfico y actualizarlo
+    timelineChart.config.type = newType;
+    timelineChart.update();
+}
+
+// ============================================
+// === FUNCIÓN PARA FILTRAR TABLA DESDE MÉTRICAS (DRILL-DOWN) ===
+// ============================================
+function filterEmployeesByChange(changeType) {
+    showToast(`Buscando empleados con cambio de: ${changeType}...`, 'info');
+    const tbody = document.getElementById('employeeTableBody');
+    if (!tbody) return;
+
+    // Mostrar un estado de carga en la tabla
+    tbody.innerHTML = '<tr><td colspan="8" class="text-center p-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div></td></tr>';
+
+    fetch(`/api/analytics/employees_by_change_type?type=${changeType}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Actualizar el título de la tabla
+                const tableTitle = document.getElementById('employeeTableTitle');
+                if (tableTitle) {
+                    const changeTypeLabels = {
+                        'cargo_id': 'Promociones',
+                        'area_id': 'Cambios de Área',
+                        'turno_id': 'Cambios de Turno',
+                        'fase_id': 'Cambios de Fase'
+                    };
+                    tableTitle.textContent = `Empleados con: ${changeTypeLabels[changeType] || 'Cambios'}`;
+                }
+
+                // Mostrar el botón para limpiar el filtro
+                const clearBtn = document.getElementById('clearFilterBtn');
+                if (clearBtn) {
+                    clearBtn.classList.remove('d-none');
+                }
+
+                // Reutilizamos la lógica de construcción de la tabla
+                tbody.innerHTML = ''; // Limpiar la tabla
+                
+                if (data.employees.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" class="text-center p-5 text-muted">No se encontraron empleados para este tipo de cambio en el mes actual.</td></tr>';
+                    return;
+                }
+                
+                data.employees.forEach(emp => {
+                    const rowHtml = `
+                        <tr data-rut="${(emp.rut || '').toLowerCase()}" 
+                            data-nombre="${(emp.nombre_completo || '').toLowerCase()}" 
+                            data-sap="${(emp.id_sap_local || '').toLowerCase()}">
+                            <td>${emp.rut || 'N/A'}</td>
+                            <td>${emp.nombre_completo || 'N/A'}</td>
+                            <td>${emp.id_sap_local || 'N/A'}</td>
+                            <td><span class="badge bg-warning text-dark">${emp.total_cambios}</span></td>
+                            <td>${emp.ultimo_cambio || 'N/A'}</td>
+                            <td class="text-success fw-bold">${emp.incremento_salarial > 0 ? `+${emp.incremento_salarial}%` : '—'}</td>
+                            <td><span class="badge ${emp.status_nombre === 'Vigente' ? 'bg-success' : 'bg-danger'}">${emp.status_nombre || 'N/A'}</span></td>
+                            <td><button class="btn btn-primary btn-sm" onclick="viewEmployeeDetailFixed('${emp.id_sap_local}')"><i class="fas fa-eye"></i></button></td>
+                        </tr>`;
+                    tbody.innerHTML += rowHtml;
+                });
+                showToast(`Se encontraron ${data.employees.length} empleados.`, 'success');
+            } else {
+                showToast(`Error: ${data.error}`, 'error');
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center p-5 text-danger">Error al cargar los datos.</td></tr>`;
+            }
+        })
+        .catch(error => {
+            showToast('Error de conexión.', 'error');
+            console.error('Error en filterEmployeesByChange:', error);
+        });
+}
+
+// --- FUNCIONES DE CARGA DE DATOS ---
+async function loadDashboardMetrics() {
+    try {
+        const response = await fetch('/api/analytics/metrics?cache_bust=' + new Date().getTime());
+        const data = await response.json();
+        if (data.success && data.metrics) { const metrics = data.metrics; animateCounter(document.getElementById('total_empleados'), metrics.total_empleados); document.getElementById('total_empleados_change').innerHTML = 'Empleados activos'; animateCounter(document.getElementById('promociones'), metrics.promociones.current); document.getElementById('promociones_change').innerHTML = formatPercentageChange(metrics.promociones.current, metrics.promociones.previous); animateCounter(document.getElementById('Cambio_de_Fase'), metrics.cambios_fase.current); document.getElementById('cambios_fase_change').innerHTML = formatPercentageChange(metrics.cambios_fase.current, metrics.cambios_fase.previous); animateCounter(document.getElementById('cambios_area'), metrics.cambios_area.current); document.getElementById('cambios_area_change').innerHTML = formatPercentageChange(metrics.cambios_area.current, metrics.cambios_area.previous); animateCounter(document.getElementById('cambios_turno'), metrics.cambios_turno.current); document.getElementById('cambios_turno_change').innerHTML = formatPercentageChange(metrics.cambios_turno.current, metrics.cambios_turno.previous); animateCounter(document.getElementById('incremento_salarial'), metrics.incremento_salarial + '%'); document.getElementById('incremento_salarial_change').innerHTML = 'Promedio en promociones'; }
+    } catch (error) { console.error('Error cargando métricas:', error); }
+}
+
+async function loadChartsDataCorrected() {
+    try {
+        const turnoverResponse = await fetch('/api/analytics/charts/employee_turnover');
+        const turnoverData = await turnoverResponse.json();
+        if (turnoverData.success && turnoverChart) {
+            turnoverChart.data.labels = turnoverData.data.labels;
+            turnoverChart.data.datasets[0].data = turnoverData.data.hires;
+            turnoverChart.data.datasets[1].data = turnoverData.data.departures;
+            turnoverChart.update();
+        }
+        
+        const salaryResponse = await fetch('/api/analytics/charts/salary_increments');
+        const salaryData = await salaryResponse.json();
+        if (salaryData.success && salaryChart) {
+            salaryChart.data.labels = salaryData.data.labels[0].includes('Sin') ? ['Sin datos'] : salaryData.data.labels;
+            salaryChart.data.datasets[0].data = salaryData.data.values;
+            salaryChart.update();
+        }
+        
+        const turnoResponse = await fetch('/api/analytics/charts/turno_changes');
+        const turnoData = await turnoResponse.json();
+        if (turnoData.success && turnoChart) {
+            turnoChart.data.labels = turnoData.data.labels;
+            turnoChart.data.datasets[0].data = turnoData.data.values;
+            turnoChart.update();
+        }
+        
+        const timelineResponse = await fetch('/api/analytics/charts/timeline_changes');
+        const timelineData = await timelineResponse.json();
+        if (timelineData.success && timelineChart) {
+            timelineChart.data.labels = timelineData.data.labels;
+            timelineChart.data.datasets[0].data = timelineData.data.promociones;
+            timelineChart.data.datasets[1].data = timelineData.data.cambios_area;
+            timelineChart.update();
+        }
+    } catch (error) { console.error('Error cargando datos de gráficos:', error); }
+}
+
+function loadTopChangedEmployeesCorrected() {
+    const tbody = document.getElementById('employeeTableBody');
+    if (!tbody) { console.error("Elemento 'employeeTableBody' no encontrado."); return; }
+    
+    fetch('/api/analytics/top_changed_employees')
+    .then(response => response.json())
+    .then(data => {
+        if(data.success) {
+            tbody.innerHTML = '';
+            data.employees.forEach(emp => {
+                const rowHtml = `<tr data-rut="${(emp.rut || '').toLowerCase()}" data-nombre="${(emp.nombre_completo || '').toLowerCase()}" data-sap="${(emp.id_sap_local || '').toLowerCase()}">
+                    <td>${emp.rut || 'N/A'}</td> <td>${emp.nombre_completo || 'N/A'}</td> <td>${emp.id_sap_local || 'N/A'}</td>
+                    <td><span class="badge bg-warning text-dark">${emp.total_cambios}</span></td> <td>${emp.ultimo_cambio || 'N/A'}</td>
+                    <td class="text-success fw-bold">${emp.incremento_salarial > 0 ? `+${emp.incremento_salarial}%` : '—'}</td> <td><span class="badge ${emp.status_nombre === 'Vigente' ? 'bg-success' : 'bg-danger'}">${emp.status_nombre || 'N/A'}</span></td>
+                    <td><button class="btn btn-primary btn-sm" onclick="viewEmployeeDetailFixed('${emp.id_sap_local}')"><i class="fas fa-eye"></i></button></td>
+                </tr>`;
+                tbody.innerHTML += rowHtml;
+            });
+        }
+    }).catch(error => console.error('Error al cargar empleados:', error));
+}
+
+// --- FUNCIONES DE UTILIDAD (COMPLETAS Y RESTAURADAS) ---
+
+function toggleTheme() {
+    const body = document.body;
+    const themeIcon = document.getElementById('theme-icon');
+    const newTheme = body.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light';
+    body.setAttribute('data-bs-theme', newTheme);
+    if(themeIcon) themeIcon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    localStorage.setItem('theme', newTheme);
+    updateChartsTheme(newTheme);
+}
+
+function toggleMirrorMode() {
+    document.body.classList.toggle('mirror-mode');
+    const isMirror = document.body.classList.contains('mirror-mode');
+    showToast(`Modo espejo ${isMirror ? 'activado' : 'desactivado'}`, 'info');
+}
+
+function updateChartsTheme(theme) {
+    const colors = getChartColors(theme);
+    [salaryChart, timelineChart, turnoChart, turnoverChart].forEach(chart => {
+        if (chart) {
+            if(chart.options.plugins.legend) chart.options.plugins.legend.labels.color = colors.text;
+            if(chart.options.scales.y) {
+                chart.options.scales.y.ticks.color = colors.text;
+                chart.options.scales.y.grid.color = colors.grid;
+            }
+            if(chart.options.scales.x) {
+                chart.options.scales.x.ticks.color = colors.text;
+                if(chart.options.scales.x.grid) chart.options.scales.x.grid.color = colors.grid;
+            }
+            chart.update();
+        }
+    });
+}
+
+// ==========================================================
+// ===         SECCIÓN DE MODAL RESTAURADA Y MEJORADA       ===
+// ==========================================================
+
+function viewEmployeeDetailFixed(idSap) {
+    showToast('Cargando información del empleado...', 'info');
+    fetch(`/api/analytics/employee_detail/${idSap}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showEmployeeModalFixed(data.empleado, data.cambios_recientes);
+            } else {
+                showToast(`Error: ${data.error}`, 'error');
+            }
+        })
+        .catch(error => showToast('Error de conexión', 'error'));
+}
+
+function showEmployeeModalFixed(empleado, cambios) {
+    const modalEl = document.getElementById('employeeDetailModal');
+    if (!modalEl) return;
+
+    const formatearFecha = (fecha) => fecha && fecha !== 'N/A' ? new Date(fecha).toLocaleDateString('es-CL', { timeZone: 'UTC' }) : 'N/A';
+
+    let edad = 'N/A';
+    if (empleado.fecha_nacimiento && empleado.fecha_nacimiento !== 'N/A') {
+        const nacimiento = new Date(empleado.fecha_nacimiento);
+        const hoy = new Date();
+        edad = Math.floor((hoy - nacimiento) / (365.25 * 24 * 60 * 60 * 1000));
+    }
+
+    let cambiosHtml = cambios && cambios.length > 0 ? `
+        <h6 class="mt-4"><i class="fas fa-history me-2"></i>Historial de Cambios Recientes</h6>
+        <div class="table-responsive" style="max-height: 200px;">
+            <table class="table table-sm table-striped table-hover">
+                <thead><tr><th>Fecha</th><th>Campo</th><th>Valor Anterior</th><th>Valor Nuevo</th></tr></thead>
+                <tbody>
+                    ${cambios.map(c => `
+                        <tr>
+                            <td>${formatearFecha(c.fecha_cambio)}</td>
+                            <td>${traducirCampo(c.campo_modificado)}</td>
+                            <td class="text-muted">${c.valor_anterior || 'N/A'}</td>
+                            <td class="fw-bold">${c.valor_nuevo || 'N/A'}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>` : '<p class="mt-4 text-muted"><i class="fas fa-info-circle me-2"></i>No hay cambios organizacionales recientes.</p>';
+
+    const content = `
+        <div class="row">
+            <div class="col-md-6">
+                <h6><i class="fas fa-id-card me-2"></i>Información Personal</h6>
+                <dl class="info-grid">
+                    <dt>RUT:</dt><dd>${empleado.rut || 'N/A'}</dd>
+                    <dt>Nombre:</dt><dd>${empleado.nombre_completo || 'N/A'}</dd>
+                    <dt>Edad:</dt><dd>${edad}</dd>
+                    <dt>Teléfono:</dt><dd>${empleado.telefono || 'N/A'}</dd>
+                    <dt>Email:</dt><dd>${empleado.correo_electronico || 'N/A'}</dd>
+                </dl>
+            </div>
+            <div class="col-md-6">
+                <h6><i class="fas fa-briefcase me-2"></i>Información Laboral</h6>
+                <dl class="info-grid">
+                    <dt>ID SAP:</dt><dd>${empleado.id_sap_local || 'N/A'}</dd>
+                    <dt>Cargo:</dt><dd>${empleado.cargo_nombre || 'N/A'}</dd>
+                    <dt>Área:</dt><dd>${empleado.area_nombre || 'N/A'}</dd>
+                    <dt>Turno:</dt><dd>${empleado.turno_nombre || 'N/A'}</dd>
+                    <dt>Estado:</dt><dd><span class="badge ${empleado.status_nombre === 'Vigente' ? 'bg-success' : 'bg-danger'}">${empleado.status_nombre || 'N/A'}</span></dd>
+                    <dt>Fecha Ingreso:</dt><dd>${formatearFecha(empleado.fecha_ingreso)}</dd>
+                </dl>
+            </div>
+        </div>
+        ${cambiosHtml}
+        <div class="mt-3 text-end">
+            <button class="btn btn-sm btn-outline-primary" onclick="openEmployeeEdit(${empleado.id})">
+                <i class="fas fa-edit me-1"></i> Ir a Ficha Completa
+            </button>
+        </div>
+    `;
+    
+    document.getElementById('employeeDetailContent').innerHTML = content;
+    const bootstrapModal = new bootstrap.Modal(modalEl);
+    bootstrapModal.show();
+}
+
+function traducirCampo(campo) {
+    const traducciones = {
+        'cargo_id': 'Cargo', 'area_id': 'Área', 'turno_id': 'Turno',
+        'supervision_id': 'Supervisión', 'fase_id': 'Fase',
+        'region_id': 'Región', 'comuna_id': 'Comuna'
+    };
+    return traducciones[campo] || campo.replace('_id', '').replace('_', ' ').toUpperCase();
+}
+
+function openEmployeeEdit(empleadoId) {
+    window.open(`/editar/${empleadoId}`, '_blank');
+}
+
+function openEmployeeEdit(empleadoId) {
+    window.open(`/editar/${empleadoId}`, '_blank');
+}
+
+async function refreshDashboard() {
+    showToast('Actualizando...', 'info');
+    try {
+        await Promise.all([loadDashboardMetrics(), loadChartsDataCorrected(), loadTopChangedEmployeesCorrected()]);
+        showToast('Dashboard actualizado', 'success');
+    } catch (error) { showToast('Error al actualizar', 'error'); }
+}
+
+function exportExcel() { window.location.href = '/api/analytics/export/excel'; }
+function exportPDF() { window.location.href = '/api/analytics/export/pdf'; }
+
+function filterEmployeeTable() {
+    const qRut = document.getElementById('search_rut').value.toLowerCase().trim();
+    const qSap = document.getElementById('search_id_sap').value.toLowerCase().trim();
+    const qName = document.getElementById('search_name').value.toLowerCase().trim();
+    const rows = document.getElementById('employeeTableBody').rows;
+    const emptyState = document.getElementById('emptyState');
+    let visible = 0;
+    for (const row of rows) {
+        const isVisible = (row.dataset.rut || '').includes(qRut) && (row.dataset.nombre || '').includes(qName) && (row.dataset.sap || '').includes(qSap);
+        row.style.display = isVisible ? "" : "none";
+        if(isVisible) visible++;
+    }
+    if (emptyState) emptyState.classList.toggle('d-none', visible > 0);
+}
+
+function animateCounter(el, val) {
+    if (!el) return;
+    const s = String(val);
+    const t = parseFloat(s.replace(/,/g, ''));
+    if (isNaN(t)) { el.textContent = s; return; }
+    const duration = 1500, startTime = performance.now();
+    const update = (ct) => {
+        const e = ct - startTime, p = Math.min(e / duration, 1);
+        const cv = (t) * (1 - Math.pow(1 - p, 3)); // easeOutCubic
+        el.textContent = s.includes('%') ? `${Math.round(cv)}%` : Math.round(cv).toLocaleString('es-CL');
+        if (p < 1) requestAnimationFrame(update);
+    };
+    requestAnimationFrame(update);
+}
+
+function formatPercentageChange(cur, prev) {
+    if (prev === 0) return cur > 0 ? '<i class="fas fa-arrow-up"></i> <span class="change-positive">Act. Nueva</span>' : 'S/C';
+    const p = ((cur - prev) / prev) * 100;
+    if (p > 0) return `<i class="fas fa-arrow-up"></i> <span class="change-positive">+${p.toFixed(0)}%</span>`;
+    if (p < 0) return `<i class="fas fa-arrow-down"></i> <span class="change-negative">${p.toFixed(0)}%</span>`;
+    return 'S/C';
+}
+
+function showToast(message, type = 'info', duration = 3000) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type} alert-dismissible fade show`;
+    toast.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+    container.appendChild(toast);
+    setTimeout(() => { if (toast) new bootstrap.Alert(toast).close(); }, duration);
+}
+
+</script>
+{% endblock %}

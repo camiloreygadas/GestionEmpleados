@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Alerta de Contratos por Vencer</title>
+    <style>
+        body { font-family: sans-serif; color: #333; }
+        .container { padding: 20px; border: 1px solid #ddd; border-radius: 8px; max-width: 600px; margin: auto; }
+        h1 { color: #d9534f; }
+        ul { list-style-type: none; padding: 0; }
+        li { background-color: #f9f9f9; border-left: 4px solid #d9534f; padding: 10px; margin-bottom: 8px; }
+        strong { color: #000; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Alerta de Contratos por Vencer</h1>
+        <p>Se ha detectado que los siguientes empleados tienen contratos que finalizarán en los próximos 30 días:</p>
+        
+        <ul>
+            {% for empleado in empleados %}
+            <li>
+                <strong>{{ empleado.nombre_completo }}</strong> (RUT: {{ empleado.rut }})<br>
+                Fecha de Vencimiento: <strong>{{ empleado.fecha_egreso }}</strong>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <p>Por favor, tomar las acciones correspondientes para su renovación o finiquito.</p>
+        <p><small>Este es un correo generado automáticamente por el Sistema de Gestión de RRHH.</small></p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,1813 @@
+{% extends 'base.html' %}
+{% block title %}Gestión de Sueldos por Cargo{% endblock %}
+{% block content %}
+
+<style>
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --border-color: #dee2e6;
+  --accent-color: #0d6efd;
+  --success-color: #198754;
+  --danger-color: #dc3545;
+  --warning-color: #fd7e14;
+  --shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+  --gradient-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+[data-bs-theme="dark"] {
+  --bg-primary: #212529;
+  --bg-secondary: #343a40;
+  --text-primary: #ffffff;
+  --text-secondary: #adb5bd;
+  --border-color: #495057;
+  --shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.5);
+  --gradient-bg: linear-gradient(135deg, #434343 0%, #000000 100%);
+}
+
+body {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.escape-container {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  max-width: none;
+}
+
+.content-wrapper {
+  padding: 1rem 2rem;
+}
+
+.header-gradient {
+  background: var(--gradient-bg);
+  padding: 3rem 0;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+  width: 100vw;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+}
+
+.header-title {
+  color: white;
+  font-weight: 700;
+  font-size: 2.5rem;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  margin: 0;
+  text-align: center;
+}
+
+.theme-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1050;
+  background: var(--bg-primary);
+  border: 2px solid var(--border-color);
+  border-radius: 50px;
+  padding: 0.75rem 1.25rem;
+  box-shadow: var(--shadow-lg);
+}
+
+.theme-toggle-btn {
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 25px;
+}
+
+.stats-card {
+  position: relative;
+  overflow: hidden;
+  border: none;
+  border-radius: 1.5rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+}
+
+.stats-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.2);
+}
+
+.stats-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  border-radius: 1.5rem;
+}
+
+.stats-card-1::before { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.stats-card-2::before { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+.stats-card-3::before { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+.stats-card-4::before { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+
+.stats-card .card-body {
+  position: relative;
+  z-index: 2;
+  color: white;
+  text-align: center;
+  padding: 2rem 1.5rem;
+}
+
+.stats-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.9;
+}
+
+.stats-number {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0.5rem 0;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.stats-label {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+.stats-sublabel {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  margin-top: 0.25rem;
+}
+
+.card {
+  margin-bottom: 2rem;
+  border-radius: 1rem;
+  box-shadow: var(--shadow-lg);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+}
+
+.card-body {
+  padding: 2rem;
+  color: var(--text-primary);
+}
+
+.card-header {
+  padding: 1.5rem 2rem;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  border-radius: 1rem 1rem 0 0;
+}
+
+.table-container {
+  background: var(--bg-primary);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  max-height: 700px;
+  position: relative;
+}
+
+.table-wrapper {
+  height: 500px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.table {
+  margin: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+.table thead th {
+  background: linear-gradient(135deg, var(--accent-color) 0%, #0b5ed7 100%);
+  color: white;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  padding: 1rem 0.75rem;
+  border: none;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.table thead th:first-child { text-align: left; }
+
+.table tbody tr {
+  transition: all 0.3s ease;
+}
+
+.table tbody tr:hover {
+  background-color: rgba(13, 110, 253, 0.1);
+  transform: translateY(-1px);
+}
+
+.table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.table td:first-child {
+  text-align: left;
+  font-weight: 600;
+  max-width: 300px;
+  word-wrap: break-word;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: rgba(13, 110, 253, 0.03);
+}
+
+.pagination-container {
+  padding: 1.5rem 2rem;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.pagination-info {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.per-page-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.per-page-selector select {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.25rem;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.pagination-btn {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.85rem;
+  min-width: 36px;
+  text-align: center;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: var(--accent-color);
+  color: white;
+  border-color: var(--accent-color);
+  transform: translateY(-1px);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-btn.active {
+  background: var(--accent-color);
+  color: white;
+  border-color: var(--accent-color);
+  box-shadow: var(--shadow);
+}
+
+.pagination-ellipsis {
+  padding: 0.5rem 0.25rem;
+  color: var(--text-secondary);
+}
+
+.form-control, .form-select {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.1);
+}
+
+.form-label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+.btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.badge {
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-success {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #065f46;
+}
+
+.badge-info {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #1e40af;
+}
+
+.badge-warning {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #92400e;
+}
+
+.badge-danger {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #991b1b;
+}
+
+.badge-secondary {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  color: #475569;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid var(--accent-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.salary-amount {
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  color: var(--success-color);
+}
+
+.cargo-nombre {
+  font-size: 0.8rem;
+  line-height: 1.2;
+}
+
+.toast-container {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 400px;
+}
+
+.toast-notification {
+  background: var(--bg-primary);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-lg);
+  border-left: 4px solid;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  animation: slideIn 0.4s ease forwards;
+}
+
+.toast-notification.toast-success { border-left-color: var(--success-color); }
+.toast-notification.toast-error { border-left-color: var(--danger-color); }
+.toast-notification.toast-warning { border-left-color: var(--warning-color); }
+.toast-notification.toast-info { border-left-color: var(--accent-color); }
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .content-wrapper { padding: 1rem; }
+  .header-title { font-size: 1.8rem; }
+  .table-responsive { font-size: 0.75rem; }
+  .theme-toggle {
+    position: relative;
+    top: auto;
+    right: auto;
+    margin-bottom: 1rem;
+  }
+  .stats-number { font-size: 2rem; }
+  .stats-icon { font-size: 2.5rem; }
+  .pagination-container {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+}
+</style>
+
+<!-- TOGGLE DE TEMA -->
+<div class="theme-toggle">
+  <button class="theme-toggle-btn" onclick="toggleTheme()" title="Cambiar tema">
+    <i class="fas fa-moon" id="theme-icon"></i>
+  </button>
+</div>
+
+<div class="escape-container">
+  <div class="content-wrapper">
+    
+    <!-- HEADER PRINCIPAL -->
+    <div class="header-gradient">
+      <div class="text-center">
+        <h1 class="header-title">
+          <i class="fas fa-dollar-sign me-3"></i>
+          Gestión de Sueldos por Cargo
+        </h1>
+        <p class="text-white-50 mb-0 fs-5">Administración de sueldos base para <span id="totalCargosHeader">625</span> cargos organizacionales</p>
+      </div>
+    </div>
+
+    <!-- NAVEGACIÓN -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-body d-flex justify-content-center flex-wrap gap-3 py-3">
+        <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
+          <i class="fas fa-users me-2"></i>
+          Gestión de Empleados
+        </a>
+        <a href="{{ url_for('dashboard_analytics') }}" class="btn btn-outline-info">
+          <i class="fas fa-chart-line me-2"></i>
+          Dashboard Analytics
+        </a>
+        <button class="btn btn-success" onclick="mostrarModalActualizacionMasiva()">
+          <i class="fas fa-edit me-2"></i>
+          Actualización Masiva
+        </button>
+        <button class="btn btn-warning" onclick="exportarSueldos()">
+          <i class="fas fa-file-excel me-2"></i>
+          Exportar Excel
+        </button>
+      </div>
+    </div>
+
+    <!-- ESTADÍSTICAS -->
+    <div class="row mb-4" id="statsContainer">
+      <div class="col-md-3">
+        <div class="card stats-card stats-card-1">
+          <div class="card-body">
+            <div class="stats-icon">
+              <i class="fas fa-briefcase"></i>
+            </div>
+            <div class="stats-number" id="totalCargos">-</div>
+            <div class="stats-label">Total Cargos</div>
+            <div class="stats-sublabel">En el sistema</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stats-card stats-card-2">
+          <div class="card-body">
+            <div class="stats-icon">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stats-number" id="conSueldo">-</div>
+            <div class="stats-label">Con Sueldo</div>
+            <div class="stats-sublabel">Configurados</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stats-card stats-card-3">
+          <div class="card-body">
+            <div class="stats-icon">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="stats-number" id="sueldoPromedio">-</div>
+            <div class="stats-label">Sueldo Promedio</div>
+            <div class="stats-sublabel">General</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stats-card stats-card-4">
+          <div class="card-body">
+            <div class="stats-icon">
+              <i class="fas fa-crown"></i>
+            </div>
+            <div class="stats-number" id="sueldoMaximo">-</div>
+            <div class="stats-label">Sueldo Máximo</div>
+            <div class="stats-sublabel">Más alto</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILTROS Y BÚSQUEDA -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">
+          <i class="fas fa-search me-2"></i>
+          Búsqueda y Filtros
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-4">
+            <label for="buscarCargo" class="form-label">Buscar por nombre de cargo</label>
+            <input type="text" class="form-control" id="buscarCargo" placeholder="Ej: ADMINISTRA, OPERADOR, TECNICO...">
+          </div>
+          <div class="col-md-3">
+            <label for="filtroRango" class="form-label">Filtrar por rango salarial</label>
+            <select class="form-select" id="filtroRango">
+              <option value="">Todos los rangos</option>
+              <option value="alto">Alto (2M+)</option>
+              <option value="medio">Medio (1M-2M)</option>
+              <option value="bajo">Bajo (<1M)</option>
+              <option value="sin_sueldo">Sin sueldo asignado</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label for="ordenarPor" class="form-label">Ordenar por</label>
+            <select class="form-select" id="ordenarPor">
+              <option value="nombre">Nombre A-Z</option>
+              <option value="sueldo_desc">Sueldo (Mayor a menor)</option>
+              <option value="sueldo_asc">Sueldo (Menor a mayor)</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-primary w-100" onclick="aplicarFiltros()">
+              <i class="fas fa-filter me-1"></i>
+              Filtrar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLA DE CARGOS -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">
+            <i class="fas fa-table me-2"></i>
+            Cargos y Sueldos
+            <span class="badge bg-secondary ms-2" id="totalMostrados">0</span>
+          </h5>
+          <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary btn-sm" onclick="cargarCargos()">
+              <i class="fas fa-sync-alt me-1"></i>
+              Actualizar
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card-body p-0">
+        <div class="table-container">
+          <div class="table-wrapper">
+            <table class="table table-hover table-striped align-middle mb-0" id="cargosTable">
+              <thead>
+                <tr>
+                  <th width="50px">ID</th>
+                  <th>Nombre del Cargo</th>
+                  <th width="130px">Sueldo Base</th>
+                  <th width="120px">Rango</th>
+                  <th width="100px">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="cargosTableBody">
+                <tr>
+                  <td colspan="5" class="text-center p-4">
+                    <div class="loading-spinner me-2"></div>
+                    Cargando cargos...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- PAGINACIÓN -->
+          <div class="pagination-container">
+            <div class="pagination-info">
+              <div>
+                Mostrando <span id="showingFrom">0</span> - <span id="showingTo">0</span> de <span id="totalRegistros">0</span> registros
+              </div>
+              <div class="per-page-selector">
+                <label for="perPageSelect">Mostrar:</label>
+                <select id="perPageSelect" onchange="cambiarPerPage()">
+                  <option value="25">25</option>
+                  <option value="50" selected>50</option>
+                  <option value="100">100</option>
+                </select>
+                <span>por página</span>
+              </div>
+            </div>
+            
+            <div class="pagination-controls" id="paginationControls">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL EDITAR SUELDO INDIVIDUAL -->
+<div class="modal fade" id="modalEditarSueldo" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-edit me-2"></i>
+          Actualizar Sueldo Individual
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formEditarSueldo">
+          <input type="hidden" id="cargoIdEdit" name="cargo_id">
+          <div class="mb-3">
+            <label for="cargoNombreEdit" class="form-label">Cargo</label>
+            <textarea class="form-control" id="cargoNombreEdit" rows="2" readonly></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="sueldoActualEdit" class="form-label">Sueldo Actual</label>
+            <input type="text" class="form-control" id="sueldoActualEdit" readonly>
+          </div>
+          <div class="mb-3">
+            <label for="nuevoSueldoEdit" class="form-label">Nuevo Sueldo Base</label>
+            <input type="number" class="form-control" id="nuevoSueldoEdit" name="sueldo_base"
+                   min="300000" max="10000000" step="1000" required>
+            <div class="form-text">Rango permitido: $300,000 - $10,000,000</div>
+          </div>
+          <div class="mb-3">
+            <label for="motivoEdit" class="form-label">Motivo del Cambio</label>
+            <select class="form-select" id="motivoEdit" name="motivo" required>
+              <option value="">Seleccionar motivo...</option>
+              <option value="Ajuste por inflación">Ajuste por inflación</option>
+              <option value="Reestructuración salarial">Reestructuración salarial</option>
+              <option value="Corrección de mercado">Corrección de mercado</option>
+              <option value="Política de aumentos">Política de aumentos</option>
+              <option value="Corrección administrativa">Corrección administrativa</option>
+              <option value="Actualización manual">Actualización manual</option>
+              <option value="Otro">Otro motivo</option>
+            </select>
+          </div>
+          <div class="mb-3" id="motivoOtroEdit" style="display: none;">
+            <label for="motivoOtroTextoEdit" class="form-label">Especificar motivo</label>
+            <input type="text" class="form-control" id="motivoOtroTextoEdit" maxlength="100">
+          </div>
+          <div class="alert alert-info" id="incrementoInfo" style="display: none;">
+            <i class="fas fa-info-circle me-2"></i>
+            <span id="incrementoTexto"></span>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-success" onclick="guardarSueldoIndividual()">
+          <i class="fas fa-save me-2"></i>
+          Guardar Cambios
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ACTUALIZACIÓN MASIVA -->
+<div class="modal fade" id="modalActualizacionMasiva" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-edit me-2"></i>
+          Actualización Masiva de Sueldos
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted">Seleccione categorías y configure los nuevos sueldos base para actualización masiva.</p>
+        
+        <!-- SELECTOR DE CATEGORÍAS -->
+        <div class="mb-4">
+          <h6><i class="fas fa-filter me-2"></i>Filtrar por Categorías</h6>
+          <div class="row g-2">
+            <div class="col-md-6">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="catAdministrativo" value="administrativo">
+                <label class="form-check-label" for="catAdministrativo">Administrativos</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="catOperador" value="operador">
+                <label class="form-check-label" for="catOperador">Operadores</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="catTecnico" value="tecnico">
+                <label class="form-check-label" for="catTecnico">Técnicos</label>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="catSupervisor" value="supervisor">
+                <label class="form-check-label" for="catSupervisor">Supervisores</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="catManager" value="manager">
+                <label class="form-check-label" for="catManager">Managers</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="catOtros" value="otros">
+                <label class="form-check-label" for="catOtros">Otros</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <hr>
+
+        <!-- TIPO DE ACTUALIZACIÓN -->
+        <div class="mb-3">
+          <h6><i class="fas fa-cog me-2"></i>Tipo de Actualización</h6>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="tipoActualizacion" id="tipoPorcentual" value="porcentual" checked>
+            <label class="form-check-label" for="tipoPorcentual">Ajuste Porcentual</label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="tipoActualizacion" id="tipoFijo" value="fijo">
+            <label class="form-check-label" for="tipoFijo">Sueldo Fijo por Categoría</label>
+          </div>
+        </div>
+
+        <!-- OPCIÓN PORCENTUAL -->
+        <div id="opcionPorcentual">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="porcentajeAjuste" class="form-label">Porcentaje de Ajuste (%)</label>
+              <input type="number" class="form-control" id="porcentajeAjuste" step="0.1" placeholder="Ej: 3.5" min="0" max="100">
+            </div>
+            <div class="col-md-6">
+              <label for="redondeoAjuste" class="form-label">Redondear a los</label>
+              <select class="form-select" id="redondeoAjuste">
+                <option value="1">Más cercano $1</option>
+                <option value="10">Más cercano $10</option>
+                <option value="100">Más cercano $100</option>
+                <option value="1000" selected>Más cercano $1,000</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- OPCIÓN FIJO -->
+        <div id="opcionFijo" style="display: none;">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="sueldoAdministrativo" class="form-label">Administrativos</label>
+              <input type="number" class="form-control" id="sueldoAdministrativo" step="1000" placeholder="Ej: 800000">
+            </div>
+            <div class="col-md-6">
+              <label for="sueldoOperador" class="form-label">Operadores</label>
+              <input type="number" class="form-control" id="sueldoOperador" step="1000" placeholder="Ej: 600000">
+            </div>
+            <div class="col-md-6">
+              <label for="sueldoTecnico" class="form-label">Técnicos</label>
+              <input type="number" class="form-control" id="sueldoTecnico" step="1000" placeholder="Ej: 900000">
+            </div>
+            <div class="col-md-6">
+              <label for="sueldoSupervisor" class="form-label">Supervisores</label>
+              <input type="number" class="form-control" id="sueldoSupervisor" step="1000" placeholder="Ej: 1200000">
+            </div>
+            <div class="col-md-6">
+              <label for="sueldoManager" class="form-label">Managers</label>
+              <input type="number" class="form-control" id="sueldoManager" step="1000" placeholder="Ej: 1800000">
+            </div>
+            <div class="col-md-6">
+              <label for="sueldoOtros" class="form-label">Otros</label>
+              <input type="number" class="form-control" id="sueldoOtros" step="1000" placeholder="Ej: 500000">
+            </div>
+          </div>
+        </div>
+
+        <hr>
+
+        <div class="mb-3">
+          <label for="motivoMasivo" class="form-label">Motivo del Cambio Masivo</label>
+          <select class="form-select" id="motivoMasivo" name="motivo" required>
+            <option value="">Seleccionar motivo...</option>
+            <option value="Ajuste por inflación">Ajuste por inflación</option>
+            <option value="Reestructuración salarial">Reestructuración salarial</option>
+            <option value="Corrección de mercado">Corrección de mercado</option>
+            <option value="Política de aumentos">Política de aumentos</option>
+            <option value="Otro">Otro motivo</option>
+          </select>
+        </div>
+        <div class="mb-3" id="motivoOtroMasivo" style="display: none;">
+          <label for="motivoOtroTextoMasivo" class="form-label">Especificar motivo</label>
+          <input type="text" class="form-control" id="motivoOtroTextoMasivo" maxlength="100">
+        </div>
+
+        <div class="alert alert-info mt-4" id="previsualizacionMasiva" style="display: none;">
+          <h6 class="alert-heading"><i class="fas fa-eye me-2"></i>Previsualización</h6>
+          <div id="resumenPrevision">
+            <p><strong>Cargos afectados:</strong> <span id="cargosAfectados">0</span></p>
+            <p><strong>Costo adicional mensual:</strong> <span id="costoAdicional">$0</span></p>
+            <p><strong>Incremento promedio:</strong> <span id="incrementoPromedio">0%</span></p>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-info" onclick="previsualizarActualizacionMasiva()">
+          <i class="fas fa-search-dollar me-2"></i>
+          Previsualizar
+        </button>
+        <button type="button" class="btn btn-success" id="btnAplicarMasivo" onclick="aplicarActualizacionMasiva()" disabled>
+          <i class="fas fa-check-circle me-2"></i>
+          Aplicar Actualización
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTAINER PARA NOTIFICACIONES -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// VARIABLES GLOBALES
+let currentPage = 1;
+let perPage = 50;
+let totalPages = 0;
+let totalRecords = 0;
+let currentFilters = {};
+let currentOrder = 'nombre';
+let isLoading = false;
+
+// INICIALIZACIÓN
+document.addEventListener('DOMContentLoaded', function() {
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  document.body.setAttribute('data-bs-theme', savedTheme);
+  const themeIcon = document.getElementById('theme-icon');
+  if (themeIcon) {
+    themeIcon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+  }
+
+  cargarCargos();
+  setupEventListeners();
+});
+
+function setupEventListeners() {
+  let searchTimeout;
+  document.getElementById('buscarCargo').addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      aplicarFiltros();
+    }, 500);
+  });
+
+  document.getElementById('motivoEdit').addEventListener('change', function() {
+    const motivoOtro = document.getElementById('motivoOtroEdit');
+    if (this.value === 'Otro') {
+      motivoOtro.style.display = 'block';
+      document.getElementById('motivoOtroTextoEdit').required = true;
+    } else {
+      motivoOtro.style.display = 'none';
+      document.getElementById('motivoOtroTextoEdit').required = false;
+    }
+  });
+
+  document.getElementById('motivoMasivo').addEventListener('change', function() {
+    const motivoOtro = document.getElementById('motivoOtroMasivo');
+    if (this.value === 'Otro') {
+      motivoOtro.style.display = 'block';
+      document.getElementById('motivoOtroTextoMasivo').required = true;
+    } else {
+      motivoOtro.style.display = 'none';
+      document.getElementById('motivoOtroTextoMasivo').required = false;
+    }
+  });
+
+  document.getElementById('nuevoSueldoEdit').addEventListener('input', function() {
+    calcularIncremento();
+  });
+
+  document.querySelectorAll('input[name="tipoActualizacion"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+      const opcionPorcentual = document.getElementById('opcionPorcentual');
+      const opcionFijo = document.getElementById('opcionFijo');
+      
+      if (this.value === 'porcentual') {
+        opcionPorcentual.style.display = 'block';
+        opcionFijo.style.display = 'none';
+      } else {
+        opcionPorcentual.style.display = 'none';
+        opcionFijo.style.display = 'block';
+      }
+      
+      document.getElementById('btnAplicarMasivo').disabled = true;
+      document.getElementById('previsualizacionMasiva').style.display = 'none';
+    });
+  });
+}
+
+// FUNCIONES DE CARGA DE DATOS
+async function cargarCargos(page = 1, resetPage = false) {
+  if (isLoading) return;
+  
+  try {
+    isLoading = true;
+    
+    if (resetPage) {
+      page = 1;
+      currentPage = 1;
+    }
+
+    showToast('Cargando cargos...', 'info', 1000);
+    mostrarLoadingEnTabla();
+
+    const params = new URLSearchParams({
+      page: page,
+      per_page: perPage,
+      orden: currentOrder
+    });
+
+    if (currentFilters.filtro) {
+      params.append('filtro', currentFilters.filtro);
+    }
+
+    const response = await fetch(`/api/cargos/sueldos?${params.toString()}`);
+    const data = await response.json();
+
+    if (data.success) {
+      currentPage = data.pagination ? data.pagination.page : page;
+      totalPages = data.pagination ? data.pagination.total_pages : Math.ceil(data.cargos.length / perPage);
+      totalRecords = data.pagination ? data.pagination.total_records : data.cargos.length;
+      perPage = data.pagination ? data.pagination.per_page : perPage;
+
+      actualizarTablaCargos(data.cargos);
+      actualizarPaginacion({
+        page: currentPage,
+        total_pages: totalPages,
+        total_records: totalRecords,
+        per_page: perPage,
+        has_prev: currentPage > 1,
+        has_next: currentPage < totalPages
+      });
+      
+      if (data.estadisticas) {
+        actualizarEstadisticas(data.estadisticas);
+      }
+
+      document.getElementById('totalCargosHeader').textContent = totalRecords;
+      
+      showToast(`${data.cargos.length} cargos cargados (Página ${currentPage} de ${totalPages})`, 'success', 2000);
+      
+    } else {
+      showToast('Error cargando cargos: ' + data.error, 'error');
+      mostrarErrorEnTabla('Error cargando datos');
+    }
+
+  } catch (error) {
+    console.error('Error cargando cargos:', error);
+    showToast('Error de conexión', 'error');
+    mostrarErrorEnTabla('Error de conexión');
+  } finally {
+    isLoading = false;
+  }
+}
+
+function mostrarLoadingEnTabla() {
+  const tbody = document.getElementById('cargosTableBody');
+  tbody.innerHTML = `
+    <tr>
+      <td colspan="5" class="text-center p-4">
+        <div class="loading-spinner me-2"></div>
+        Cargando cargos...
+      </td>
+    </tr>
+  `;
+}
+
+function mostrarErrorEnTabla(mensaje) {
+  const tbody = document.getElementById('cargosTableBody');
+  tbody.innerHTML = `
+    <tr>
+      <td colspan="5" class="text-center p-4 text-danger">
+        <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+        <p class="mb-2">${mensaje}</p>
+        <button class="btn btn-outline-primary btn-sm" onclick="cargarCargos()">
+          <i class="fas fa-retry me-1"></i>
+          Reintentar
+        </button>
+      </td>
+    </tr>
+  `;
+}
+
+function actualizarTablaCargos(cargos) {
+  const tbody = document.getElementById('cargosTableBody');
+  const totalMostrados = document.getElementById('totalMostrados');
+
+  if (!cargos || cargos.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" class="text-center p-4">
+          <i class="fas fa-inbox fa-2x text-muted mb-2"></i>
+          <p class="text-muted mb-0">No se encontraron cargos con los filtros aplicados</p>
+        </td>
+      </tr>
+    `;
+    totalMostrados.textContent = '0';
+    return;
+  }
+
+  tbody.innerHTML = '';
+  
+  const badgeColor = {
+    'Alto': 'badge-success',
+    'Medio-Alto': 'badge-info',
+    'Medio': 'badge-warning',
+    'Medio-Bajo': 'badge-secondary',
+    'Básico': 'badge-danger',
+    'Sin asignar': 'badge-secondary'
+  };
+
+  cargos.forEach(cargo => {
+    const row = document.createElement('tr');
+    row.dataset.cargoId = cargo.id;
+    
+    row.innerHTML = `
+      <td>${cargo.id}</td>
+      <td>
+        <div class="cargo-nombre" title="${escapeHtml(cargo.nombre)}">${escapeHtml(cargo.nombre)}</div>
+      </td>
+      <td>
+        <span class="salary-amount">${formatCurrency(cargo.sueldo_base || 0)}</span>
+      </td>
+      <td>
+        <span class="badge ${badgeColor[cargo.rango_salarial] || 'badge-secondary'}">
+          ${cargo.rango_salarial || 'Sin asignar'}
+        </span>
+      </td>
+      <td>
+        <button class="btn btn-primary btn-sm"
+                onclick="editarSueldoIndividual(${cargo.id}, '${escapeHtml(cargo.nombre)}', ${cargo.sueldo_base || 0})"
+                title="Editar sueldo">
+          <i class="fas fa-edit"></i>
+        </button>
+      </td>
+    `;
+    
+    tbody.appendChild(row);
+  });
+
+  totalMostrados.textContent = cargos.length;
+}
+
+// FUNCIONES DE PAGINACIÓN
+function actualizarPaginacion(pagination) {
+  const showingFrom = (pagination.page - 1) * pagination.per_page + 1;
+  const showingTo = Math.min(pagination.page * pagination.per_page, pagination.total_records);
+  
+  document.getElementById('showingFrom').textContent = showingFrom;
+  document.getElementById('showingTo').textContent = showingTo;
+  document.getElementById('totalRegistros').textContent = pagination.total_records;
+
+  generarControlesPaginacion(pagination);
+}
+
+function generarControlesPaginacion(pagination) {
+  const container = document.getElementById('paginationControls');
+  container.innerHTML = '';
+
+  const { page, total_pages, has_prev, has_next } = pagination;
+
+  const prevBtn = crearBotonPaginacion('«', page - 1, !has_prev);
+  container.appendChild(prevBtn);
+
+  const pageNumbers = generarNumerosPagina(page, total_pages);
+  pageNumbers.forEach(item => {
+    if (item === '...') {
+      const ellipsis = document.createElement('span');
+      ellipsis.className = 'pagination-ellipsis';
+      ellipsis.textContent = '...';
+      container.appendChild(ellipsis);
+    } else {
+      const pageBtn = crearBotonPaginacion(item, item, false, item === page);
+      container.appendChild(pageBtn);
+    }
+  });
+
+  const nextBtn = crearBotonPaginacion('»', page + 1, !has_next);
+  container.appendChild(nextBtn);
+}
+
+function crearBotonPaginacion(texto, pagina, disabled = false, active = false) {
+  const btn = document.createElement('button');
+  btn.className = `pagination-btn ${active ? 'active' : ''}`;
+  btn.textContent = texto;
+  btn.disabled = disabled;
+  
+  if (!disabled && !active) {
+    btn.onclick = () => irAPagina(pagina);
+  }
+  
+  return btn;
+}
+
+function generarNumerosPagina(currentPage, totalPages) {
+  const pages = [];
+  const delta = 2;
+
+  if (totalPages <= 7) {
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push(i);
+    }
+    return pages;
+  }
+
+  if (currentPage > delta + 2) {
+    pages.push(1);
+    if (currentPage > delta + 3) {
+      pages.push('...');
+    }
+  }
+
+  const start = Math.max(1, currentPage - delta);
+  const end = Math.min(totalPages, currentPage + delta);
+  
+  for (let i = start; i <= end; i++) {
+    pages.push(i);
+  }
+
+  if (currentPage < totalPages - delta - 1) {
+    if (currentPage < totalPages - delta - 2) {
+      pages.push('...');
+    }
+    pages.push(totalPages);
+  }
+
+  return pages;
+}
+
+function irAPagina(page) {
+  if (page < 1 || page > totalPages || page === currentPage || isLoading) {
+    return;
+  }
+  cargarCargos(page);
+}
+
+function cambiarPerPage() {
+  const newPerPage = parseInt(document.getElementById('perPageSelect').value);
+  if (newPerPage !== perPage) {
+    perPage = newPerPage;
+    cargarCargos(1, true);
+  }
+}
+
+// FUNCIONES DE FILTRADO Y BÚSQUEDA
+function aplicarFiltros() {
+  const busqueda = document.getElementById('buscarCargo').value.trim();
+  const rangoFiltro = document.getElementById('filtroRango').value;
+  const orden = document.getElementById('ordenarPor').value;
+
+  let filtro = null;
+  if (busqueda) {
+    filtro = `buscar:${busqueda}`;
+  } else if (rangoFiltro) {
+    filtro = rangoFiltro;
+  }
+
+  currentFilters = { filtro };
+  currentOrder = orden;
+
+  cargarCargos(1, true);
+}
+
+function limpiarFiltros() {
+  document.getElementById('buscarCargo').value = '';
+  document.getElementById('filtroRango').value = '';
+  document.getElementById('ordenarPor').value = 'nombre';
+  
+  currentFilters = {};
+  currentOrder = 'nombre';
+  
+  cargarCargos(1, true);
+}
+
+// FUNCIONES DE EDICIÓN Y ACTUALIZACIÓN
+function editarSueldoIndividual(cargoId, cargoNombre, sueldoActual) {
+  document.getElementById('cargoIdEdit').value = cargoId;
+  document.getElementById('cargoNombreEdit').value = cargoNombre;
+  document.getElementById('sueldoActualEdit').value = formatCurrency(sueldoActual);
+  document.getElementById('nuevoSueldoEdit').value = sueldoActual;
+
+  document.getElementById('motivoEdit').value = '';
+  document.getElementById('motivoOtroEdit').style.display = 'none';
+  document.getElementById('incrementoInfo').style.display = 'none';
+
+  const modal = new bootstrap.Modal(document.getElementById('modalEditarSueldo'));
+  modal.show();
+}
+
+async function guardarSueldoIndividual() {
+  const form = document.getElementById('formEditarSueldo');
+  const formData = new FormData(form);
+  const cargoId = formData.get('cargo_id');
+  const nuevoSueldo = formData.get('sueldo_base');
+  let motivo = formData.get('motivo');
+
+  if (!cargoId || !nuevoSueldo || !motivo) {
+    showToast('Todos los campos son requeridos', 'error');
+    return;
+  }
+
+  const sueldoNum = parseFloat(nuevoSueldo);
+  if (sueldoNum < 300000 || sueldoNum > 10000000) {
+    showToast('El sueldo debe estar entre $300,000 y $10,000,000', 'error');
+    return;
+  }
+
+  if (motivo === 'Otro') {
+    const motivoOtro = document.getElementById('motivoOtroTextoEdit').value.trim();
+    if (!motivoOtro) {
+      showToast('Debe especificar el motivo', 'error');
+      return;
+    }
+    motivo = motivoOtro;
+  }
+
+  try {
+    showToast('Actualizando sueldo...', 'info');
+
+    const response = await fetch('/api/cargos/actualizar_sueldo', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        cargo_id: parseInt(cargoId),
+        sueldo_base: sueldoNum,
+        motivo: motivo
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      showToast('Sueldo actualizado exitosamente', 'success');
+      
+      const modal = bootstrap.Modal.getInstance(document.getElementById('modalEditarSueldo'));
+      modal.hide();
+      
+      setTimeout(() => {
+        cargarCargos(currentPage);
+      }, 1000);
+      
+    } else {
+      showToast('Error: ' + data.error, 'error');
+    }
+
+  } catch (error) {
+    console.error('Error guardando sueldo:', error);
+    showToast('Error de conexión', 'error');
+  }
+}
+
+function calcularIncremento() {
+  const sueldoActualText = document.getElementById('sueldoActualEdit').value.replace(/[$.]/g, '').replace(/,/g, '');
+  const nuevoSueldoText = document.getElementById('nuevoSueldoEdit').value;
+  
+  const sueldoActual = parseFloat(sueldoActualText);
+  const nuevoSueldo = parseFloat(nuevoSueldoText);
+
+  if (sueldoActual && nuevoSueldo && sueldoActual > 0) {
+    const incremento = ((nuevoSueldo - sueldoActual) / sueldoActual) * 100;
+    const incrementoInfo = document.getElementById('incrementoInfo');
+    const incrementoTexto = document.getElementById('incrementoTexto');
+
+    if (incremento !== 0) {
+      const signo = incremento > 0 ? '+' : '';
+      const color = incremento > 0 ? 'success' : 'danger';
+      const icono = incremento > 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+      
+      incrementoTexto.innerHTML = `
+        <i class="fas ${icono} me-1"></i>
+        ${signo}${incremento.toFixed(2)}% respecto al sueldo actual
+        (${signo}${formatCurrency(nuevoSueldo - sueldoActual)})
+      `;
+      incrementoInfo.className = `alert alert-${color}`;
+      incrementoInfo.style.display = 'block';
+    } else {
+      incrementoInfo.style.display = 'none';
+    }
+  } else {
+    document.getElementById('incrementoInfo').style.display = 'none';
+  }
+}
+
+// FUNCIONES DE ESTADÍSTICAS
+function actualizarEstadisticas(stats) {
+  if (!stats) return;
+  
+  document.getElementById('totalCargos').textContent = stats.total_cargos || 0;
+  document.getElementById('conSueldo').textContent = stats.con_sueldo || 0;
+  document.getElementById('sueldoPromedio').textContent = formatCurrency(stats.sueldo_promedio || 0);
+  document.getElementById('sueldoMaximo').textContent = formatCurrency(stats.sueldo_maximo || 0);
+}
+
+// FUNCIONES DE ACTUALIZACIÓN MASIVA
+function mostrarModalActualizacionMasiva() {
+  document.querySelector('input[name="tipoActualizacion"][value="porcentual"]').checked = true;
+  document.getElementById('opcionPorcentual').style.display = 'block';
+  document.getElementById('opcionFijo').style.display = 'none';
+  document.getElementById('previsualizacionMasiva').style.display = 'none';
+  document.getElementById('porcentajeAjuste').value = '';
+  document.getElementById('motivoMasivo').value = '';
+  document.getElementById('btnAplicarMasivo').disabled = true;
+  
+  document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+  
+  document.getElementById('sueldoAdministrativo').value = '';
+  document.getElementById('sueldoOperador').value = '';
+  document.getElementById('sueldoTecnico').value = '';
+  document.getElementById('sueldoSupervisor').value = '';
+  document.getElementById('sueldoManager').value = '';
+  document.getElementById('sueldoOtros').value = '';
+
+  const modal = new bootstrap.Modal(document.getElementById('modalActualizacionMasiva'));
+  modal.show();
+}
+
+function previsualizarActualizacionMasiva() {
+  const categoriasSeleccionadas = [];
+  document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
+    categoriasSeleccionadas.push(cb.value);
+  });
+
+  if (categoriasSeleccionadas.length === 0) {
+    showToast('Debe seleccionar al menos una categoría', 'warning');
+    return;
+  }
+
+  const tipo = document.querySelector('input[name="tipoActualizacion"]:checked').value;
+  const motivo = document.getElementById('motivoMasivo').value;
+  
+  if (!motivo) {
+    showToast('Debe seleccionar un motivo', 'error');
+    return;
+  }
+
+  let parametros = {
+    tipo: tipo,
+    categorias: categoriasSeleccionadas,
+    motivo: motivo
+  };
+
+  if (tipo === 'porcentual') {
+    const porcentaje = parseFloat(document.getElementById('porcentajeAjuste').value);
+    if (!porcentaje || porcentaje <= 0) {
+      showToast('Debe ingresar un porcentaje válido mayor a 0', 'warning');
+      return;
+    }
+    parametros.porcentaje = porcentaje;
+    parametros.redondeo = parseInt(document.getElementById('redondeoAjuste').value);
+  } else {
+    const sueldos = {
+      administrativo: parseFloat(document.getElementById('sueldoAdministrativo').value) || 0,
+      operador: parseFloat(document.getElementById('sueldoOperador').value) || 0,
+      tecnico: parseFloat(document.getElementById('sueldoTecnico').value) || 0,
+      supervisor: parseFloat(document.getElementById('sueldoSupervisor').value) || 0,
+      manager: parseFloat(document.getElementById('sueldoManager').value) || 0,
+      otros: parseFloat(document.getElementById('sueldoOtros').value) || 0
+    };
+
+    let hayConfiguracion = false;
+    categoriasSeleccionadas.forEach(cat => {
+      if (sueldos[cat] > 0) {
+        hayConfiguracion = true;
+      }
+    });
+
+    if (!hayConfiguracion) {
+      showToast('Debe configurar al menos un sueldo para las categorías seleccionadas', 'warning');
+      return;
+    }
+
+    parametros.sueldos = sueldos;
+  }
+
+  simularPrevisualizacion(parametros);
+}
+
+function simularPrevisualizacion(parametros) {
+  const cargosEstimados = parametros.categorias.length * 50;
+  let incrementoPromedio = 0;
+  let costoAdicional = 0;
+
+  if (parametros.tipo === 'porcentual') {
+    incrementoPromedio = parametros.porcentaje;
+    costoAdicional = cargosEstimados * 800000 * (parametros.porcentaje / 100);
+  } else {
+    const sueldosPromedios = {
+      administrativo: 800000,
+      operador: 600000,
+      tecnico: 900000,
+      supervisor: 1200000,
+      manager: 1800000,
+      otros: 500000
+    };
+
+    let totalIncremento = 0;
+    let categorias = 0;
+
+    parametros.categorias.forEach(cat => {
+      if (parametros.sueldos[cat] > 0) {
+        const incremento = ((parametros.sueldos[cat] - sueldosPromedios[cat]) / sueldosPromedios[cat]) * 100;
+        totalIncremento += incremento;
+        categorias++;
+        costoAdicional += 50 * (parametros.sueldos[cat] - sueldosPromedios[cat]);
+      }
+    });
+
+    incrementoPromedio = categorias > 0 ? totalIncremento / categorias : 0;
+  }
+
+  document.getElementById('cargosAfectados').textContent = cargosEstimados;
+  document.getElementById('costoAdicional').textContent = formatCurrency(Math.max(0, costoAdicional));
+  document.getElementById('incrementoPromedio').textContent = incrementoPromedio.toFixed(1) + '%';
+  
+  document.getElementById('previsualizacionMasiva').style.display = 'block';
+  document.getElementById('btnAplicarMasivo').disabled = false;
+  
+  showToast(`Previsualización generada: ${cargosEstimados} cargos serán afectados`, 'info');
+}
+
+async function aplicarActualizacionMasiva() {
+  if (!confirm('¿Está seguro de aplicar estos cambios masivos? Esta acción no se puede deshacer.')) {
+    return;
+  }
+
+  const btn = document.getElementById('btnAplicarMasivo');
+  const originalText = btn.innerHTML;
+  
+  try {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Aplicando cambios...';
+    
+    showToast('Procesando actualización masiva...', 'info');
+
+    const categoriasSeleccionadas = [];
+    document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
+      categoriasSeleccionadas.push(cb.value);
+    });
+
+    const tipo = document.querySelector('input[name="tipoActualizacion"]:checked').value;
+    let motivo = document.getElementById('motivoMasivo').value;
+
+    if (motivo === 'Otro') {
+      motivo = document.getElementById('motivoOtroTextoMasivo').value.trim();
+    }
+
+    const payload = {
+      tipo: tipo,
+      categorias: categoriasSeleccionadas,
+      motivo: motivo
+    };
+
+    if (tipo === 'porcentual') {
+      payload.porcentaje = parseFloat(document.getElementById('porcentajeAjuste').value);
+      payload.redondeo = parseInt(document.getElementById('redondeoAjuste').value);
+    } else {
+      payload.sueldos = {
+        administrativo: parseFloat(document.getElementById('sueldoAdministrativo').value) || 0,
+        operador: parseFloat(document.getElementById('sueldoOperador').value) || 0,
+        tecnico: parseFloat(document.getElementById('sueldoTecnico').value) || 0,
+        supervisor: parseFloat(document.getElementById('sueldoSupervisor').value) || 0,
+        manager: parseFloat(document.getElementById('sueldoManager').value) || 0,
+        otros: parseFloat(document.getElementById('sueldoOtros').value) || 0
+      };
+    }
+
+    const response = await fetch('/api/cargos/masivo/actualizar', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      showToast(`${data.actualizados || 0} sueldos actualizados exitosamente`, 'success');
+      
+      if (data.errores && data.errores.length > 0) {
+        console.warn('Errores en actualización masiva:', data.errores);
+        showToast(`${data.errores.length} cargos no pudieron actualizarse`, 'warning');
+      }
+
+      const modal = bootstrap.Modal.getInstance(document.getElementById('modalActualizacionMasiva'));
+      modal.hide();
+
+      setTimeout(() => {
+        cargarCargos(currentPage);
+      }, 2000);
+      
+    } else {
+      showToast('Error en actualización masiva: ' + (data.error || 'Error desconocido'), 'error');
+    }
+
+  } catch (error) {
+    console.error('Error en actualización masiva:', error);
+    showToast('Error de conexión en actualización masiva', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalText;
+  }
+}
+
+// FUNCIONES DE EXPORTACIÓN
+async function exportarSueldos() {
+  try {
+    showToast('Generando archivo Excel...', 'info');
+    
+    const params = new URLSearchParams();
+    if (currentFilters.filtro) {
+      params.append('filtro', currentFilters.filtro);
+    }
+    params.append('orden', currentOrder);
+    
+    const link = document.createElement('a');
+    link.href = `/api/cargos/export/excel?${params.toString()}`;
+    link.download = `sueldos_cargos_${new Date().toISOString().split('T')[0]}.xlsx`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    setTimeout(() => {
+      showToast('Archivo Excel generado exitosamente', 'success');
+    }, 2000);
+    
+  } catch (error) {
+    console.error('Error exportando:', error);
+    showToast('Error generando Excel', 'error');
+  }
+}
+
+// FUNCIONES DE UTILIDAD
+function formatCurrency(amount) {
+  if (!amount && amount !== 0) return '$0';
+  return new Intl.NumberFormat('es-CL', {
+    style: 'currency',
+    currency: 'CLP',
+    minimumFractionDigits: 0
+  }).format(amount);
+}
+
+function formatNumber(number) {
+  if (!number && number !== 0) return '0';
+  return new Intl.NumberFormat('es-CL').format(number);
+}
+
+function escapeHtml(text) {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// SISTEMA DE TEMA OSCURO/CLARO
+function toggleTheme() {
+  try {
+    const body = document.body;
+    const themeIcon = document.getElementById('theme-icon');
+    
+    if (!body || !themeIcon) {
+      console.error('Elementos del tema no encontrados');
+      return;
+    }
+
+    const currentTheme = body.getAttribute('data-bs-theme') || 'light';
+    
+    if (currentTheme === 'light') {
+      body.setAttribute('data-bs-theme', 'dark');
+      themeIcon.className = 'fas fa-sun';
+      localStorage.setItem('theme', 'dark');
+    } else {
+      body.setAttribute('data-bs-theme', 'light');
+      themeIcon.className = 'fas fa-moon';
+      localStorage.setItem('theme', 'light');
+    }
+    
+  } catch (error) {
+    console.error('Error en toggleTheme:', error);
+  }
+}
+
+// SISTEMA DE NOTIFICACIONES
+function showToast(message, type = 'info', duration = 4000) {
+  const toastContainer = document.getElementById('toast-container');
+  if (!toastContainer) {
+    console.log(`Toast ${type}: ${message}`);
+    return;
+  }
+
+  const toastId = 'toast-' + Date.now();
+  const iconMap = {
+    success: 'fas fa-check-circle',
+    error: 'fas fa-exclamation-circle',
+    warning: 'fas fa-exclamation-triangle',
+    info: 'fas fa-info-circle'
+  };
+
+  const toast = document.createElement('div');
+  toast.id = toastId;
+  toast.className = `toast-notification toast-${type}`;
+  toast.innerHTML = `
+    <div class="d-flex align-items-center">
+      <i class="${iconMap[type] || iconMap.info} me-2"></i>
+      <span>${escapeHtml(message)}</span>
+    </div>
+    <button class="btn btn-sm ms-2" onclick="removeToast('${toastId}')" 
+            style="background: none; border: none; color: inherit;">
+      <i class="fas fa-times"></i>
+    </button>
+  `;
+
+  toastContainer.appendChild(toast);
+
+  setTimeout(() => {
+    removeToast(toastId);
+  }, duration);
+}
+
+function removeToast(toastId) {
+  const toast = document.getElementById(toastId);
+  if (toast) {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(100%)';
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.parentNode.removeChild(toast);
+      }
+    }, 300);
+  }
+}
+
+// NAVEGACIÓN POR TECLADO
+document.addEventListener('keydown', function(e) {
+  if (!document.activeElement || !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) {
+    switch(e.key) {
+      case 'ArrowLeft':
+        if (currentPage > 1) {
+          e.preventDefault();
+          irAPagina(currentPage - 1);
+        }
+        break;
+      case 'ArrowRight':
+        if (currentPage < totalPages) {
+          e.preventDefault();
+          irAPagina(currentPage + 1);
+        }
+        break;
+      case 'Home':
+        if (currentPage !== 1) {
+          e.preventDefault();
+          irAPagina(1);
+        }
+        break;
+      case 'End':
+        if (currentPage !== totalPages) {
+          e.preventDefault();
+          irAPagina(totalPages);
+        }
+        break;
+    }
+  }
+});
+
+// OPTIMIZACIONES DE RENDIMIENTO
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+const tableObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      if (!isLoading && currentPage === 1 && document.getElementById('cargosTableBody').children.length === 1) {
+        cargarCargos();
+      }
+    }
+  });
+}, { threshold: 0.1 });
+
+setTimeout(() => {
+  const tableContainer = document.querySelector('.table-container');
+  if (tableContainer) {
+    tableObserver.observe(tableContainer);
+  }
+}, 100);
+
+// FUNCIONES AUXILIARES PARA DEVELOPMENT
+function resetearPaginacion() {
+  currentPage = 1;
+  currentFilters = {};
+  currentOrder = 'nombre';
+  limpiarFiltros();
+}
+
+window.debugCargos = {
+  cargarCargos,
+  currentPage: () => currentPage,
+  totalPages: () => totalPages,
+  currentFilters: () => currentFilters,
+  resetearPaginacion
+};
+
+console.log('Sistema de gestión de cargos con paginación cargado exitosamente');
+</script>
+
+{% endblock %}

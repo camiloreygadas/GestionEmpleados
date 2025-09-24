@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo de Reportes - Sistema de Asistencia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            /* Colores principales */
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            
+            /* Tema claro */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-card: rgba(255, 255, 255, 0.9);
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+            
+            /* Gradientes */
+            --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+            --gradient-bg: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+            
+            --radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: rgba(30, 41, 59, 0.9);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.4);
+            --gradient-bg: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--gradient-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            transition: var(--transition);
+        }
+
+        /* Header moderno */
+        .page-header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='m36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+        }
+
+        .page-header .container {
+            position: relative;
+            z-index: 2;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-title {
+            font-size: 3rem;
+            font-weight: 800;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .page-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-top: 0.5rem;
+            font-weight: 400;
+        }
+
+        /* Toggle tema día/noche */
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            padding: 0.5rem 1rem;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            backdrop-filter: blur(10px);
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        /* Navegación mejorada */
+        .back-navigation {
+            margin-bottom: 1.5rem;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius);
+            transition: var(--transition);
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+            background: var(--bg-primary);
+            transform: translateX(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Cards modernos */
+        .card {
+            border: none;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px);
+        }
+
+        .card-header {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius) var(--radius) 0 0;
+            padding: 1.5rem 2rem;
+            font-size: 1.3rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .card-body {
+            padding: 2.5rem;
+            color: var(--text-primary);
+        }
+
+        /* Texto específico para contenido de cards */
+        .card-body ul li {
+            color: var(--text-primary);
+        }
+
+        .card-body strong {
+            color: var(--text-primary);
+        }
+
+        .card-body .text-primary {
+            color: var(--primary) !important;
+        }
+
+        .card-body .text-secondary {
+            color: var(--text-secondary) !important;
+        }
+
+        .card-body .text-warning {
+            color: var(--warning) !important;
+        }
+
+        .card-body .text-success {
+            color: var(--success) !important;
+        }
+
+        /* Formularios modernos */
+        .form-floating {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-control, .form-select {
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            font-size: 1rem;
+            transition: var(--transition);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        /* Botones modernos */
+        .btn {
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            transition: var(--transition);
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, var(--info) 0%, #0891b2 100%);
+            color: white;
+            box-shadow: 0 4px 20px rgba(6, 182, 212, 0.3);
+        }
+
+        .btn-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(6, 182, 212, 0.4);
+        }
+
+        .btn-outline-secondary {
+            border: 2px solid var(--border);
+            color: var(--text-primary);
+            background: transparent;
+        }
+
+        .btn-outline-secondary:hover {
+            background: var(--text-primary);
+            border-color: var(--text-primary);
+            color: var(--bg-primary);
+        }
+
+        /* Alertas modernas */
+        .alert {
+            border: none;
+            border-radius: var(--radius);
+            padding: 1.25rem 1.75rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
+            color: var(--success);
+            border-left: 4px solid var(--success);
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%);
+            color: var(--danger);
+            border-left: 4px solid var(--danger);
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.05) 100%);
+            color: var(--warning);
+            border-left: 4px solid var(--warning);
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(6, 182, 212, 0.05) 100%);
+            color: var(--info);
+            border-left: 4px solid var(--info);
+        }
+
+        /* Header de reporte */
+        .report-header {
+            background: var(--bg-card);
+            padding: 2.5rem;
+            border-radius: var(--radius);
+            margin: 2rem 0;
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+            backdrop-filter: blur(20px);
+        }
+
+        .report-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .report-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-top: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Tablas modernas */
+        .table-container {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            margin-top: 2rem;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(20px);
+        }
+
+        .table {
+            margin: 0;
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+
+        .table thead th {
+            background: var(--gradient-primary);
+            color: white;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            padding: 1.25rem 1rem;
+            border: none;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .table thead th:first-child { text-align: left; }
+        .table thead th:nth-child(3) { text-align: left; }
+
+        .table tbody tr {
+            transition: var(--transition);
+        }
+
+        .table tbody tr:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+
+        .table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .table td:first-child,
+        .table td:nth-child(3) {
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .table td:nth-child(2) {
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+        }
+
+        .table td[data-numeric="true"] {
+            text-align: center;
+            font-weight: 700;
+            font-family: 'Inter', monospace;
+        }
+
+        .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: rgba(59, 130, 246, 0.03);
+        }
+
+        /* Estilos para porcentajes */
+        .porcentaje-alto {
+            color: var(--danger) !important;
+            font-weight: 800 !important;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%) !important;
+            padding: 4px 8px !important;
+            border-radius: 8px !important;
+        }
+
+        .porcentaje-medio {
+            color: var(--warning) !important;
+            font-weight: 700 !important;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.05) 100%) !important;
+            padding: 4px 8px !important;
+            border-radius: 8px !important;
+        }
+
+        .porcentaje-bajo {
+            color: var(--success) !important;
+            font-weight: 600 !important;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%) !important;
+            padding: 4px 8px !important;
+            border-radius: 8px !important;
+        }
+
+        /* Campos de fecha chilenos */
+        .fecha-chilena {
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .fecha-chilena:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+        }
+
+        .fecha-chilena::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.8;
+        }
+
+        /* Badges para códigos */
+        .badge-codigo {
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-align: center;
+            min-width: 2.5rem;
+            display: inline-block;
+        }
+
+        .badge-T { background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); color: #065f46; }
+        .badge-D { background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%); color: #374151; }
+        .badge-F { background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); color: #991b1b; }
+        .badge-LM { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); color: #92400e; }
+        .badge-V { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); color: #1e40af; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container-fluid { padding: 1rem; }
+            .page-title { font-size: 2.5rem; }
+            .card-body { padding: 2rem; }
+            .report-header { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
+            .btn { width: 100%; justify-content: center; }
+            .table { font-size: 0.8rem; }
+            .table th, .table td { padding: 0.75rem 0.5rem; font-size: 0.8rem; }
+            .header-content { flex-direction: column; align-items: flex-start; }
+        }
+
+        /* Animaciones */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        /* Loading states */
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .loading {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+            animation: loading 2s infinite;
+        }
+
+        @keyframes loading {
+            to { left: 100%; }
+        }
+
+        /* Iconos y utilidades */
+        .icon-accent {
+            color: var(--primary);
+        }
+
+        .text-gradient {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-header">
+        <div class="container">
+            <div class="back-navigation">
+                <a href="{{ url_for('index') }}" class="back-link">
+                    <i class="bi bi-arrow-left"></i>
+                    Volver a Gestión Principal
+                </a>
+            </div>
+            <div class="header-content">
+                <div>
+                    <h1 class="page-title">
+                        <i class="bi bi-graph-up-arrow"></i>
+                        Módulo de Reportes
+                    </h1>
+                    <p class="page-subtitle">
+                        Genera reportes detallados de asistencia, ausentismo y cálculo de horas laborales
+                    </p>
+                </div>
+                <button class="theme-toggle" onclick="toggleTheme()" title="Cambiar tema">
+                    <i class="bi bi-sun-fill" id="theme-icon"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid fade-in-up">
+        <!-- Formulario de generación de reportes -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <i class="bi bi-sliders2"></i>
+                Configuración de Reporte
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('reportes') }}" class="row g-4" id="reportForm">
+                    <div class="col-md-6 col-lg-3">
+                        <div class="form-floating">
+                            <select name="report_type" id="report_type" class="form-select" required>
+                                <option value="general_asistencia" {% if filters and filters.report_type == 'general_asistencia' %}selected{% endif %}>
+                                    Reporte General de Asistencia y Horas
+                                </option>
+                                <option value="ausentismo_especifico" {% if filters and filters.report_type == 'ausentismo_especifico' %}selected{% endif %}>
+                                    Reporte de Ausentismo
+                                </option>
+                            </select>
+                            <label for="report_type">
+                                <i class="bi bi-file-text me-1"></i>
+                                Tipo de Reporte
+                            </label>
+                        </div>
+                    </div>
+
+                     <div class="col-md-3 col-lg-2">
+                        <div class="form-floating">
+                            <input type="text" name="date_from" id="date_from" class="form-control fecha-chilena" 
+                                value="{{ display_dates.date_from_formatted if display_dates else '' }}" 
+                                placeholder="DD-MM-YYYY" required maxlength="10">
+                            <label for="date_from">
+                                <i class="bi bi-calendar-event me-1"></i>
+                                Fecha Desde
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 col-lg-2">
+                        <div class="form-floating">
+                            <input type="text" name="date_to" id="date_to" class="form-control fecha-chilena" 
+                                value="{{ display_dates.date_to_formatted if display_dates else '' }}" 
+                                placeholder="DD-MM-YYYY" required maxlength="10">
+                            <label for="date_to">
+                                <i class="bi bi-calendar-check me-1"></i>
+                                Fecha Hasta
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-3">
+                        <div class="form-floating">
+                            <select name="area_id" id="area_id" class="form-select">
+                                <option value="">Todas las áreas</option>
+                                {% for area in areas %}
+                                    <option value="{{ area.id }}" {% if filters and filters.area_id == area.id|string %}selected{% endif %}>
+                                        {{ area.nombre }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <label for="area_id">
+                                <i class="bi bi-building me-1"></i>
+                                Área (Opcional)
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-2">
+                        <div class="form-floating">
+                            <select name="codigo_filtro" id="codigo_filtro" class="form-select">
+                                <option value="">Todos los eventos</option>
+                                {% for codigo in codigos_asistencia %}
+                                    <option value="{{ codigo.codigo }}" 
+                                            {% if filters and filters.codigo_filtro == codigo.codigo %}selected{% endif %}>
+                                        {{ codigo.descripcion }} ({{ codigo.codigo }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <label for="codigo_filtro">
+                                <i class="bi bi-filter me-1"></i>
+                                Filtrar Evento
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="d-flex gap-3 justify-content-end">
+                            <button type="button" class="btn btn-outline-secondary" onclick="resetForm()">
+                                <i class="bi bi-arrow-clockwise"></i>
+                                Limpiar Filtros
+                            </button>
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <i class="bi bi-play-fill"></i>
+                                Generar Reporte
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Mensajes de estado -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="alert-container">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                {% if category == 'success' %}
+                    <i class="bi bi-check-circle-fill"></i>
+                {% elif category == 'error' or category == 'danger' %}
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                {% elif category == 'warning' %}
+                    <i class="bi bi-exclamation-circle-fill"></i>
+                {% else %}
+                    <i class="bi bi-info-circle-fill"></i>
+                {% endif %}
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <!-- Resultados del reporte -->
+        {% if report_data %}
+        <div class="report-header">
+            <div>
+                <h2 class="report-title">
+                    <i class="bi bi-file-earmark-bar-graph icon-accent"></i>
+                    {{ report_title }}
+                </h2>
+                <p class="report-subtitle">
+                    <i class="bi bi-calendar-range me-1"></i>
+                    Periodo: {{ display_dates.date_from_formatted if display_dates else filters.date_from }} hasta {{ display_dates.date_to_formatted if display_dates else filters.date_to }}
+                    {% if filters.area_id %}
+                        | Área filtrada
+                    {% endif %}
+                    {% if filters.codigo_filtro %}
+                        | Evento: {{ filters.codigo_filtro }}
+                    {% endif %}
+                </p>
+            </div>
+            <a href="{{ url_for('exportar_reporte') }}" class="btn btn-info">
+                <i class="bi bi-download"></i>
+                Exportar a Excel
+            </a>
+        </div>
+
+        <div class="table-container">
+            <div class="table-responsive">
+                {{ report_html | safe }}
+            {% if paginacion %}
+<!-- Información de paginación -->
+<div class="d-flex justify-content-between align-items-center mb-3 mt-3">
+    <div class="text-muted">
+        <small>
+            <i class="bi bi-info-circle me-1"></i>
+            Mostrando {{ paginacion.registros_mostrados }} de {{ paginacion.total_registros }} registros
+        </small>
+    </div>
+    
+    <div class="text-muted">
+        <small>
+            Página {{ paginacion.pagina_actual }} de {{ paginacion.total_paginas }}
+        </small>
+    </div>
+</div>
+
+<!-- Controles de paginación -->
+<nav aria-label="Paginación de reportes" class="mb-4">
+    <ul class="pagination justify-content-center">
+        <!-- Botón Primera página -->
+        {% if paginacion.pagina_actual > 1 %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('reportes', pagina=1) }}" title="Primera página">
+                <i class="bi bi-chevron-double-left"></i>
+            </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link">
+                <i class="bi bi-chevron-double-left"></i>
+            </span>
+        </li>
+        {% endif %}
+
+        <!-- Botón Anterior -->
+        {% if paginacion.tiene_anterior %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('reportes', pagina=paginacion.pagina_actual-1) }}" title="Página anterior">
+                <i class="bi bi-chevron-left"></i> Anterior
+            </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link">
+                <i class="bi bi-chevron-left"></i> Anterior
+            </span>
+        </li>
+        {% endif %}
+
+        <!-- Números de página -->
+        {% set inicio_rango = [paginacion.pagina_actual - 2, 1] | max %}
+        {% set fin_rango = [paginacion.pagina_actual + 2, paginacion.total_paginas] | min %}
+
+        {% if inicio_rango > 1 %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('reportes', pagina=1) }}">1</a>
+        </li>
+        {% if inicio_rango > 2 %}
+        <li class="page-item disabled">
+            <span class="page-link">...</span>
+        </li>
+        {% endif %}
+        {% endif %}
+
+        {% for pagina in range(inicio_rango, fin_rango + 1) %}
+        <li class="page-item {% if pagina == paginacion.pagina_actual %}active{% endif %}">
+            {% if pagina == paginacion.pagina_actual %}
+            <span class="page-link">{{ pagina }}</span>
+            {% else %}
+            <a class="page-link" href="{{ url_for('reportes', pagina=pagina) }}">{{ pagina }}</a>
+            {% endif %}
+        </li>
+        {% endfor %}
+
+        {% if fin_rango < paginacion.total_paginas %}
+        {% if fin_rango < paginacion.total_paginas - 1 %}
+        <li class="page-item disabled">
+            <span class="page-link">...</span>
+        </li>
+        {% endif %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('reportes', pagina=paginacion.total_paginas) }}">{{ paginacion.total_paginas }}</a>
+        </li>
+        {% endif %}
+
+        <!-- Botón Siguiente -->
+        {% if paginacion.tiene_siguiente %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('reportes', pagina=paginacion.pagina_actual+1) }}" title="Página siguiente">
+                Siguiente <i class="bi bi-chevron-right"></i>
+            </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link">
+                Siguiente <i class="bi bi-chevron-right"></i>
+            </span>
+        </li>
+        {% endif %}
+
+        <!-- Botón Última página -->
+        {% if paginacion.pagina_actual < paginacion.total_paginas %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('reportes', pagina=paginacion.total_paginas) }}" title="Última página">
+                <i class="bi bi-chevron-double-right"></i>
+            </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link">
+                <i class="bi bi-chevron-double-right"></i>
+            </span>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+
+<!-- Selector rápido de páginas para datasets grandes -->
+{% if paginacion.total_paginas > 10 %}
+<div class="text-center mb-3">
+    <div class="d-inline-flex align-items-center">
+        <label for="ir_a_pagina" class="form-label me-2 mb-0">Ir a página:</label>
+        <select id="ir_a_pagina" class="form-select form-select-sm" style="width: auto;" onchange="window.location.href='{{ url_for('reportes') }}?pagina=' + this.value">
+            {% for p in range(1, paginacion.total_paginas + 1) %}
+            <option value="{{ p }}" {% if p == paginacion.pagina_actual %}selected{% endif %}>{{ p }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+{% endif %}
+
+{% endif %}
+    
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Información adicional -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-info-circle"></i>
+                        Información sobre Reportes
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <i class="bi bi-calculator text-primary me-2"></i>
+                                <strong>General:</strong> Incluye asistencia, ausentismo y cálculo de horas
+                            </li>
+                            <li class="mb-0">
+                                <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+                                <strong>Ausentismo:</strong> Ausencias Injustificadas, Permisos no Pago, Licencias Médicas Y Licencia Mutual
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-lightbulb"></i>
+                        Consejos de Uso
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <i class="bi bi-calendar2-week text-primary me-2"></i>
+                                Selecciona rangos de fechas específicos para mejor rendimiento
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-funnel text-secondary me-2"></i>
+                                Usa filtros por área para reportes departamentales
+                            </li>
+                            <li class="mb-0">
+                                <i class="bi bi-file-spreadsheet text-success me-2"></i>
+                                Los archivos Excel conservan el formato y colores
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // SISTEMA DE TEMA DÍA/NOCHE
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('theme-icon');
+            if (icon) {
+                icon.className = theme === 'dark' ? 'bi bi-moon-stars-fill' : 'bi bi-sun-fill';
+            }
+        }
+
+        // JAVASCRIPT PARA FECHAS CHILENAS
+        document.addEventListener('DOMContentLoaded', function() {
+            initTheme();
+            initFechasChilenas();
+            
+            const dateFrom = document.getElementById('date_from');
+            const dateTo = document.getElementById('date_to');
+            const form = document.getElementById('reportForm');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            // Auto-completar fecha hasta
+            dateFrom.addEventListener('change', function() {
+                if (this.value && !dateTo.value) {
+                    try {
+                        const fechaChilena = this.value.trim();
+                        if (validarFormatoChileno(fechaChilena)) {
+                            const fechaISO = chilenToISO(fechaChilena);
+                            const selectedDate = new Date(fechaISO);
+                            
+                            if (!isNaN(selectedDate.getTime())) {
+                                const year = selectedDate.getFullYear();
+                                const month = selectedDate.getMonth();
+                                
+                                if (year >= 2020) {
+                                    const lastDayOfMonth = new Date(year, month + 1, 0);
+                                    const fechaChilenaFin = isoToChilen(lastDayOfMonth.toISOString().split('T')[0]);
+                                    dateTo.value = fechaChilenaFin;
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        console.log('Error en autocompletado:', e);
+                    }
+                }
+            });
+
+            // Validación mejorada
+            [dateFrom, dateTo].forEach(field => {
+                field.addEventListener('blur', function() {
+                    const valor = this.value.trim();
+                    if (valor && !validarFormatoChileno(valor)) {
+                        showNotification('Use formato DD-MM-YYYY (ej: 31-12-2024)', 'warning');
+                        this.focus();
+                    }
+                });
+                
+                field.addEventListener('input', function() {
+                    formatearEntrada(this);
+                });
+            });
+
+            // Validación al enviar formulario
+            form.addEventListener('submit', function(e) {
+                if (!validarFechas()) {
+                    e.preventDefault();
+                    return false;
+                }
+
+                convertirFechasParaEnvio();
+
+                // Loading state
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Generando...';
+                
+                setTimeout(() => {
+                    if (submitBtn.disabled) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="bi bi-play-fill"></i>Generar Reporte';
+                    }
+                }, 15000);
+            });
+
+            // Colorear porcentajes después de cargar
+            setTimeout(colorearPorcentajes, 100);
+        });
+
+        // FUNCIONES PARA FECHAS CHILENAS
+        function initFechasChilenas() {
+            const campos = document.querySelectorAll('.fecha-chilena');
+            campos.forEach(campo => {
+                const valorISO = campo.dataset.isoValue;
+                if (valorISO && validarFormatoISO(valorISO)) {
+                    campo.value = isoToChilen(valorISO);
+                }
+                
+                if (!campo.value.trim()) {
+                    const hoy = new Date();
+                    if (campo.id === 'date_from') {
+                        const primerDia = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+                        campo.value = isoToChilen(primerDia.toISOString().split('T')[0]);
+                    } else if (campo.id === 'date_to') {
+                        campo.value = isoToChilen(hoy.toISOString().split('T')[0]);
+                    }
+                }
+            });
+        }
+
+        function validarFormatoChileno(fecha) {
+            const regex = /^(\d{1,2})-(\d{1,2})-(\d{4})$/;
+            const match = fecha.match(regex);
+            
+            if (!match) return false;
+            
+            const dia = parseInt(match[1], 10);
+            const mes = parseInt(match[2], 10);
+            const año = parseInt(match[3], 10);
+            
+            if (mes < 1 || mes > 12) return false;
+            if (dia < 1 || dia > 31) return false;
+            if (año < 2020 || año > 2030) return false;
+            
+            const diasPorMes = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+            
+            if (año % 4 === 0 && (año % 100 !== 0 || año % 400 === 0)) {
+                diasPorMes[1] = 29;
+            }
+            
+            return dia <= diasPorMes[mes - 1];
+        }
+
+        function validarFormatoISO(fecha) {
+            const regex = /^\d{4}-\d{2}-\d{2}$/;
+            return regex.test(fecha);
+        }
+
+        function chilenToISO(fechaChilena) {
+            const partes = fechaChilena.split('-');
+            const dia = partes[0].padStart(2, '0');
+            const mes = partes[1].padStart(2, '0');
+            const año = partes[2];
+            return `${año}-${mes}-${dia}`;
+        }
+
+        function isoToChilen(fechaISO) {
+            const partes = fechaISO.split('-');
+            const año = partes[0];
+            const mes = parseInt(partes[1], 10);
+            const dia = parseInt(partes[2], 10);
+            return `${dia}-${mes}-${año}`;
+        }
+
+        function formatearEntrada(campo) {
+            let valor = campo.value.replace(/\D/g, '');
+            
+            if (valor.length >= 2) {
+                valor = valor.substring(0, 2) + '-' + valor.substring(2);
+            }
+            if (valor.length >= 5) {
+                valor = valor.substring(0, 5) + '-' + valor.substring(5);
+            }
+            if (valor.length > 10) {
+                valor = valor.substring(0, 10);
+            }
+            
+            campo.value = valor;
+        }
+
+        function validarFechas() {
+            const dateFrom = document.getElementById('date_from');
+            const dateTo = document.getElementById('date_to');
+            
+            const fechaDesde = dateFrom.value.trim();
+            const fechaHasta = dateTo.value.trim();
+            
+            if (!fechaDesde || !fechaHasta) {
+                showNotification('Complete ambas fechas', 'error');
+                return false;
+            }
+            
+            if (!validarFormatoChileno(fechaDesde)) {
+                showNotification('Formato incorrecto en fecha desde. Use DD-MM-YYYY', 'error');
+                dateFrom.focus();
+                return false;
+            }
+            
+            if (!validarFormatoChileno(fechaHasta)) {
+                showNotification('Formato incorrecto en fecha hasta. Use DD-MM-YYYY', 'error');
+                dateTo.focus();
+                return false;
+            }
+            
+            const fechaDesdeObj = new Date(chilenToISO(fechaDesde));
+            const fechaHastaObj = new Date(chilenToISO(fechaHasta));
+            
+            if (fechaDesdeObj > fechaHastaObj) {
+                showNotification('La fecha desde debe ser anterior a la fecha hasta', 'error');
+                return false;
+            }
+            
+            const diffTime = Math.abs(fechaHastaObj - fechaDesdeObj);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays > 365) {
+                showNotification('El rango de fechas no puede exceder 1 año', 'error');
+                return false;
+            }
+            
+            return true;
+        }
+
+        function convertirFechasParaEnvio() {
+            const dateFrom = document.getElementById('date_from');
+            const dateTo = document.getElementById('date_to');
+            
+            const hiddenFrom = document.createElement('input');
+            hiddenFrom.type = 'hidden';
+            hiddenFrom.name = 'date_from_iso';
+            hiddenFrom.value = chilenToISO(dateFrom.value);
+            
+            const hiddenTo = document.createElement('input');
+            hiddenTo.type = 'hidden';
+            hiddenTo.name = 'date_to_iso';
+            hiddenTo.value = chilenToISO(dateTo.value);
+            
+            document.getElementById('reportForm').appendChild(hiddenFrom);
+            document.getElementById('reportForm').appendChild(hiddenTo);
+        }
+
+        function resetForm() {
+            try {
+                const form = document.getElementById('reportForm');
+                if (form) {
+                    const inputs = form.querySelectorAll('input:not(.fecha-chilena), select');
+                    inputs.forEach(input => {
+                        if (input.type === 'checkbox' || input.type === 'radio') {
+                            input.checked = false;
+                        } else {
+                            input.value = '';
+                        }
+                    });
+                    
+                    initFechasChilenas();
+                    showNotification('Filtros limpiados correctamente', 'success');
+                }
+            } catch (e) {
+                console.error('Error limpiando formulario:', e);
+                showNotification('Error limpiando filtros', 'error');
+            }
+        }
+
+        // COLOREAR PORCENTAJES
+        function colorearPorcentajes() {
+            const celdas = document.querySelectorAll('td');
+            
+            celdas.forEach(celda => {
+                const texto = celda.textContent.trim();
+                
+                if (texto.includes('%')) {
+                    const valor = parseFloat(texto.replace('%', ''));
+                    
+                    if (!isNaN(valor)) {
+                        if (celda.parentElement.children[0].textContent.includes('Ausentismo') || 
+                            texto.includes('Ausentismo') ||
+                            celda.previousElementSibling?.textContent.includes('Ausentismo')) {
+                            
+                            if (valor >= 15) {
+                                celda.classList.add('porcentaje-alto');
+                            } else if (valor >= 8) {
+                                celda.classList.add('porcentaje-medio');
+                            } else {
+                                celda.classList.add('porcentaje-bajo');
+                            }
+                        }
+                        else if (celda.parentElement.children[0].textContent.includes('Presentismo') || 
+                                 texto.includes('Presentismo') ||
+                                 celda.previousElementSibling?.textContent.includes('Presentismo')) {
+                            
+                            if (valor <= 85) {
+                                celda.classList.add('porcentaje-alto');
+                            } else if (valor <= 92) {
+                                celda.classList.add('porcentaje-medio');
+                            } else {
+                                celda.classList.add('porcentaje-bajo');
+                            }
+                        }
+                        else {
+                            const tabla = celda.closest('table');
+                            if (tabla) {
+                                const headers = tabla.querySelectorAll('th');
+                                const celdaIndex = Array.from(celda.parentElement.children).indexOf(celda);
+                                const header = headers[celdaIndex];
+                                
+                                if (header) {
+                                    const headerText = header.textContent.toLowerCase();
+                                    if (headerText.includes('ausentismo')) {
+                                        if (valor >= 15) {
+                                            celda.classList.add('porcentaje-alto');
+                                        } else if (valor >= 8) {
+                                            celda.classList.add('porcentaje-medio');
+                                        } else {
+                                            celda.classList.add('porcentaje-bajo');
+                                        }
+                                    } else if (headerText.includes('presentismo')) {
+                                        if (valor <= 85) {
+                                            celda.classList.add('porcentaje-alto');
+                                        } else if (valor <= 92) {
+                                            celda.classList.add('porcentaje-medio');
+                                        } else {
+                                            celda.classList.add('porcentaje-bajo');
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // NOTIFICACIONES
+        function showNotification(message, type = 'info') {
+            const existing = document.querySelector('.notification-toast');
+            if (existing) existing.remove();
+            
+            const toast = document.createElement('div');
+            toast.className = `notification-toast alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show`;
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                max-width: 400px;
+                min-width: 300px;
+                box-shadow: var(--shadow-lg);
+                border-radius: var(--radius);
+                backdrop-filter: blur(20px);
+            `;
+            
+            const icon = {
+                'success': 'bi-check-circle-fill',
+                'error': 'bi-exclamation-triangle-fill', 
+                'danger': 'bi-exclamation-triangle-fill',
+                'warning': 'bi-exclamation-circle-fill',
+                'info': 'bi-info-circle-fill'
+            }[type] || 'bi-info-circle-fill';
+            
+            toast.innerHTML = `
+                <i class="bi ${icon} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 300);
+                }
+            }, 4000);
+        }
+    </script>
+</body>
+</html>

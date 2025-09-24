@@ -1,0 +1,703 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Empleado - {{ empleado.nombre_completo }}{% endblock %}
+
+{% block content %}
+<style>
+/* VARIABLES PARA TEMA OSCURO/CLARO */
+:root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-tertiary: #e9ecef;
+    --text-primary: #212529;
+    --text-secondary: #6c757d;
+    --border-color: #dee2e6;
+    --accent-color: #0d6efd;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --warning-color: #fd7e14;
+    --shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+    --gradient-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+[data-bs-theme="dark"] {
+    --bg-primary: #212529;
+    --bg-secondary: #343a40;
+    --bg-tertiary: #495057;
+    --text-primary: #ffffff;
+    --text-secondary: #adb5bd;
+    --border-color: #495057;
+    --shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.5);
+    --gradient-bg: linear-gradient(135deg, #434343 0%, #000000 100%);
+}
+
+/* LAYOUT GLOBAL */
+body {
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    transition: all 0.3s ease;
+}
+
+.container-fluid {
+    max-width: 100%;
+    padding: 1rem 2rem;
+}
+
+/* TOGGLE TEMA */
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    border-radius: 50px;
+    padding: 0.75rem 1.25rem;
+    box-shadow: var(--shadow-lg);
+}
+
+.theme-toggle-btn {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* HEADER GRADIENTE */
+.header-gradient {
+    background: var(--gradient-bg);
+    padding: 2rem 0;
+    margin: -1rem -2rem 2rem -2rem;
+    color: white;
+    position: relative;
+}
+
+.header-title {
+    color: white;
+    font-weight: 700;
+    font-size: 2rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    margin: 0;
+}
+
+/* CARDS */
+.card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    box-shadow: var(--shadow-lg);
+    margin-bottom: 2rem;
+}
+
+.card-header {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    border-radius: 1rem 1rem 0 0;
+    padding: 1.5rem 2rem;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+/* FORMULARIOS */
+.form-control, .form-select {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    background: var(--bg-primary);
+    border-color: var(--accent-color);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.1);
+}
+
+.form-label {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.form-label.fw-bold {
+    color: var(--accent-color);
+}
+
+/* SECCIONES */
+.section-title {
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+/* BOTONES */
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+}
+
+.btn-success {
+    background: var(--success-color);
+    border: none;
+}
+
+.btn-secondary {
+    background: var(--text-secondary);
+    border: none;
+}
+
+/* EDAD CALCULADA */
+#edad_calculada {
+    background: var(--bg-tertiary) !important;
+    font-weight: 600;
+    color: var(--accent-color);
+}
+
+/* CAMPOS CONDICIONALES */
+.conditional-field {
+    transition: all 0.4s ease;
+    overflow: hidden;
+}
+
+.conditional-field.hidden {
+    max-height: 0;
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+}
+
+/* RESPONSIVO */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding: 1rem;
+    }
+    
+    .header-title {
+        font-size: 1.5rem;
+    }
+    
+    .theme-toggle {
+        position: relative;
+        top: auto;
+        right: auto;
+        margin-bottom: 1rem;
+    }
+}
+
+/* TEMA OSCURO ESPECÍFICO */
+[data-bs-theme="dark"] .form-control:focus,
+[data-bs-theme="dark"] .form-select:focus {
+    background: var(--bg-primary) !important;
+    border-color: var(--accent-color) !important;
+    color: var(--text-primary) !important;
+}
+
+[data-bs-theme="dark"] option {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+</style>
+
+<div class="theme-toggle">
+    <button class="theme-toggle-btn" onclick="toggleTheme()" title="Cambiar tema">
+        <i class="fas fa-moon" id="theme-icon"></i>
+    </button>
+</div>
+
+<div class="container-fluid">
+    <div class="header-gradient">
+        <div class="text-center">
+            <h1 class="header-title">
+                <i class="fas fa-user-edit me-3"></i>
+                Editar Empleado
+            </h1>
+            <p class="text-white-50 mb-0">{{ empleado.nombre_completo }}</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">
+                <i class="fas fa-edit me-2"></i>
+                Modificar Información
+            </h3>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Volver
+            </a>
+        </div>
+        
+        <div class="card-body">
+            <form action="/actualizar/{{ empleado['id'] }}" method="post">
+                
+                <!-- INFORMACIÓN PERSONAL -->
+                <h5 class="section-title">
+                    <i class="fas fa-user me-2"></i>
+                    Información Personal
+                </h5>
+                
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <label for="rut" class="form-label fw-bold">RUT / Pasaporte</label>
+                        <input type="text" class="form-control" name="rut" value="{{ empleado.rut }}" required>
+                    </div>
+                    
+                    <div class="col-md-5">
+                        <label for="nombre_completo" class="form-label fw-bold">Nombre Completo</label>
+                        <input type="text" class="form-control" name="nombre_completo" value="{{ empleado.nombre_completo }}" required>
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
+                        <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento" value="{{ empleado.fecha_nacimiento }}">
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <label for="edad_calculada" class="form-label">Edad</label>
+                        <input type="text" class="form-control" id="edad_calculada" readonly>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="telefono" class="form-label">Teléfono</label>
+                        <input type="tel" class="form-control" name="telefono" value="{{ empleado.telefono }}">
+                    </div>
+                    
+                    <div class="col-md-5">
+                        <label for="correo_electronico" class="form-label">Correo Electrónico</label>
+                        <input type="email" class="form-control" name="correo_electronico" value="{{ empleado.correo_electronico }}">
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label for="genero_id" class="form-label">Género</label>
+                        <select name="genero_id" class="form-select">
+                            <option value="">-- Seleccione --</option>
+                            {% for item in generos %}
+                            <option value="{{ item.id }}" {% if item.id == empleado.genero_id %}selected{% endif %}>
+                                {{ item.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-8">
+                        <label for="nacionalidad_id" class="form-label">Nacionalidad</label>
+                        <select name="nacionalidad_id" class="form-select">
+                            <option value="">-- Seleccione --</option>
+                            {% for nac in nacionalidades %}
+                            <option value="{{ nac.id }}" {% if nac.id == empleado.nacionalidad_id %}selected{% endif %}>
+                                {{ nac.pais }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <label for="direccion" class="form-label">Dirección</label>
+                        <input type="text" class="form-control" name="direccion" value="{{ empleado.direccion }}">
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="region_id" class="form-label">Región</label>
+                        <select id="region_id" name="region_id" class="form-select">
+                            <option value="">-- Seleccione Región --</option>
+                            {% for region in regiones %}
+                            <option value="{{ region.id }}" {% if region.id == empleado.region_id %}selected{% endif %}>
+                                {{ region.region }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="comuna_id" class="form-label">Comuna</label>
+                        <select id="comuna_id" name="comuna_id" class="form-select">
+                            <option value="">-- Primero elija una región --</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Foto del Empleado</label>
+                        <div class="d-flex align-items-center">
+                            <img id="foto-preview" src="{{ url_for('serve_employee_photo', filename=empleado.foto_url) if empleado.foto_url else 'https://via.placeholder.com/100' }}" alt="Vista previa" class="rounded-circle me-3" style="width: 100px; height: 100px; object-fit: cover;">
+                    
+                            <div class="flex-grow-1">
+                                <input type="file" class="form-control" name="foto_empleado" id="foto_empleado" accept="image/png, image/jpeg, image/gif">
+                                <small class="form-text text-muted">Sube una foto para el perfil del empleado (opcional).</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INFORMACIÓN LABORAL -->
+                <h5 class="section-title">
+                    <i class="fas fa-briefcase me-2"></i>
+                    Información Contractual y Organizacional
+                </h5>
+                
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <label for="id_sap_local" class="form-label">ID SAP Local</label>
+                        <input type="text" class="form-control" name="id_sap_local" value="{{ empleado.id_sap_local }}">
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="id_sap_global" class="form-label">ID SAP Global</label>
+                        <input type="text" class="form-control" name="id_sap_global" value="{{ empleado.id_sap_global }}">
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="fecha_ingreso" class="form-label fw-bold">Fecha de Ingreso</label>
+                        <input type="date" class="form-control" name="fecha_ingreso" value="{{ empleado.fecha_ingreso }}" required>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="tipo_contrato_id" class="form-label">Tipo de Contrato</label>
+                        <select id="tipo_contrato_id" name="tipo_contrato_id" class="form-select">
+                            <option value="">-- Seleccione --</option>
+                            {% for item in tipos_contrato %}
+                            <option value="{{ item.id }}" {% if item.id == empleado.tipo_contrato_id %}selected{% endif %}>
+                                {{ item.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-3 conditional-field hidden" id="campo-vencimiento-contrato">
+                        <label for="fecha_vencimiento_contrato" class="form-label">Fecha Vencimiento</label>
+                        <input type="date" class="form-control" name="fecha_vencimiento_contrato" value="{{ empleado.fecha_vencimiento_contrato }}">
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="cargo_id" class="form-label">Cargo</label>
+                        <select name="cargo_id" class="form-select">
+                            <option value="">-- Seleccione --</option>
+                            {% for item in cargos %}
+                            <option value="{{ item.id }}" {% if item.id == empleado.cargo_id %}selected{% endif %}>
+                                {{ item.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="area_id" class="form-label">Área</label>
+                        <select name="area_id" class="form-select">
+                            <option value="">-- Seleccione --</option>
+                            {% for item in areas %}
+                            <option value="{{ item.id }}" {% if item.id == empleado.area_id %}selected{% endif %}>
+                                {{ item.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="turno_id" class="form-label">Turno</label>
+                        <select name="turno_id" class="form-select">
+                            <option value="">-- Seleccione --</option>
+                            {% for item in turnos %}
+                            <option value="{{ item.id }}" {% if item.id == empleado.turno_id %}selected{% endif %}>
+                                {{ item.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="supervision_id" class="form-label">Supervisión</label>
+                        <select name="supervision_id" class="form-select">
+                            <option value="">-- Seleccione --</option>
+                            {% for item in supervisiones %}
+                            <option value="{{ item.id }}" {% if item.id == empleado.supervision_id %}selected{% endif %}>
+                                {{ item.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="fase_id" class="form-label">Fase</label>
+                        <select name="fase_id" class="form-select">
+                            <option value="">-- Seleccione --</option>
+                            {% for item in fases %}
+                            <option value="{{ item.id }}" {% if item.id == empleado.fase_id %}selected{% endif %}>
+                                {{ item.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="relacion_laboral_id" class="form-label">Relación Laboral</label>
+                        <select name="relacion_laboral_id" class="form-select">
+                            <option value="">-- Seleccione --</option>
+                            {% for item in relaciones_laborales %}
+                            <option value="{{ item.id }}" {% if item.id == empleado.relacion_laboral_id %}selected{% endif %}>
+                                {{ item.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="distribucion_categoria_id" class="form-label">Distribución</label>
+                        <select name="distribucion_categoria_id" class="form-select">
+                            <option value="">-- Seleccione --</option>
+                            {% for item in distribucion_categorias %}
+                            <option value="{{ item.id }}" {% if item.id == empleado.distribucion_categoria_id %}selected{% endif %}>
+                                {{ item.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="nomina_id" class="form-label">Nómina</label>
+                        <select name="nomina_id" class="form-select">
+                            <option value="">-- Seleccione --</option>
+                            {% for item in nominas %}
+                            <option value="{{ item.id }}" {% if item.id == empleado.nomina_id %}selected{% endif %}>
+                                {{ item.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="tipo_pasaje_id" class="form-label">Tipo de Pasaje</label>
+                        <select name="tipo_pasaje_id" class="form-select">
+                            <option value="">-- Seleccione --</option>
+                            {% for item in tipos_pasaje %}
+                            <option value="{{ item.id }}" {% if item.id == empleado.tipo_pasaje_id %}selected{% endif %}>
+                                {{ item.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label for="acreditacion_id" class="form-label">Acreditación</label>
+                        <select name="acreditacion_id" class="form-select">
+                            <option value="">-- Seleccione --</option>
+                            {% for item in acreditaciones %}
+                            <option value="{{ item.id }}" {% if item.id == empleado.acreditacion_id %}selected{% endif %}>
+                                {{ item.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- STATUS Y DESVINCULACIÓN -->
+                <h5 class="section-title">
+                    <i class="fas fa-user-check me-2"></i>
+                    Status y Desvinculación
+                </h5>
+                
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label for="status_id" class="form-label fw-bold">Status</label>
+                        <select id="status_id" name="status_id" class="form-select">
+                            <option value="">-- Seleccione --</option>
+                            {% for item in status_empleado %}
+                            <option value="{{ item.id }}" {% if item.id == empleado.status_id %}selected{% endif %}>
+                                {{ item.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div id="campos_desvinculacion" class="col-md-8 row g-3 conditional-field hidden">
+                        <div class="col-md-6">
+                            <label for="fecha_egreso" class="form-label">Fecha Egreso (Finiquito)</label>
+                            <input type="date" class="form-control" id="fecha_egreso" name="fecha_egreso" value="{{ empleado.fecha_egreso }}">
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="causal_despido_id" class="form-label">Causal de Despido</label>
+                            <select name="causal_despido_id" class="form-select">
+                                <option value="">-- Ninguna --</option>
+                                {% for item in causales_despido %}
+                                <option value="{{ item.id }}" {% if item.id == empleado.causal_despido_id %}selected{% endif %}>
+                                    {{ item.nombre_causal }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BOTONES -->
+                <div class="text-end">
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="fas fa-save me-2"></i>
+                        Actualizar Empleado
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Inicializar tema
+function initializeTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    const body = document.body;
+    const themeIcon = document.getElementById('theme-icon');
+    
+    body.setAttribute('data-bs-theme', savedTheme);
+    if (themeIcon) {
+        themeIcon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    }
+}
+
+function toggleTheme() {
+    const body = document.body;
+    const themeIcon = document.getElementById('theme-icon');
+    
+    const currentTheme = body.getAttribute('data-bs-theme') || 'light';
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    
+    body.setAttribute('data-bs-theme', newTheme);
+    if (themeIcon) {
+        themeIcon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    }
+    localStorage.setItem('theme', newTheme);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar tema
+    initializeTheme();
+    
+    const empleadoComunaId = {{ empleado.comuna_id or 'null' }};
+    const regionSelect = document.getElementById('region_id');
+    const comunaSelect = document.getElementById('comuna_id');
+    const statusSelect = document.getElementById('status_id');
+    const tipoContratoSelect = document.getElementById('tipo_contrato_id');
+    const fechaNacimiento = document.getElementById('fecha_nacimiento');
+    
+    // Función para cargar comunas
+    function cargarComunas(regionId, comunaSeleccionada = null) {
+        if (!regionId) {
+            comunaSelect.innerHTML = '<option value="">-- Primero elija una región --</option>';
+            comunaSelect.disabled = true;
+            return;
+        }
+        
+        fetch(`/get_comunas/${regionId}`)
+            .then(response => response.json())
+            .then(comunas => {
+                let html = '<option value="">-- Seleccione Comuna --</option>';
+                comunas.forEach(comuna => {
+                    const selected = (comuna.id == comunaSeleccionada) ? 'selected' : '';
+                    html += `<option value="${comuna.id}" ${selected}>${comuna.nombre}</option>`;
+                });
+                comunaSelect.innerHTML = html;
+                comunaSelect.disabled = false;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                comunaSelect.innerHTML = '<option value="">-- Error cargando comunas --</option>';
+                comunaSelect.disabled = true;
+            });
+    }
+    
+    // Cargar comunas al inicio
+    if (regionSelect.value) {
+        cargarComunas(regionSelect.value, empleadoComunaId);
+    }
+    
+    // Evento cambio de región
+    regionSelect.addEventListener('change', function() {
+        cargarComunas(this.value);
+    });
+    
+    // Mostrar/ocultar campos de desvinculación
+    function toggleDesvinculacion() {
+        const statusId = statusSelect.value;
+        const campos = document.getElementById('campos_desvinculacion');
+        
+        if (statusId == '2') { // Desvinculado
+            campos.classList.remove('hidden');
+        } else {
+            campos.classList.add('hidden');
+        }
+    }
+    
+    statusSelect.addEventListener('change', toggleDesvinculacion);
+    toggleDesvinculacion();
+    
+    // Mostrar/ocultar vencimiento contrato
+    function toggleVencimientoContrato() {
+        const tipoId = tipoContratoSelect.value;
+        const campo = document.getElementById('campo-vencimiento-contrato');
+        
+        if (tipoId == '2') { // Plazo Fijo
+            campo.classList.remove('hidden');
+        } else {
+            campo.classList.add('hidden');
+        }
+    }
+    
+    tipoContratoSelect.addEventListener('change', toggleVencimientoContrato);
+    toggleVencimientoContrato();
+    
+    // Calcular edad
+    function calcularEdad() {
+        if (fechaNacimiento.value) {
+            const hoy = new Date();
+            const nacimiento = new Date(fechaNacimiento.value);
+            let edad = hoy.getFullYear() - nacimiento.getFullYear();
+            const mesActual = hoy.getMonth();
+            const mesNacimiento = nacimiento.getMonth();
+            
+            if (mesActual < mesNacimiento || (mesActual === mesNacimiento && hoy.getDate() < nacimiento.getDate())) {
+                edad--;
+            }
+            
+            document.getElementById('edad_calculada').value = edad >= 0 ? edad + ' años' : '';
+        } else {
+            document.getElementById('edad_calculada').value = '';
+        }
+    }
+    
+    fechaNacimiento.addEventListener('change', calcularEdad);
+    calcularEdad();
+
+    // Preview de foto
+    const fotoInput = document.getElementById('foto_empleado');
+    const fotoPreview = document.getElementById('foto-preview');
+    
+    if (fotoInput && fotoPreview) {
+        fotoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    fotoPreview.src = event.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+});
+</script>
+
+{% endblock %}

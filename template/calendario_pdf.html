@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Calendario Turnos</title>
+<style>
+  @page { size: A4 portrait; margin: 12mm; }
+  * { box-sizing: border-box; font-family: Inter, Arial, sans-serif; }
+  .page { page-break-after: always; }
+  .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .title { font-weight:700; font-size:16pt; }
+  .subtitle { font-size:10pt; color:#555; }
+  .grid { display:grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .dow { text-align:center; font-weight:700; padding:6px 0; border:1px solid #e5e7eb; background:#f1f5f9; font-size:9pt; }
+  .day { min-height:85px; border:1px solid #e5e7eb; padding:6px; position:relative; font-size:9pt; }
+  .num { position:absolute; top:4px; right:6px; font-weight:700; font-size:9pt; color:#374151; }
+  .code { margin-top:18px; text-align:center; font-weight:700; border:1px solid rgba(0,0,0,.1); padding:4px; }
+  .T { background:#d1fae5; }
+  .D { background:#f3f4f6; }
+  .F { background:#fee2e2; }
+</style>
+</head>
+<body>
+{% for m in meses %}  <!-- meses = lista de dicts {year, month} -->
+  <section class="page">
+    <div class="header">
+      <div class="title">{{ (m.year, m.month)|mes_es }}</div>
+      <div class="subtitle">{{ nombre_turno }} · Patrón: {{ patron_turno }}</div>
+    </div>
+
+    <div class="grid">
+      {% for d in ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"] %}
+        <div class="dow">{{ d }}</div>
+      {% endfor %}
+
+      {# celdas vacías iniciales #}
+      {% for _ in range(inicio_semana(m.year, m.month)) %}
+        <div class="day"></div>
+      {% endfor %}
+
+      {# días del mes #}
+      {% for day in range(1, dias_en_mes(m.year, m.month)+1) %}
+        {% set month_key = m.year ~ "-" ~ (m.month-1) %} {# ojo: si tu JSON guardó 0=Enero #}
+        {% set code = (calendario_turnos[selected_turno_id] or {}).get(month_key, {}).get(day) %}
+        <div class="day">
+          <div class="num">{{ day }}</div>
+          {% if code %}
+            <div class="code {{ code }}">{{ code }}</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+{% endfor %}
+</body>
+</html>

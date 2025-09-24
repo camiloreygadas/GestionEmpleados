@@ -1,0 +1,1775 @@
+{% extends 'base.html' %}
+{% block title %}Reporte de Asistencia{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"/>
+<style>
+/* ===================================================================== */
+/* CSS OPTIMIZADO PARA reporte_asistencia.html - ESTILO UNIFICADO */
+/* ===================================================================== */
+/* VARIABLES CSS - TEMA CLARO Y OSCURO */
+:root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-tertiary: #e9ecef;
+    --text-primary: #212529;
+    --text-secondary: #6c757d;
+    --text-muted: #adb5bd;
+    --border-color: #dee2e6;
+    --accent-color: #0d6efd;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --warning-color: #fd7e14;
+    --info-color: #0dcaf0;
+    --shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+    --gradient-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --card-hover: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    
+    /* Colores específicos para asistencia */
+    --asistencia-T: #22c55e;
+    --asistencia-D: #6b7280;
+    --asistencia-F: #ef4444;
+    --asistencia-LM: #f59e0b;
+    --asistencia-V: #3b82f6;
+    --asistencia-PNP: #8b5cf6;
+    --asistencia-PSN: #ec4899;
+    --asistencia-PF: #facc15;
+    --asistencia-MUT: #eab308;
+}
+
+[data-bs-theme="dark"] {
+    --bg-primary: #212529;
+    --bg-secondary: #343a40;
+    --bg-tertiary: #495057;
+    --text-primary: #ffffff;
+    --text-secondary: #adb5bd;
+    --text-muted: #6c757d;
+    --border-color: #495057;
+    --shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.5);
+    --gradient-bg: linear-gradient(135deg, #434343 0%, #000000 100%);
+    --card-hover: 0 0.5rem 1rem rgba(0, 0, 0, 0.5);
+}
+
+/* Estilos para Choices.js en tema oscuro */
+[data-bs-theme="dark"] .choices {
+    background-color: var(--bg-secondary);
+    border-color: var(--border-color);
+}
+
+[data-bs-theme="dark"] .choices__inner {
+    background-color: var(--bg-primary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+[data-bs-theme="dark"] .choices__list--dropdown,
+[data-bs-theme="dark"] .choices__list[aria-expanded] {
+    background-color: var(--bg-secondary);
+    border-color: var(--border-color);
+}
+
+[data-bs-theme="dark"] .choices__list--dropdown .choices__item--selectable.is-highlighted,
+[data-bs-theme="dark"] .choices__list[aria-expanded] .choices__item--selectable.is-highlighted {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+[data-bs-theme="dark"] .choices__item {
+    color: var(--text-primary);
+}
+
+[data-bs-theme="dark"] .choices__button {
+    filter: invert(1);
+    border: none;
+    background-image: url('data:image/svg+xml;charset=UTF-8,<svg width="21" height="21" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg"><g fill="%23fff" fill-rule="evenodd"><path d="M2.592.044l18.364 18.364-2.548 2.548L.044 2.592z"/><path d="M.044 18.364L18.408.000l2.548 2.548L2.592 20.912z"/></g></svg>');
+}
+
+
+/* LAYOUT PRINCIPAL */
+.escape-container {
+    width: 100vw !important;
+    position: relative !important;
+    left: 50% !important;
+    right: 50% !important;
+    margin-left: -50vw !important;
+    margin-right: -50vw !important;
+    max-width: none !important;
+}
+
+.content-wrapper {
+    padding: 1rem 2rem;
+}
+
+@media (min-width: 768px) { .content-wrapper { padding: 1rem 4rem; } }
+@media (min-width: 1200px) { .content-wrapper { padding: 1rem 6rem; } }
+@media (min-width: 1400px) { .content-wrapper { padding: 1rem 8rem; } }
+
+/* ESTILOS BASE */
+* {
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+body {
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* CARDS Y CONTENEDORES */
+.card {
+    margin-bottom: 2rem;
+    border-radius: 1rem;
+    box-shadow: var(--shadow-lg);
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+}
+
+.card-body {
+    padding: 2rem;
+    color: var(--text-primary);
+}
+
+.card-header {
+    padding: 1.5rem 2rem;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    border-radius: 1rem 1rem 0 0;
+}
+
+.panel {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-lg);
+    margin-bottom: 1.5rem;
+}
+
+/* HEADER CON GRADIENTE */
+.header-gradient {
+    background: var(--gradient-bg);
+    padding: 3rem 0;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+    width: 100vw;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+}
+
+.header-title {
+    color: white;
+    font-weight: 700;
+    font-size: 2.5rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    margin: 0;
+    text-align: center;
+}
+
+/* TOGGLE DE TEMA */
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    border-radius: 50px;
+    padding: 0.75rem 1.25rem;
+    box-shadow: var(--shadow-lg);
+}
+
+.theme-toggle-btn {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 25px;
+}
+
+/* FORMULARIOS Y FILTROS */
+.panel-form {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.panel-form label {
+    font-size: 0.85rem; /* Aumentado para mejor legibilidad */
+    color: var(--text-secondary);
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.panel-form input[type="date"],
+.panel-form input[type="search"],
+.panel-form .choices__inner { /* Apunta al elemento interno de Choices.js */
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem; /* Aumentado para esquinas más suaves */
+    padding: 0.85rem 1.25rem; /* Aumentado para más espacio interno */
+    font-size: 1rem; /* Aumentado para texto más grande */
+    min-width: 200px; /* Ancho mínimo aumentado */
+    min-height: 55px; /* Altura mínima aumentada para consistencia */
+}
+.panel-form .choices {
+    margin-top: 0;
+}
+
+.panel-form input[type="search"] {
+    min-width: 240px; /* Ancho aumentado */
+}
+
+.panel-form input:focus,
+.panel-form select:focus,
+.panel-form textarea:focus,
+.panel-form .choices.is-focused .choices__inner {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.1);
+    outline: none;
+}
+
+/* Estilos para el nuevo campo de búsqueda */
+.panel-form .search-container-wrapper {
+    flex-grow: 1; /* Ocupa el espacio disponible */
+    min-width: 300px; /* Ancho mínimo */
+    flex-basis: 100%; /* Ocupa toda la fila */
+}
+
+.panel-form textarea {
+    width: 100%;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    resize: vertical; /* Permite redimensionar verticalmente */
+    min-height: 90px;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+}
+
+.search-container-wrapper small {
+    margin-top: 0.5rem;
+    display: block;
+}
+
+.filter-group {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.secondary-filters {
+    display: none; /* Oculto por defecto */
+    flex-basis: 100%;
+    margin-top: 1rem;
+}
+
+#toggle-filters-btn {
+    margin-left: auto; /* Alinea el botón a la derecha */
+}
+
+
+/* BOTONES */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    background: linear-gradient(180deg, rgba(13, 110, 253, 0.1), rgba(13, 110, 253, 0.05));
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    border-color: var(--accent-color);
+    box-shadow: var(--card-hover);
+    color: var(--text-primary);
+    text-decoration: none;
+}
+
+.btn-info {
+    background: linear-gradient(180deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05));
+    border-color: var(--info-color);
+}
+
+.btn-info:hover {
+    border-color: var(--info-color);
+    box-shadow: 0 0.5rem 1rem rgba(59, 130, 246, 0.2);
+}
+
+/* ESTADÍSTICAS Y KPIs */
+.dashboard-wrap {
+    position: relative;
+    margin-top: 1rem;
+}
+
+.estado-title {
+    font-weight: 800;
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.estado-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.estado-card, .filtro-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+}
+
+.estado-card:hover, .filtro-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent-color);
+    box-shadow: var(--card-hover);
+}
+
+.filtro-card.active-filter {
+    outline: 2px solid var(--accent-color);
+    box-shadow: 0 0 25px rgba(13, 110, 253, 0.3);
+    transform: translateY(-2px);
+}
+
+.estado-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--accent-color);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.estado-value {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--text-primary);
+}
+
+.estado-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.estado-total {
+    position: absolute;
+    right: 8px;
+    top: -10px;
+    background: var(--accent-color);
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    box-shadow: var(--shadow-lg);
+}
+
+/* KPIs CARDS */
+.kpis-mini {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+}
+
+.kpi-card {
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
+}
+
+.kpi-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent-color);
+    box-shadow: var(--card-hover);
+}
+
+.kpi-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-secondary);
+    color: var(--accent-color);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.kpi-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.kpi-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    font-weight: 800;
+}
+
+.kpi-value {
+    font-size: 1.75rem;
+    font-weight: 900;
+    line-height: 1;
+    margin-top: 0.25rem;
+    color: var(--text-primary);
+}
+
+.kpi-sub {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
+/* Colores específicos para KPIs */
+.kpi--vig .kpi-icon {
+    background: rgba(34, 197, 94, 0.1);
+    color: var(--success-color);
+}
+
+.kpi--vig .kpi-value {
+    color: var(--success-color);
+}
+
+.kpi--fin .kpi-icon {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger-color);
+}
+
+.kpi--fin .kpi-value {
+    color: var(--danger-color);
+}
+
+/* TABLA DE ASISTENCIA */
+.calendar-table-wrapper {
+    position: relative;
+    overflow: auto;
+    /* max-height: 70vh; */ /* Eliminado para que la paginación controle la altura */
+    margin-top: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    background: var(--bg-primary);
+    -webkit-overflow-scrolling: touch;
+    box-shadow: var(--shadow-lg);
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+th, td {
+    border-bottom: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    padding: 0.75rem;
+    text-align: center;
+    min-width: 78px;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+}
+
+thead th {
+    position: sticky;
+    top: 0;
+    background: var(--bg-secondary);
+    font-weight: 800;
+    z-index: 10;
+}
+
+/* Mejoras en encabezados de tabla */
+th.month-header {
+    text-align: center;
+    font-weight: 900;
+    font-size: 1rem;
+    background-color: var(--bg-tertiary) !important;
+    color: var(--accent-color);
+    padding: 0.75rem;
+    border-bottom: 2px solid var(--border-color);
+    z-index: 11; /* Prioridad sobre los días */
+}
+
+thead tr:nth-child(2) th {
+    top: 52px; /* Altura de la fila de meses */
+}
+
+th.employee-name, td.employee-name {
+    text-align: left;
+    min-width: 360px;
+    position: sticky;
+    left: 0;
+    background: var(--bg-primary);
+    font-weight: 800;
+    padding: 1rem;
+    border-right: 2px solid var(--border-color);
+    z-index: 3;
+    box-shadow: 2px 0 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Controles de paginación */
+.table-controls-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.table-controls-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pagination-controls button {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-primary);
+}
+.pagination-controls button:hover {
+    background: var(--bg-secondary);
+    border-color: var(--accent-color);
+}
+.pagination-controls button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--bg-tertiary);
+}
+
+#page-indicator {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    padding: 0 0.5rem;
+}
+
+/* CÓDIGOS DE ASISTENCIA */
+.asistencia-T { background: rgba(34, 197, 94, 0.15); color: var(--success-color); font-weight: 800; }
+.asistencia-D { background: rgba(107, 114, 128, 0.15); color: var(--text-muted); }
+.asistencia-F { background: rgba(239, 68, 68, 0.15); color: var(--danger-color); font-weight: 900; }
+.asistencia-LM { background: rgba(245, 158, 11, 0.15); color: var(--warning-color); font-weight: 800; }
+.asistencia-V { background: rgba(59, 130, 246, 0.15); color: var(--info-color); font-weight: 800; }
+.asistencia-PNP { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
+.asistencia-MUT { background: rgba(234, 179, 8, 0.15); color: #eab308; }
+.asistencia-PSN { background: rgba(236, 72, 153, 0.15); color: #ec4899; }
+.asistencia-PF { background: rgba(250, 204, 21, 0.15); color: #facc15; }
+
+/* BADGES Y CHIPS */
+.pill-badge { background: var(--accent-color); color: white; border-radius: 999px; padding: 0.5rem 1rem; font-weight: 900; font-size: 0.85rem; }
+.badge { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.5rem; border-radius: 0.375rem; border: 1px solid var(--border-color); background: var(--bg-secondary); font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); }
+.status-chip { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.2px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); transition: all 0.3s ease; }
+.future-chip { background: rgba(250, 204, 21, 0.1); color: var(--warning-color); border-color: rgba(250, 204, 21, 0.3); }
+.fin-chip { margin-top: 0.5rem; background: rgba(239, 68, 68, 0.1); color: var(--danger-color); border-color: rgba(239, 68, 68, 0.3); font-weight: 900; }
+
+/* UTILIDADES */
+.flex-center { display: flex; align-items: center; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.legend-list { list-style: none; padding: 0; margin: 0; }
+.legend-item { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color); }
+.legend-item:last-child { border-bottom: none; }
+
+/* VISTA MÓVIL */
+.mobile-only { display: none; }
+.mobile-view-toggle { display: flex; gap: 0.5rem; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 0.5rem; padding: 0.25rem; }
+.mobile-view-toggle .btn { flex: 1; justify-content: center; background: transparent; border-color: transparent; padding: 0.5rem; }
+.mobile-view-toggle .btn.active { background: var(--accent-color); color: white; border-color: var(--accent-color); }
+
+/* Estilos para el gráfico */
+.chart-container { position: relative; height: 300px; margin-bottom: 1rem; }
+.chart-container canvas { max-width: 100%; height: auto !important; }
+.view-selector { margin-bottom: 1rem; }
+.view-selector button { font-size: 0.8rem; padding: 0.4rem 0.8rem; }
+.custom-legend {
+    padding: 0.75rem;
+    background: var(--bg-secondary);
+    border-radius: 0.5rem;
+}
+.legend-item {
+    cursor: pointer;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-align: left;
+}
+.legend-item:hover {
+    background: var(--bg-tertiary);
+}
+.legend-item.disabled {
+    opacity: 0.5;
+}
+.legend-info {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+.legend-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    width: 100%;
+}
+.legend-gender-name {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+.legend-value {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    font-weight: 800;
+}
+.legend-attendance-avg {
+    font-size: 0.75rem;
+    color: var(--success-color);
+    font-weight: 600;
+}
+
+@media (max-width: 992px) {
+    .panel > div[style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
+    .chart-container { height: 250px !important; }
+}
+
+@media (max-width: 768px) {
+    .content-wrapper { padding: 1rem; }
+    .header-title { font-size: 1.8rem; }
+    .mobile-only { display: block; }
+    .desktop-only { display: none !important; }
+    .theme-toggle { position: relative; top: auto; right: auto; margin-bottom: 1rem; }
+}
+
+/* ESTILOS ESPECÍFICOS PARA GRÁFICOS Y RANKING */
+.region-stat-bar { display: flex; align-items: center; padding: 0.75rem; border-radius: 0.5rem; cursor: pointer; transition: all 0.3s ease; margin-bottom: 0.5rem; background: var(--bg-primary); border: 1px solid var(--border-color); }
+.region-stat-bar:hover { background: var(--bg-tertiary); transform: translateX(5px); }
+.region-stat-bar.active { background: var(--bg-tertiary); border-color: var(--accent-color); box-shadow: 0 0 10px rgba(13, 110, 253, 0.2); }
+#map-tooltip { position: absolute; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 0.5rem; padding: 1rem; box-shadow: var(--shadow-lg); z-index: 1000; display: none; max-width: 250px; font-size: 0.85rem; pointer-events: none; }
+#map-tooltip h6 { margin: 0 0 0.5rem 0; font-weight: 700; color: var(--accent-color); }
+#top-regiones-content { display: grid; gap: 0.5rem; }
+
+/* ESTILOS PARA LA TABLA EN MÓVILES */
+@media (max-width: 768px) {
+    .calendar-table-wrapper { max-height: 50vh; }
+    th.employee-name, td.employee-name { min-width: 200px; }
+    th, td { min-width: 60px; padding: 0.5rem; font-size: 0.75rem; }
+}
+</style>
+
+<div id="map-tooltip">
+    <h6></h6>
+    <div></div>
+</div>
+
+<div class="theme-toggle">
+    <button class="theme-toggle-btn" onclick="toggleTheme()" title="Cambiar tema">
+        <i class="fas fa-moon" id="theme-icon"></i>
+    </button>
+</div>
+
+<div class="escape-container">
+    <div class="content-wrapper">
+        <div class="header-gradient">
+            <div class="text-center">
+                <h1 class="header-title">
+                    <i class="fas fa-calendar-check me-3"></i>
+                    Reporte de Asistencia
+                </h1>
+                <p class="text-white-50 mb-0 fs-5">Control y seguimiento de asistencia del personal</p>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body d-flex justify-content-center flex-wrap gap-3 py-3">
+                {% if not modo_exportacion %}
+                <a href="{{ url_for('index') }}" class="btn">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    Volver
+                </a>
+                {% endif %}
+                <a href="{{ url_for('exportar_reporte_parcial', fecha_desde=fecha_desde, fecha_hasta=fecha_hasta, query=request.args.get('query', ''), turno=request.args.get('turno', ''), region=request.args.get('region', ''), area=request.args.get('area', ''), fase=request.args.get('fase', '')) }}" class="btn btn-info" title="Descargar la vista actual como archivo Excel">
+                    <i class="fas fa-file-excel me-2"></i>
+                    Exportar Excel
+                </a>
+                <button type="button" id="btn-compartir" class="btn" title="Copiar enlace para compartir">
+                    <i class="fas fa-share-alt me-2"></i>
+                    Compartir
+                </button>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <form action="{{ url_for('reporte_asistencia') }}" method="get" class="panel-form">
+                <div class="filter-group">
+                    <div>
+                        <label for="fecha_desde">Fecha Desde</label>
+                        <input type="date" name="fecha_desde" id="fecha_desde" value="{{ fecha_desde }}" required />
+                    </div>
+                    <div>
+                        <label for="fecha_hasta">Fecha Hasta</label>
+                        <input type="date" name="fecha_hasta" id="fecha_hasta" value="{{ fecha_hasta }}" required />
+                    </div>
+                     <button type="submit" class="btn">
+                        <i class="fas fa-search me-2"></i>
+                        Generar Reporte
+                    </button>
+                    <button type="button" class="btn" id="toggle-filters-btn">
+                        <i class="fas fa-filter me-2"></i>
+                        Filtros Avanzados
+                    </button>
+                </div>
+                <div class="secondary-filters" id="secondary-filters-container">
+                     <div class="filter-group">
+                        <div>
+                            <label for="turno">Turno</label>
+                            <select name="turno" id="turno" multiple>
+                                {% for turno in turnos %}
+                                <option value="{{ turno.id }}" {% if turno.id|string in request.args.getlist('turno') %}selected{% endif %}>{{ turno.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="region">Región</label>
+                            <select name="region" id="region" multiple>
+                                {% for region in regiones %}
+                                <option value="{{ region.id }}" {% if region.id|string in request.args.getlist('region') %}selected{% endif %}>
+                                    {{ region.nombre or region.region }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="area">Área</label>
+                            <select name="area" id="area" multiple>
+                                {% for area in areas %}
+                                <option value="{{ area.id }}" {% if area.id|string in request.args.getlist('area') %}selected{% endif %}>
+                                    {{ area.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="fase">Fase</label>
+                            <select name="fase" id="fase" multiple>
+                                {% for fase in fases %}
+                                <option value="{{ fase.id }}" {% if fase.id|string in request.args.getlist('fase') %}selected{% endif %}>
+                                    {{ fase.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="cargo_query">Búsqueda por Cargo</label>
+                            <input type="search" name="cargo_query" id="cargo_query" value="{{ request.args.get('cargo_query', '') }}" placeholder="Ej: Excavadora, Operador...">
+                        </div>
+                    </div>
+                    <div class="search-container-wrapper" style="margin-top: 1rem;">
+                        <label for="query">Búsqueda Inteligente (RUT, ID, Nombres)</label>
+                        <textarea name="query" id="query" rows="3" 
+                                  placeholder="Ejemplos:&#10;12345678-9, 87654321-0&#10;EMP001, EMP002, EMP003&#10;Juan Pérez, María González">{{ request.args.get('query', '') }}</textarea>
+                        <small class="form-text text-muted">💡 Puedes buscar múltiples empleados separando por comas, espacios o saltos de línea.</small>
+                    </div>
+                     <div class="filter-group" style="margin-top: 1rem; gap: 1rem;">
+                        <button type="submit" class="btn btn-info">
+                            <i class="fas fa-check me-2"></i>
+                            Aplicar Filtros
+                        </button>
+                        <button type="button" id="limpiar-filtros-avanzados" class="btn">
+                            <i class="fas fa-eraser me-2"></i>
+                            Limpiar Filtros
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="dashboard-wrap">
+            <div class="flex-between" style="margin-bottom: 1rem;">
+                <h2 class="estado-title">Estado del Personal · Último día del período</h2>
+                <button type="button" id="limpiar-filtro" class="btn btn-info" style="display: none;">Mostrar Todos</button>
+            </div>
+            
+            {% set CARDS = [
+                ('T', 'Personal en Obra', '#22c55e', '<i class="fas fa-hammer"></i>'),
+                ('D', 'Descanso', '#6b7280', '<i class="fas fa-bed"></i>'),
+                ('LM', 'Licencia Médica', '#f59e0b', '<i class="fas fa-user-md"></i>'),
+                ('V', 'Vacaciones', '#3b82f6', '<i class="fas fa-umbrella-beach"></i>'),
+                ('F', 'Fallas', '#ef4444', '<i class="fas fa-exclamation-triangle"></i>'),
+                ('PNP', 'Permiso Sin Goce', '#8b5cf6', '<i class="fas fa-pause-circle"></i>'),
+                ('PSN', 'Permiso Post-Natal', '#ec4899', '<i class="fas fa-baby"></i>'),
+                ('PF', 'Permiso por Fallecimiento', '#facc15', '<i class="fas fa-cross"></i>'),
+                ('MUT', 'Licencia Mutual', '#eab308', '<i class="fas fa-shield-alt"></i>')
+            ] %}
+            
+            {% set counts = resumen_ultimo_dia or {} %}
+            {% set ns = namespace(total=0) %}
+            {% for v in counts.values() %}{% set ns.total = ns.total + v %}{% endfor %}
+            
+            <div class="estado-total" title="Total de personas consideradas">{{ ns.total }}</div>
+            
+            <div class="estado-grid" id="dashboard-filtros">
+                {% for code, label, color, icon in CARDS %}
+                <button type="button" class="estado-card filtro-card" data-codigo="{{ code }}" title="{{ label }}">
+                    <div class="estado-icon" style="color: {{ color }}">{{ icon|safe }}</div>
+                    <div>
+                        <div class="estado-value">{{ counts.get(code, 0) }}</div>
+                        <div class="estado-label">{{ label }}</div>
+                    </div>
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% set tv = total_vigentes or 0 %}
+        {% set tf = total_finiquitados or 0 %}
+        {% set tot = tv + tf %}
+        {% set pv = ((tv / (tot or 1)) * 100) | round(1) %}
+        {% set pf = ((tf / (tot or 1)) * 100) | round(1) %}
+        
+        <div class="panel">
+            <div class="flex-between" style="margin-bottom: 1rem">
+                <h2 style="margin: 0; font-weight: 900; font-size: 1.25rem">Dotación del período</h2>
+                <div class="pill-badge" title="Total del período (Vigentes + Finiquitados)">
+                    Total: {{ tot }}
+                </div>
+            </div>
+            <div class="kpis-mini">
+                <div class="kpi-card kpi--vig" data-tip="Vigentes: {{ tv }} ({{ pv }}%) · Activos en el rango seleccionado">
+                    <div class="kpi-icon">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div class="kpi-body">
+                        <div class="kpi-label">Vigentes</div>
+                        <div class="kpi-value">{{ tv }}</div>
+                        <div class="kpi-sub">Relación activa en el período ({{ pv }}%)</div>
+                    </div>
+                </div>
+                <div class="kpi-card kpi--fin" data-tip="Finiquitados: {{ tf }} ({{ pf }}%) · Egreso en el rango filtrado">
+                    <div class="kpi-icon">
+                        <i class="fas fa-user-times"></i>
+                    </div>
+                    <div class="kpi-body">
+                        <div class="kpi-label">Finiquitados</div>
+                        <div class="kpi-value">{{ tf }}</div>
+                        <div class="kpi-sub">Egresos en el período ({{ pf }}%)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2 style="margin: 0 0 1.5rem 0; font-weight: 900; font-size: 1.25rem">Análisis Demográfico y Distribución</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                
+                <div style="background: var(--bg-secondary); border-radius: 1rem; padding: 1.5rem; border: 1px solid var(--border-color);">
+                    <div class="flex-between" style="margin-bottom: 1rem">
+                        <h3 style="margin: 0; font-weight: 900; font-size: 1.1rem">Distribución de estados</h3>
+                        <div class="pill-badge">{{ total_distribucion }}</div>
+                    </div>
+                    <ul class="legend-list" id="distribucion-legend"></ul>
+                </div>
+
+                <div style="background: var(--bg-secondary); border-radius: 1rem; padding: 1.5rem; border: 1px solid var(--border-color); min-height: 400px;">
+                    <div class="flex-between" style="margin-bottom: 1rem;">
+                        <h3 style="margin: 0; font-weight: 900; font-size: 1.1rem">
+                            <i class="fas fa-venus-mars me-2" style="color: var(--accent-color);"></i>
+                            Por Género y Edad
+                        </h3>
+                    </div>
+                    
+                    <div class="view-selector mb-3">
+                        <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                            <button type="button" class="btn btn-sm active" onclick="changeView('bar')" style="flex: 1;">
+                                <i class="fas fa-chart-bar"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm" onclick="changeView('horizontal')" style="flex: 1;">
+                                <i class="fas fa-align-left"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm" onclick="changeView('radar')" style="flex: 1;">
+                                <i class="fas fa-star"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container" style="position: relative; height: 300px; margin-bottom: 1rem;">
+                        <canvas id="generoEdadChart"></canvas>
+                    </div>
+                    
+                    <div class="custom-legend">
+                        <div style="display: grid; grid-template-columns: 1fr; gap: 0.25rem;">
+                            <div class="legend-item" data-gender="masculino">
+                                <i class="fas fa-male" style="color: #3b82f6; font-size: 1.5rem;"></i>
+                                <div class="legend-info">
+                                    <div class="legend-header">
+                                        <span class="legend-gender-name">Masculino</span>
+                                        <span class="legend-value">-</span>
+                                    </div>
+                                    <div class="legend-attendance-avg">Asistencia: -%</div>
+                                </div>
+                            </div>
+                            <div class="legend-item" data-gender="femenino">
+                                <i class="fas fa-female" style="color: #ec4899; font-size: 1.5rem;"></i>
+                                <div class="legend-info">
+                                    <div class="legend-header">
+                                        <span class="legend-gender-name">Femenino</span>
+                                        <span class="legend-value">-</span>
+                                    </div>
+                                    <div class="legend-attendance-avg">Asistencia: -%</div>
+                                </div>
+                            </div>
+                            <div class="legend-item" data-gender="otro">
+                                <i class="fas fa-user" style="color: #8b5cf6; font-size: 1.5rem;"></i>
+                                <div class="legend-info">
+                                    <div class="legend-header">
+                                        <span class="legend-gender-name">Otro</span>
+                                        <span class="legend-value">-</span>
+                                    </div>
+                                    <div class="legend-attendance-avg">Asistencia: -%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: var(--bg-secondary); border-radius: 1rem; padding: 1.5rem; border: 1px solid var(--border-color);">
+                    {% set modo_actual = request.args.get('modo','historico') %}
+                    <div class="flex-between" style="margin-bottom: 1rem;">
+                        <h3 style="margin: 0; font-weight: 900; font-size: 1.1rem">Personal con más ausencias</h3>
+                        <div class="pill-badge">{{ total_faltas }}</div>
+                    </div>
+                    <div class="mobile-view-toggle" style="margin-bottom: 1rem;">
+                        <a class="btn {{ 'active' if modo_actual=='historico' else '' }}" 
+                           href="{{ url_for('reporte_asistencia', modo='historico', fecha_desde=fecha_desde, fecha_hasta=fecha_hasta) }}"
+                           style="flex: 1; text-align: center;">Histórico</a>
+                        <a class="btn {{ 'active' if modo_actual=='mensual' else '' }}" 
+                           href="{{ url_for('reporte_asistencia', modo='mensual', fecha_desde=fecha_desde, fecha_hasta=fecha_hasta) }}"
+                           style="flex: 1; text-align: center;">Mensual</a>
+                    </div>
+                    <ul class="legend-list" id="faltas-ranking"></ul>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-top: 1rem; align-items: flex-start;">
+
+            <div style="display: flex; flex-direction: column; gap: 2rem;">
+                
+                <div class="panel" style="padding: 1.5rem; margin-bottom: 0;">
+                    <div class="view-selector mb-3">
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-sm active" onclick="switchChart('column')" id="btn-column">
+                                <i class="fas fa-chart-column"></i> Columnas
+                            </button>
+                            <button class="btn btn-sm" onclick="switchChart('marimekko')" id="btn-marimekko">
+                                <i class="fas fa-th"></i> Barras
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chart-container" style="position: relative; height: 400px;">
+                        <canvas id="regionesChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="panel" style="margin-bottom: 0;">
+                    <div class="flex-between" style="margin-bottom: 1rem;">
+                        <h3 style="margin: 0; font-weight: 900; font-size: 1.25rem">
+                            <i class="fas fa-clock" style="color: var(--accent-color); margin-right: 0.5rem;"></i>
+                            Distribución por Turno
+                        </h3>
+                        <div class="pill-badge" id="total-turnos">0</div>
+                    </div>
+                    <div class="chart-selector" style="margin-bottom: 1rem;">
+                        <button class="chart-btn active" onclick="cambiarGraficoTurnos('columnas')">
+                            <i class="fas fa-chart-column"></i> Columnas
+                        </button>
+                        <button class="chart-btn" onclick="cambiarGraficoTurnos('barras')">
+                            <i class="fas fa-chart-bar"></i> Barras
+                        </button>
+                        <button class="chart-btn" onclick="cambiarGraficoTurnos('pie')">
+                            <i class="fas fa-chart-pie"></i> Circular
+                        </button>
+                    </div>
+                    <div class="chart-container" style="position: relative; height: 400px;">
+                        <canvas id="turnosEmpleadosChart"></canvas>
+                    </div>
+                </div>
+
+            </div>
+        
+            <div>
+                <div class="panel" style="padding: 1.5rem; margin-bottom: 2rem;">
+                    <h6 style="margin-bottom: 1rem;">Regiones por Empleados</h6>
+                    <div id="total-nacional" style="font-size: 1.5rem; font-weight: 900; color: var(--accent-color); margin-bottom: 1rem;">0</div>
+                    <div id="top-regiones-list"></div>
+                </div>
+                
+                <div class="panel" style="margin-bottom: 0;">
+                    <div style="background: var(--bg-secondary); border-radius: 1rem; padding: 1.5rem; border: 1px solid var(--border-color);">
+                        <h4 style="margin: 0 0 1rem 0; font-weight: 800; font-size: 1rem;">
+                            <i class="fas fa-info-circle"></i> Detalles del Turno
+                        </h4>
+                        <div id="turnoDetalles" style="font-size: 0.9rem;">
+                            <p style="color: var(--text-muted); text-align: center; padding: 2rem 0;">
+                                Haz clic en el gráfico para ver detalles
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        
+        <!-- SECCIÓN DE TABLA DE ASISTENCIA MEJORADA -->
+        <div class="panel desktop-only">
+            <div class="table-controls-header">
+                <h3>Tabla de Asistencia</h3>
+                <div class="pagination-controls">
+                    <button id="prev-page-btn" title="Página anterior"><i class="fas fa-chevron-left"></i></button>
+                    <span id="page-indicator"></span>
+                    <button id="next-page-btn" title="Página siguiente"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+            <div class="calendar-table-wrapper" id="tableWrapper">
+                <table id="asistencia-table">
+                    <caption>Resumen de asistencia de empleados del {{ fecha_desde }} al {{ fecha_hasta }}</caption>
+                    <thead>
+                        <!-- Fila para nombres de Mes -->
+                        <tr>
+                            <th class="employee-name" scope="col" rowspan="2">Empleado</th>
+                            {# START: Bloque corregido para generar encabezados de mes #}
+                            {% set visible_dias = [] %}
+                            {% for dia in dias_rango %}
+                                {% if dia <= today %}
+                                    {% if visible_dias.append(dia) %}{% endif %}
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% for year_group in visible_dias | groupby('year') %}
+                                {% for month_group in year_group.list | groupby('month') %}
+                                    {% set any_day_in_month = month_group.list[0] %}
+                                    <th colspan="{{ month_group.list | length }}" class="month-header">{{ any_day_in_month.strftime('%B %Y') | capitalize }}</th>
+                                {% endfor %}
+                            {% endfor %}
+                            {# END: Bloque corregido #}
+                        </tr>
+                        <!-- Fila para días -->
+                        <tr>
+                            {% for dia in dias_rango %}
+                                {% if dia <= today %}
+                                    <th scope="col">
+                                        {{ dia.day }}<br />
+                                        <small>
+                                            {% set wd = dia.weekday() %}
+                                            {% if   wd == 0 %}Lun{% elif wd == 1 %}Mar{% elif wd == 2 %}Mié{% elif wd == 3 %}Jue{% elif wd == 4 %}Vie{% elif wd == 5 %}Sáb{% else %}Dom{% endif %}
+                                        </small>
+                                    </th>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for empleado in empleados %}
+                            <tr data-empleado-id="{{ empleado.id }}" data-empleado-nombre="{{ empleado.nombre_completo }}">
+                                <th class="employee-name" scope="row">
+                                    <div class="employee-info-header">
+                                        <div>
+                                            <div style="font-weight: 900">{{ empleado.nombre_completo }}</div>
+                                            <small style="color: var(--text-muted); font-weight: 700">RUT: {{ empleado.rut }} · Turno: {{ empleado.turno_nombre or 'N/A' }}</small>
+                                        </div>
+
+                                        <div class="attendance-summary">
+                                            {% set res = resumen_por_empleado.get(empleado.id, {}) %}
+                                            {% for code in ['T','D','F','LM','V','PNP','MUT','PSN','PF'] %}
+                                                {% if res.get(code) %}
+                                                    <span class="badge">{{ code }}: {{ res[code] }}</span>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+
+                                    {% if finiquitos_mes.get(empleado.id) %}
+                                        <div class="status-chip fin-chip" title="Finiquito: {{ finiquitos_mes[empleado.id] }}">
+                                            <i class="fas fa-user-times"></i>
+                                            FINIQUITO · {{ finiquitos_mes[empleado.id] }}
+                                        </div>
+                                    {% endif %}
+
+                                    {% set skip_badge = false %}
+                                    {% if futuros_permisos.get(empleado.id) and empleado.id in licencias_info %}
+                                        {% for p in futuros_permisos[empleado.id] %}
+                                            {% if p.codigo == licencias_info[empleado.id].codigo %}
+                                                {% set skip_badge = true %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                    {% if (empleado.id in licencias_info) and (not skip_badge) %}
+                                        <div class="chip" title="Último permiso hasta">
+                                            Licencia ({{ licencias_info[empleado.id].codigo }}) hasta {{ licencias_info[empleado.id].fecha_fin }}
+                                        </div>
+                                    {% endif %}
+
+                                    {% if futuros_permisos.get(empleado.id) %}
+                                        <div class="future-chips">
+                                            {% for p in futuros_permisos[empleado.id] %}
+                                                <span class="status-chip future-chip" title="Próximo permiso {{ p.codigo }} · {{ p.desde }} → {{ p.hasta }}">
+                                                    {% if p.codigo == 'LM' %}
+                                                        <i class="fas fa-user-md"></i>
+                                                    {% elif p.codigo == 'V' %}
+                                                        <i class="fas fa-umbrella-beach"></i>
+                                                    {% elif p.codigo == 'PNP' %}
+                                                        <i class="fas fa-pause-circle"></i>
+                                                    {% elif p.codigo == 'PSN' %}
+                                                        <i class="fas fa-baby"></i>
+                                                    {% elif p.codigo == 'MUT' %}
+                                                        <i class="fas fa-shield-alt"></i>
+                                                    {% elif p.codigo == 'PF' %}
+                                                        <i class="fas fa-cross"></i>
+                                                    {% endif %}
+                                                    {{ p.codigo }} {{ p.desde }} → {{ p.hasta }}
+                                                </span>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </th>
+
+                                {% for dia in dias_rango %}
+                                    {% if dia <= today %}
+                                        {% set valor_actual = asistencia_grid[empleado.id].get(dia.day, '') %}
+                                        {% set future_codes = ['LM','V','PNP','PSN','MUT','PF'] %}
+                                        {% set is_future_perm = (dia >= today and valor_actual in future_codes) %}
+                                        <td class="{{ 'asistencia-' + valor_actual if valor_actual else '' }} {% if is_future_perm %}cell-future-perm{% endif %}"
+                                            title="{% if is_future_perm %}Próximo permiso: {{ valor_actual }}{% endif %}">
+                                            {{ valor_actual }}
+                                        </td>
+                                    {% endif %}
+                                {% endfor %}
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="{{ dias_rango|length + 1 }}" style="text-align: center; color: var(--text-muted); padding: 2rem">
+                                    No se encontraron empleados para este rango de fechas.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+<script>
+// ============================================
+// FUNCIONES GLOBALES
+// ============================================
+function toggleTheme() {
+    const body = document.body;
+    const themeIcon = document.getElementById('theme-icon');
+    const currentTheme = body.getAttribute('data-bs-theme') || 'light';
+    
+    if (currentTheme === 'light') {
+        body.setAttribute('data-bs-theme', 'dark');
+        themeIcon.className = 'fas fa-sun';
+        localStorage.setItem('theme', 'dark');
+    } else {
+        body.setAttribute('data-bs-theme', 'light');
+        themeIcon.className = 'fas fa-moon';
+        localStorage.setItem('theme', 'light');
+    }
+}
+
+// Variables globales adicionales
+let regionesSeleccionadas = new Set();
+let fechaHastaGlobal = document.getElementById('fecha_hasta')?.value || new Date().toISOString().split('T')[0];
+
+// ============================================
+// GRÁFICOS DE REGIONES
+// ============================================
+let chartData = null;
+let currentChart = null;
+let currentTurnosChartType = 'columnas'; // Variable para mantener el tipo de gráfico de turnos
+
+function switchChart(type) {
+    if (currentChart) currentChart.destroy();
+    document.getElementById('btn-column').classList.toggle('active', type === 'column');
+    document.getElementById('btn-marimekko').classList.toggle('active', type === 'marimekko');
+    currentChart = (type === 'column') ? createColumnChart() : createMarimekkoChart();
+}
+
+async function loadRegionalData() {
+    try {
+        const response = await fetch('/api/analytics/distribucion-regional');
+        const result = await response.json();
+        if (result.success) {
+            chartData = result.data;
+            updateRankingList(result.total_nacional);
+            switchChart('column');
+        }
+    } catch (error) { console.error('Error cargando datos regionales:', error); }
+}
+
+function updateRankingList(totalNacional) {
+    const totalElement = document.getElementById('total-nacional');
+    if (totalElement) {
+        totalElement.textContent = totalNacional.toLocaleString('es-CL');
+    }
+
+    const sortedRegions = Object.values(chartData)
+        .sort((a, b) => b.total_empleados - a.total_empleados);
+
+    const topList = document.getElementById('top-regiones-list');
+    if (topList) {
+        topList.innerHTML = sortedRegions.map((region, index) => {
+            const regionId = region.id;
+            return `
+                <div class="region-stat-bar ${regionesSeleccionadas.has(regionId) ? 'active' : ''}" 
+                     data-region-id="${regionId}"
+                     data-region-nombre="${region.nombre}"
+                     onmouseenter="showTooltip(event, 'region-${regionId}')"
+                     onmouseleave="hideTooltip()"
+                     onclick="toggleRegionSelection(${regionId}, '${region.nombre}', this)">
+                    <div style="flex: 1;">
+                        <div style="font-size: 0.9rem;">
+                            <span style="font-weight: 700; color: var(--accent-color);">${index + 1}.</span>
+                            ${region.nombre}
+                        </div>
+                    </div>
+                    <div style="text-align: right; margin-left: 1rem;">
+                        <div style="font-weight: 700;">${region.total_empleados}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">${region.porcentaje_nacional}%</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+}
+
+function toggleRegionSelection(regionId, regionNombre, element) {
+    if (regionesSeleccionadas.has(regionId)) {
+        regionesSeleccionadas.delete(regionId);
+        element.classList.remove('active');
+    } else {
+        regionesSeleccionadas.add(regionId);
+        element.classList.add('active');
+    }
+    actualizarGraficoTurnosPorRegiones();
+    mostrarIndicadorFiltro();
+}
+
+async function actualizarGraficoTurnosPorRegiones() {
+    try {
+        let url = '/api/analytics/turnos-empleados-con-viajes';
+        const params = new URLSearchParams();
+        params.append('fecha_hasta', fechaHastaGlobal);
+        if (regionesSeleccionadas.size > 0) {
+            Array.from(regionesSeleccionadas).forEach(id => params.append('region_id', id));
+        }
+        url += '?' + params.toString();
+        const response = await fetch(url);
+        const result = await response.json();
+        if (result.success) {
+            turnosData = result.data;
+            const totalBadge = document.getElementById('total-turnos');
+            if (totalBadge) {
+                const totalEmpleados = turnosData.reduce((sum, t) => sum + t.total_empleados, 0);
+                const filtroText = regionesSeleccionadas.size > 0 ? ` (${regionesSeleccionadas.size} región${regionesSeleccionadas.size > 1 ? 'es' : ''})` : '';
+                totalBadge.textContent = totalEmpleados.toLocaleString('es-CL') + ' empleados' + filtroText;
+            }
+            if (turnosChart) crearGraficoTurnos(currentTurnosChartType || 'columnas');
+        }
+    } catch (error) { console.error('Error actualizando turnos:', error); }
+}
+
+function mostrarIndicadorFiltro() {
+    let indicador = document.getElementById('indicador-filtro-region');
+    if (!indicador) {
+        const panelTurnos = document.querySelector('#turnosEmpleadosChart').closest('.panel');
+        if (panelTurnos) {
+            indicador = document.createElement('div');
+            indicador.id = 'indicador-filtro-region';
+            indicador.style.cssText = 'padding: 0.5rem; background: rgba(59, 130, 246, 0.1); border-radius: 0.5rem; margin-bottom: 1rem; display: none;';
+            panelTurnos.insertBefore(indicador, panelTurnos.firstChild.nextSibling);
+        }
+    }
+    if (indicador) {
+        if (regionesSeleccionadas.size > 0) {
+            const nombres = Array.from(document.querySelectorAll('.region-stat-bar.active')).map(el => el.dataset.regionNombre).join(', ');
+            indicador.innerHTML = `<div style="display: flex; justify-content: space-between; align-items: center;"><span><i class="fas fa-filter" style="color: var(--accent-color);"></i><strong>Filtro activo:</strong> ${nombres}</span><button onclick="limpiarSeleccionRegiones()" class="btn btn-sm"><i class="fas fa-times"></i> Limpiar filtro</button></div>`;
+            indicador.style.display = 'block';
+        } else {
+            indicador.style.display = 'none';
+        }
+    }
+}
+
+function limpiarSeleccionRegiones() {
+    regionesSeleccionadas.clear();
+    document.querySelectorAll('.region-stat-bar.active').forEach(el => el.classList.remove('active'));
+    actualizarGraficoTurnosPorRegiones();
+    const indicador = document.getElementById('indicador-filtro-region');
+    if (indicador) indicador.style.display = 'none';
+}
+
+function createColumnChart() {
+    const ctx = document.getElementById('regionesChart');
+    if (!ctx || !chartData) return null;
+    const regiones = Object.values(chartData).sort((a, b) => b.total_empleados - a.total_empleados);
+    const labels = regiones.map(r => r.nombre);
+    return new Chart(ctx, { type: 'bar', data: { labels, datasets: [{ label: 'Masculino', data: regiones.map(r => r.masculino), backgroundColor: 'rgba(59, 130, 246, 0.7)' }, { label: 'Femenino', data: regiones.map(r => r.femenino), backgroundColor: 'rgba(236, 72, 153, 0.7)' }, { label: 'Otro', data: regiones.map(r => r.otro), backgroundColor: 'rgba(139, 92, 246, 0.7)' }] }, options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, scales: { x: { ticks: { maxRotation: 45, minRotation: 45 } }, y: { beginAtZero: true, stacked: true } } } });
+}
+
+function createMarimekkoChart() {
+    const ctx = document.getElementById('regionesChart');
+    if (!ctx || !chartData) return null;
+    const regiones = Object.values(chartData).sort((a, b) => b.total_empleados - a.total_empleados);
+    const labels = regiones.map(r => r.nombre);
+    return new Chart(ctx, { type: 'bar', data: { labels, datasets: [{ label: 'Masculino', data: regiones.map(r => r.masculino), backgroundColor: 'rgba(59, 130, 246, 0.8)' }, { label: 'Femenino', data: regiones.map(r => r.femenino), backgroundColor: 'rgba(236, 72, 153, 0.8)' }, { label: 'Otro', data: regiones.map(r => r.otro), backgroundColor: 'rgba(139, 92, 246, 0.8)' }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } } });
+}
+
+// ============================================
+// GRÁFICOS DE GÉNERO Y EDAD
+// ============================================
+let genderAgeChart = null, genderChartData = null, currentGenderChartType = 'bar'; 
+
+function changeView(type) {
+    currentGenderChartType = type;
+    document.querySelectorAll('.view-selector button').forEach(btn => btn.classList.remove('active'));
+    event.target.closest('button').classList.add('active');
+    createGenderAgeChart();
+}
+
+async function loadGenderAgeData() {
+    try {
+        const response = await fetch(`/api/analytics/genero-edad-asistencia`);
+        const result = await response.json();
+        if (result.success) {
+            genderChartData = result.data;
+            createGenderAgeChart();
+            updateLegend();
+        }
+    } catch (error) { console.error('Error cargando datos de género y edad:', error); }
+}
+
+function createGenderAgeChart() {
+    const ctx = document.getElementById('generoEdadChart');
+    if (!ctx || !genderChartData) return;
+    if (genderAgeChart) genderAgeChart.destroy();
+    
+    const rangosEdad = ['18-24', '25-34', '35-44', '45-54', '55+'];
+    const data = {
+        labels: rangosEdad,
+        datasets: [
+            { label: 'Masculino', data: rangosEdad.map(r => genderChartData.masculino[r]?.porcentaje_asistencia || 0), backgroundColor: 'rgba(59, 130, 246, 0.5)', borderColor: 'rgb(59, 130, 246)', borderWidth: 2 },
+            { label: 'Femenino', data: rangosEdad.map(r => genderChartData.femenino[r]?.porcentaje_asistencia || 0), backgroundColor: 'rgba(236, 72, 153, 0.5)', borderColor: 'rgb(236, 72, 153)', borderWidth: 2 },
+            { label: 'Otro', data: rangosEdad.map(r => genderChartData.otro[r]?.porcentaje_asistencia || 0), backgroundColor: 'rgba(139, 92, 246, 0.5)', borderColor: 'rgb(139, 92, 246)', borderWidth: 2 }
+        ]
+    };
+
+    // Configuración común de opciones
+    let options = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const gender = context.dataset.label || '';
+                        const ageRange = context.label || '';
+                        const genderKey = gender.toLowerCase();
+
+                        // Obtener el recuento de empleados para ese segmento específico
+                        const segmentData = genderChartData[genderKey] ? genderChartData[genderKey][ageRange] : null;
+                        const employeeCount = segmentData ? segmentData.total_empleados : 0;
+                        
+                        // Obtener el valor del porcentaje de asistencia de la barra
+                        let attendancePercentage = 0;
+                        if (context.parsed.r !== undefined && context.parsed.r !== null) {
+                            attendancePercentage = context.parsed.r; // Radar
+                        } else if (currentGenderChartType === 'horizontal') {
+                            attendancePercentage = context.parsed.x; // Horizontal bar
+                        } else {
+                            attendancePercentage = context.parsed.y; // Vertical bar
+                        }
+
+                        // Devolver un array de strings para múltiples líneas
+                        return [
+                            `${gender}: ${employeeCount} emp`,
+                            `Asistencia: ${attendancePercentage.toFixed(1)}%`
+                        ];
+                    }
+                }
+            }
+        },
+        scales: {} // Se configurará según el tipo de gráfico
+    };
+
+    let config = {
+        type: currentGenderChartType === 'radar' ? 'radar' : 'bar',
+        data: data,
+        options: options
+    };
+
+    // Configuraciones específicas por tipo de gráfico
+    if (currentGenderChartType === 'horizontal') {
+        config.options.indexAxis = 'y';
+        config.options.scales = {
+            x: {
+                beginAtZero: true,
+                title: { display: true, text: 'Porcentaje de Asistencia (%)' }
+            }
+        };
+    } else if (currentGenderChartType === 'bar') {
+        config.options.scales = {
+            y: {
+                beginAtZero: true,
+                title: { display: true, text: 'Porcentaje de Asistencia (%)' }
+            }
+        };
+    } else if (currentGenderChartType === 'radar') {
+        config.options.scales = {
+            r: {
+                angleLines: { display: true },
+                suggestedMin: 0,
+                suggestedMax: 100,
+                pointLabels: { font: { size: 12 } },
+                ticks: { backdropColor: 'transparent', callback: value => `${value}%` }
+            }
+        };
+    }
+    
+    genderAgeChart = new Chart(ctx, config);
+}
+
+
+function updateLegend() {
+    if (!genderChartData) return;
+    
+    Object.keys(genderChartData).forEach(genero => {
+        const rangos = Object.values(genderChartData[genero]);
+        
+        // Calcular total de empleados
+        const totalEmpleados = rangos.reduce((acc, rango) => acc + rango.total_empleados, 0);
+        
+        // Calcular asistencia promedio ponderada
+        const totalDiasAsistidosPonderados = rangos.reduce((acc, rango) => {
+            return acc + (rango.porcentaje_asistencia * rango.total_empleados);
+        }, 0);
+        
+        const asistenciaPromedio = totalEmpleados > 0 ? (totalDiasAsistidosPonderados / totalEmpleados).toFixed(1) : '0.0';
+        
+        const legendItem = document.querySelector(`.legend-item[data-gender="${genero}"]`);
+        if (legendItem) {
+            const valueEl = legendItem.querySelector('.legend-value');
+            const avgEl = legendItem.querySelector('.legend-attendance-avg');
+            
+            if (valueEl) valueEl.innerHTML = `<strong>${totalEmpleados}</strong> emp`;
+            if (avgEl) avgEl.textContent = `Asistencia: ${asistenciaPromedio}%`;
+        }
+    });
+}
+
+// ============================================
+// GRÁFICOS DE TURNOS
+// ============================================
+let turnosChart = null, turnosData = null;
+
+async function cargarDatosTurnos() {
+    try {
+        const response = await fetch('/api/analytics/turnos-empleados');
+        const result = await response.json();
+        if (result.success) {
+            turnosData = result.data;
+            const totalBadge = document.getElementById('total-turnos');
+            if (totalBadge) totalBadge.textContent = turnosData.reduce((sum, t) => sum + t.total_empleados, 0).toLocaleString('es-CL');
+            crearGraficoTurnos('columnas');
+        }
+    } catch (error) { console.error('Error cargando datos de turnos:', error); }
+}
+
+function cambiarGraficoTurnos(tipo) {
+    document.querySelectorAll('.panel[style*="margin-bottom: 0"] .chart-btn').forEach(btn => btn.classList.remove('active'));
+    if (event) event.target.closest('button')?.classList.add('active');
+    currentTurnosChartType = tipo;
+    crearGraficoTurnos(tipo);
+}
+
+function crearGraficoTurnos(tipo) {
+    const ctx = document.getElementById('turnosEmpleadosChart');
+    if (!ctx || !turnosData) return;
+    if (turnosChart) turnosChart.destroy();
+    const labels = turnosData.map(t => t.turno_nombre);
+    const colores = ['rgba(59, 130, 246, 0.7)', 'rgba(236, 72, 153, 0.7)', 'rgba(139, 92, 246, 0.7)', 'rgba(34, 197, 94, 0.7)'];
+    let config;
+    if (tipo === 'pie') {
+        config = { type: 'doughnut', data: { labels, datasets: [{ data: turnosData.map(t => t.total_empleados), backgroundColor: colores }] }, options: { responsive: true, maintainAspectRatio: false, onClick: handleChartClick, plugins: { legend: { position: 'bottom' } } } };
+    } else {
+        config = { type: 'bar', data: { labels, datasets: [{ label: 'Masculino', data: turnosData.map(t => t.masculino || 0), backgroundColor: colores[0] }, { label: 'Femenino', data: turnosData.map(t => t.femenino || 0), backgroundColor: colores[1] }, { label: 'Otro', data: turnosData.map(t => t.otro || 0), backgroundColor: colores[2] }] }, options: { responsive: true, maintainAspectRatio: false, indexAxis: tipo === 'barras' ? 'y' : 'x', onClick: handleChartClick, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } }, plugins: { tooltip: { callbacks: { footer: items => `Total: ${turnosData[items[0].dataIndex].total_empleados}` } } } } };
+    }
+    turnosChart = new Chart(ctx, config);
+}
+
+function handleChartClick(event, elements) {
+    if (elements && elements.length > 0) {
+        const index = elements[0].index !== undefined ? elements[0].index : elements[0].dataIndex;
+        if (turnosData && turnosData[index]) mostrarDetallesTurnoCompleto(turnosData[index]);
+    }
+}
+
+function mostrarDetallesTurnoCompleto(turno) {
+    const detallesDiv = document.getElementById('turnoDetalles');
+    if (!detallesDiv) return;
+    const total = turno.total_empleados || 1;
+    const pM = ((turno.masculino / total) * 100).toFixed(1);
+    const pF = ((turno.femenino / total) * 100).toFixed(1);
+    const bAv = turno.bajando_avion || 0, bBu = turno.bajando_bus || 0, bNA = turno.bajando_no_aplica || 0;
+    const tB = bAv + bBu + bNA;
+    const sAv = turno.subiendo_avion || 0, sBu = turno.subiendo_bus || 0, sNA = turno.subiendo_no_aplica || 0;
+    const tS = sAv + sBu + sNA;
+    detallesDiv.innerHTML = `<div style="padding: 1rem; background: var(--bg-primary); border-radius: 0.5rem; border: 1px solid var(--border-color);"><h5 style="color: var(--accent-color); margin-bottom: 1rem; font-weight: 800;"><i class="fas fa-clock"></i> ${turno.turno_nombre}</h5><div style="display: grid; gap: 0.75rem;"><div style="display: flex; justify-content: space-between; padding: 0.5rem; background: var(--bg-secondary); border-radius: 0.25rem;"><span>Total empleados vigentes:</span><strong style="color: var(--accent-color);">${turno.total_empleados}</strong></div><div style="display: flex; justify-content: space-between;"><span><i class="fas fa-male" style="color: #3b82f6;"></i> Masculino:</span><strong>${turno.masculino} (${pM}%)</strong></div><div style="display: flex; justify-content: space-between;"><span><i class="fas fa-female" style="color: #ec4899;"></i> Femenino:</span><strong>${turno.femenino} (${pF}%)</strong></div><hr style="border-color: var(--border-color); margin: 0.5rem 0;">${tB > 0 ? `<div style="background: rgba(239, 68, 68, 0.1); padding: 0.75rem; border-radius: 0.5rem; border: 1px solid rgba(239, 68, 68, 0.3);"><div style="font-weight: 700; color: var(--danger-color); margin-bottom: 0.5rem;"><i class="fas fa-arrow-down"></i> BAJANDO DE TURNO (${tB})</div><div style="font-size: 0.85rem;">${bAv > 0 ? `<div><i class="fas fa-plane"></i> Avión: ${bAv}</div>` : ''}${bBu > 0 ? `<div><i class="fas fa-bus"></i> Bus: ${bBu}</div>` : ''}${bNA > 0 ? `<div><i class="fas fa-home"></i> No aplica: ${bNA}</div>` : ''}</div></div>` : ''}${tS > 0 ? `<div style="background: rgba(34, 197, 94, 0.1); padding: 0.75rem; border-radius: 0.5rem; border: 1px solid rgba(34, 197, 94, 0.3);"><div style="font-weight: 700; color: var(--success-color); margin-bottom: 0.5rem;"><i class="fas fa-arrow-up"></i> SUBIENDO A TURNO (${tS})</div><div style="font-size: 0.85rem;">${sAv > 0 ? `<div><i class="fas fa-plane"></i> Avión: ${sAv}</div>` : ''}${sBu > 0 ? `<div><i class="fas fa-bus"></i> Bus: ${sBu}</div>` : ''}${sNA > 0 ? `<div><i class="fas fa-home"></i> No aplica: ${sNA}</div>` : ''}</div></div>` : ''}${turno.edad_promedio ? `<hr style="border-color: var(--border-color); margin: 0.5rem 0;"><div style="display: flex; justify-content: space-between;"><span><i class="fas fa-calendar-alt"></i> Edad promedio:</span><strong>${turno.edad_promedio} años</strong></div>` : ''}</div></div>`;
+}
+
+// ============================================
+// INICIALIZACIÓN Y LÓGICA DE LA APLICACIÓN
+// ============================================
+document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.body.setAttribute('data-bs-theme', savedTheme);
+    const themeIcon = document.getElementById('theme-icon');
+    if (themeIcon) themeIcon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+
+    // Manejo de filtros secundarios
+    const toggleBtn = document.getElementById('toggle-filters-btn');
+    const secondaryFilters = document.getElementById('secondary-filters-container');
+    if(toggleBtn && secondaryFilters){
+        toggleBtn.addEventListener('click', () => {
+            const isHidden = secondaryFilters.style.display === 'none' || secondaryFilters.style.display === '';
+            secondaryFilters.style.display = isHidden ? 'block' : 'none';
+        });
+    }
+
+    // START: Código para filtros múltiples
+    const choicesOptions = {
+        removeItemButton: true,
+        noResultsText: 'No se encontraron resultados',
+        loadingText: 'Cargando...',
+        searchPlaceholderValue: 'Buscar',
+    };
+
+    const turnoSelect = new Choices('#turno', { ...choicesOptions, placeholder: true, placeholderValue: 'Seleccionar turnos' });
+    const regionSelect = new Choices('#region', { ...choicesOptions, placeholder: true, placeholderValue: 'Seleccionar regiones' });
+    const areaSelect = new Choices('#area', { ...choicesOptions, placeholder: true, placeholderValue: 'Seleccionar áreas' });
+    const faseSelect = new Choices('#fase', { ...choicesOptions, placeholder: true, placeholderValue: 'Seleccionar fases' });
+
+    const clearFiltersBtn = document.getElementById('limpiar-filtros-avanzados');
+    if (clearFiltersBtn) {
+        clearFiltersBtn.addEventListener('click', () => {
+            turnoSelect.setValue([]);
+            regionSelect.setValue([]);
+            areaSelect.setValue([]);
+            faseSelect.setValue([]);
+            document.getElementById('cargo_query').value = '';
+            document.getElementById('query').value = '';
+        });
+    }
+    // END: Código para filtros múltiples
+    
+    // Carga de datos para todos los gráficos
+    if (document.getElementById('generoEdadChart')) loadGenderAgeData();
+    if (document.getElementById('regionesChart')) loadRegionalData();
+    if (document.getElementById('turnosEmpleadosChart')) actualizarGraficoTurnosPorRegiones();
+
+    const App = {
+        config: { codigosInfo: { T: { desc: 'En Obra', color: '#22c55e' }, D: { desc: 'Descanso', color: '#6b7280' }, F: { desc: 'Fallas', color: '#ef4444' }, LM: { desc: 'Licencia Médica', color: '#f59e0b' }, V: { desc: 'Vacaciones', color: '#3b82f6' }, PNP: { desc: 'Permiso S/G', color: '#8b5cf6' }, PSN: { desc: 'Post-Natal', color: '#ec4899' }, PF: { desc: 'Fallecimiento', color: '#facc15' }, MUT: { desc: 'Mutual', color: '#eab308' } } },
+        data: {
+            distribucion: {{ distribucion_estados | tojson | safe }},
+            ranking: {{ ranking_faltas | tojson | safe }},
+            asistenciaGrid: {{ asistencia_grid | tojson | safe }},
+            diasRango: {{ dias_rango_iso | tojson | safe }}
+        },
+        state: { 
+            activeFilterCode: null,
+            currentPage: 1,
+            rowsPerPage: 15 // Número de empleados por página
+        },
+        dom: {
+            filterContainer: document.getElementById('dashboard-filtros'),
+            clearFilterBtn: document.getElementById('limpiar-filtro'),
+            employeeRows: document.querySelectorAll('#asistencia-table tbody tr[data-empleado-id]'),
+            distribucionLegend: document.getElementById('distribucion-legend'),
+            rankingList: document.getElementById('faltas-ranking'),
+            prevPageBtn: document.getElementById('prev-page-btn'),
+            nextPageBtn: document.getElementById('next-page-btn'),
+            pageIndicator: document.getElementById('page-indicator')
+        },
+        methods: {
+            init() {
+                this.renderList(App.dom.distribucionLegend, App.data.distribucion, item => { const info = App.config.codigosInfo[item.codigo] || { desc: 'Otros', color: '#9ca3af' }; return `<span style="display:inline-flex;width:14px;height:14px;border-radius:4px;background:${info.color};margin-right:8px"></span><span>${info.desc}</span><strong>${(item.porcentaje || 0).toFixed(1)}%</strong>`; }, '<li>Sin datos</li>');
+                this.renderList(App.dom.rankingList, App.data.ranking, item => `<span><i class="fas fa-exclamation-triangle" style="color: var(--danger-color); margin-right: 0.5rem"></i>${item.nombre}</span><strong style="color: var(--danger-color)">${item.faltas}</strong>`, '<li>Sin ausencias.</li>');
+                
+                if (App.dom.filterContainer) App.dom.filterContainer.addEventListener('click', this.handleFilterClick.bind(this));
+                if (App.dom.clearFilterBtn) App.dom.clearFilterBtn.addEventListener('click', () => { App.state.activeFilterCode = null; App.state.currentPage = 1; this.render(); });
+                if (App.dom.prevPageBtn) App.dom.prevPageBtn.addEventListener('click', () => this.changePage(-1));
+                if (App.dom.nextPageBtn) App.dom.nextPageBtn.addEventListener('click', () => this.changePage(1));
+                
+                this.render(); // Render inicial para aplicar paginación
+            },
+            renderList(container, data, renderItem, noDataHtml) {
+                if (!container) return;
+                container.innerHTML = (!data || data.length === 0) ? (noDataHtml || '<li>Sin datos</li>') : data.map(itemData => `<li class="legend-item">${renderItem(itemData)}</li>`).join('');
+            },
+            handleFilterClick(e) {
+                const card = e.target.closest('.filtro-card');
+                if (!card) return;
+                const codigo = card.dataset.codigo;
+                App.state.activeFilterCode = App.state.activeFilterCode === codigo ? null : codigo;
+                App.state.currentPage = 1; // Resetear a la primera página con cada filtro
+                this.render();
+            },
+            changePage(direction) {
+                const filteredRows = this.getFilteredRows();
+                const totalPages = Math.ceil(filteredRows.length / App.state.rowsPerPage);
+                const newPage = App.state.currentPage + direction;
+                if (newPage > 0 && newPage <= totalPages) {
+                    App.state.currentPage = newPage;
+                    this.render();
+                }
+            },
+            getFilteredRows() {
+                const { activeFilterCode } = App.state;
+                const { employeeRows } = App.dom;
+                if (!activeFilterCode) return Array.from(employeeRows);
+                
+                const ultimoDiaStr = App.data.diasRango[App.data.diasRango.length - 1];
+                if (!ultimoDiaStr || !App.data.asistenciaGrid) return [];
+
+                const diaNumero = parseInt(ultimoDiaStr.split('-')[0], 10);
+                const empleadosVisibles = Object.keys(App.data.asistenciaGrid).filter(id => App.data.asistenciaGrid[id]?.[String(diaNumero)] === activeFilterCode);
+                return Array.from(employeeRows).filter(fila => empleadosVisibles.includes(fila.dataset.empleadoId));
+            },
+            render() {
+                const { filterContainer, clearFilterBtn, employeeRows, prevPageBtn, nextPageBtn, pageIndicator } = App.dom;
+                const { activeFilterCode, currentPage, rowsPerPage } = App.state;
+                
+                if (filterContainer) filterContainer.querySelectorAll('.filtro-card').forEach(card => card.classList.toggle('active-filter', card.dataset.codigo === activeFilterCode));
+                if (clearFilterBtn) clearFilterBtn.style.display = activeFilterCode ? 'inline-flex' : 'none';
+                
+                const filteredRows = this.getFilteredRows();
+                const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+                
+                employeeRows.forEach(row => row.style.display = 'none');
+                
+                const start = (currentPage - 1) * rowsPerPage;
+                const end = start + rowsPerPage;
+                const pageRows = filteredRows.slice(start, end);
+                pageRows.forEach(row => row.style.display = '');
+
+                // Actualizar controles de paginación
+                if (totalPages > 1) {
+                    pageIndicator.textContent = `Página ${currentPage} de ${totalPages}`;
+                    prevPageBtn.disabled = currentPage === 1;
+                    nextPageBtn.disabled = currentPage === totalPages;
+                    [pageIndicator, prevPageBtn, nextPageBtn].forEach(el => el.style.display = '');
+                } else {
+                    [pageIndicator, prevPageBtn, nextPageBtn].forEach(el => el.style.display = 'none');
+                }
+            }
+        }
+    };
+    App.methods.init();
+
+    // Otros listeners
+    document.getElementById('btn-compartir')?.addEventListener('click', () => { 
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            // Reemplazar alert con un feedback visual más moderno si es posible
+            alert('¡Enlace copiado!');
+        }); 
+    });
+    document.querySelectorAll('.legend-item[data-gender]').forEach(item => {
+        item.addEventListener('click', function() {
+            const gender = this.dataset.gender;
+            const index = gender === 'masculino' ? 0 : gender === 'femenino' ? 1 : 2;
+            if (genderAgeChart) {
+                const meta = genderAgeChart.getDatasetMeta(index);
+                meta.hidden = !meta.hidden;
+                genderAgeChart.update();
+                this.classList.toggle('disabled');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
+

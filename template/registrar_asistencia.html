@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Registro de Asistencia - Vista Mensual</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* ===================  VARIABLES & BASE  =================== */
+    :root{
+      --color-primario:#0d6efd;
+      --color-exito:#198754;
+      --color-info:#0dcaf0;
+      --color-fondo:#f8f9fa;
+      --color-superficie:#ffffff;
+      --color-texto:#1f2937;
+      --borde:#dee2e6;
+      --muted:#6b7280;
+      --sombra:0 4px 8px rgba(0,0,0,.05);
+
+      /* Paleta para códigos (claro) */
+      --c-T-bg:#d1fae5; --c-T-fg:#065f46;
+      --c-D-bg:#e5e7eb; --c-D-fg:#374151;
+      --c-F-bg:#fee2e2; --c-F-fg:#991b1b;
+      --c-LM-bg:#fef3c7; --c-LM-fg:#92400e;
+      --c-V-bg:#dbeafe; --c-V-fg:#1e40af;
+      --c-PP-bg:#e0e7ff; --c-PP-fg:#3730a3;
+      --c-PNP-bg:#fae8ff; --c-PNP-fg:#86198f;
+      --c-MUT-bg:#fff7ed; --c-MUT-fg:#c2410c;
+      --c-PSN-bg:#e0f2fe; --c-PSN-fg:#0c4a6e;
+      --c-PF-bg:#fce7f3; --c-PF-fg:#be185d;
+      --c-FQTO-bg:#6b7280; --c-FQTO-fg:#ffffff;
+
+      /* Table */
+      --thead-bg:#e9ecef;
+      --sticky-bg:#f8f9fa;
+      --holiday-bg:#ef5350; --holiday-fg:#fff;
+    }
+    body.modo-oscuro{
+      --color-fondo:#0f1115;
+      --color-superficie:#141821;
+      --color-texto:#e5e7eb;
+      --borde:#2a303b;
+      --muted:#94a3b8;
+      --sombra:0 6px 12px rgba(0,0,0,.25);
+      --thead-bg:#1b2230;
+      --sticky-bg:#111827;
+
+      /* Paleta para códigos (oscuro) */
+      --c-T-bg:#064e3b; --c-T-fg:#a7f3d0;
+      --c-D-bg:#374151; --c-D-fg:#e5e7eb;
+      --c-F-bg:#7f1d1d; --c-F-fg:#fecaca;
+      --c-LM-bg:#78350f; --c-LM-fg:#fde68a;
+      --c-V-bg:#1e3a8a; --c-V-fg:#bfdbfe;
+      --c-PP-bg:#312e81; --c-PP-fg:#e0e7ff;
+      --c-PNP-bg:#701a75; --c-PNP-fg:#f5d0fe;
+      --c-MUT-bg:#7c2d12; --c-MUT-fg:#fed7aa;
+      --c-PSN-bg:#0e7490; --c-PSN-fg:#bae6fd;
+      --c-PF-bg:#831843; --c-PF-fg:#fbcfe8;
+      --c-FQTO-bg:#111827; --c-FQTO-fg:#e5e7eb;
+    }
+
+    html,body{height:100%}
+    body{
+      font-family:'Roboto',sans-serif;
+      margin:0; padding:0;
+      background:var(--color-fondo);
+      color:var(--color-texto);
+      font-size:14px;
+    }
+    .container{max-width:95%; margin:2em auto; padding:2em; background:var(--color-superficie); border-radius:12px; box-shadow:var(--sombra)}
+    h1{margin-top:0; color:var(--color-texto); border-bottom:1px solid var(--borde); padding-bottom:10px}
+    a{color:var(--color-primario); text-decoration:none; font-weight:500}
+
+    /* ===================  NAV & ACCIONES  =================== */
+    .calendar-header{display:flex; justify-content:space-between; align-items:center; margin-bottom:1em}
+    .calendar-header h2{margin:0; font-size:2em}
+    .calendar-nav a{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:44px; height:44px; font-size:22px; font-weight:700;
+      color:var(--color-texto); background:#11182710; border:2px solid var(--borde); border-radius:999px;
+      transition:.2s; box-shadow:0 2px 4px rgba(0,0,0,.08)
+    }
+    .calendar-nav a:hover{background:var(--color-primario); color:#fff; border-color:var(--color-primario); transform:scale(1.06)}
+
+    /* ===================  TABLA  =================== */
+    .calendar-table-wrapper{overflow:auto; max-height:70vh; border:1px solid var(--borde); border-radius:10px}
+    table{width:100%; border-collapse:separate; border-spacing:0}
+    th,td{border:1px solid var(--borde); padding:4px; text-align:center; min-width:64px; height:40px; transition:background-color .15s}
+    thead th{background:var(--thead-bg); position:sticky; top:0; z-index:2}
+    th.employee-name,td.employee-name{position:sticky; left:0; background:var(--sticky-bg); z-index:1; text-align:left; min-width:320px; padding-left:10px; font-weight:500}
+    thead th.employee-name{z-index:3}
+    .holiday{background:var(--holiday-bg)!important; color:var(--holiday-fg)!important; font-weight:700}
+    .today{outline:2px solid var(--color-primario)}
+
+    td select{width:100%; height:100%; border:none; background:transparent; color:inherit; font:inherit; text-align:center; appearance:none; cursor:pointer; font-weight:700}
+    td select:focus{outline:2px solid var(--color-primario)}
+
+    /* ===================  PANEL FILTROS/FOCUS  =================== */
+    .panel{margin-bottom:1.2em; padding:1em; background:color-mix(in oklab, var(--color-superficie), #000 3%); border-radius:8px; border:1px solid var(--borde)}
+    .panel-form{display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap}
+    .panel-form .form-group{flex:1 1 420px; margin:0}
+    .btn{display:inline-flex; align-items:center; gap:8px; padding:10px 16px; border:none; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; transition:.2s; text-decoration:none}
+    .btn-primary{background:var(--color-primario); color:#fff}
+    .btn-primary:hover{filter:brightness(.95)}
+    .btn-success{background:var(--color-exito); color:#fff}
+    .btn-success:hover{filter:brightness(.95)}
+    .btn-info{background:var(--color-info); color:#fff}
+    .btn-info:hover{filter:brightness(.95)}
+    .btn-secondary{background:#6b7280; color:#fff}
+    .btn-warning{background:#f59e0b; color:#fff}
+
+    /* Switch enfoque */
+    .focus-mode-container{display:flex; align-items:center; gap:12px; margin-top:.8em; padding:.8em; background:color-mix(in oklab, var(--color-superficie), #000 6%); border:1px solid var(--borde); border-radius:8px; flex-wrap:wrap}
+    .toggle-switch{position:relative; display:inline-block; width:50px; height:24px}
+    .toggle-switch input{opacity:0; width:0; height:0}
+    .toggle-slider{position:absolute; cursor:pointer; inset:0; background:#9ca3af; border-radius:999px; transition:.3s}
+    .toggle-slider::before{content:""; position:absolute; width:18px; height:18px; left:3px; bottom:3px; background:#fff; border-radius:50%; transition:.3s}
+    .toggle-switch input:checked + .toggle-slider{background:var(--color-primario)}
+    .toggle-switch input:checked + .toggle-slider::before{transform:translateX(26px)}
+    .focus-mode-label{margin:0; font-weight:600}
+    .focus-mode-description{margin:0; font-size:12px; color:var(--muted)}
+
+    .focus-visibility{display:flex; align-items:center; gap:10px; margin-left:auto}
+    .focus-visibility label{display:flex; align-items:center; gap:6px; font-size:13px; color:var(--muted)}
+
+    .focus-mode:not(.show-all) .asistencia-T,
+    .focus-mode:not(.show-all) .asistencia-D{
+      background:transparent!important; color:#9ca3af!important
+    }
+    .focus-mode:not(.show-all) .counter-T,
+    .focus-mode:not(.show-all) .counter-D{opacity:.35}
+
+    /* ===================  CONTADORES RESUMEN  =================== */
+    .attendance-summary{display:block; font-size:11px; color:var(--muted); margin-top:4px; line-height:1.2}
+    .attendance-counter{display:inline-block; margin-right:8px; padding:2px 5px; border-radius:4px; font-weight:700}
+    .counter-T{background:var(--c-T-bg); color:var(--c-T-fg)}
+    .counter-D{background:var(--c-D-bg); color:var(--c-D-fg)}
+    .counter-F{background:var(--c-F-bg); color:var(--c-F-fg)}
+    .counter-LM{background:var(--c-LM-bg); color:var(--c-LM-fg)}
+    .counter-V{background:var(--c-V-bg); color:var(--c-V-fg)}
+    .counter-PP{background:var(--c-PP-bg); color:var(--c-PP-fg)}
+    .counter-PNP{background:var(--c-PNP-bg); color:var(--c-PNP-fg)}
+    .counter-MUT{background:var(--c-MUT-bg); color:var(--c-MUT-fg)}
+    .counter-PSN{background:var(--c-PSN-bg); color:var(--c-PSN-fg)}
+    .counter-PF{background:var(--c-PF-bg); color:var(--c-PF-fg)}
+    .counter-FQTO{background:var(--c-FQTO-bg); color:var(--c-FQTO-fg)}
+
+    /* ===================  COLORES CÓDIGOS EN CELDAS  =================== */
+    .asistencia-T{background:var(--c-T-bg)!important; color:var(--c-T-fg)!important}
+    .asistencia-D{background:var(--c-D-bg)!important; color:var(--c-D-fg)!important}
+    .asistencia-F{background:var(--c-F-bg)!important; color:var(--c-F-fg)!important}
+    .asistencia-LM{background:var(--c-LM-bg)!important; color:var(--c-LM-fg)!important}
+    .asistencia-V{background:var(--c-V-bg)!important; color:var(--c-V-fg)!important}
+    .asistencia-PP{background:var(--c-PP-bg)!important; color:var(--c-PP-fg)!important}
+    .asistencia-PNP{background:var(--c-PNP-bg)!important; color:var(--c-PNP-fg)!important}
+    .asistencia-MUT{background:var(--c-MUT-bg)!important; color:var(--c-MUT-fg)!important}
+    .asistencia-PSN{background:var(--c-PSN-bg)!important; color:var(--c-PSN-fg)!important}
+    .asistencia-PF{background:var(--c-PF-bg)!important; color:var(--c-PF-fg)!important}
+    .asistencia-FQTO{background:var(--c-FQTO-bg)!important; color:var(--c-FQTO-fg)!important}
+
+    /* ===================  NO APLICA  =================== */
+    .no-aplica-pre{background:#f3f4f6!important; border:1px solid #d1d5db; text-align:center; vertical-align:middle}
+    .no-aplica-post{
+      background:#fee2e2!important; border:1px solid #fecaca; text-align:center; vertical-align:middle
+    }
+    .no-aplica-pre:hover{background:#e5e7eb!important}
+    .no-aplica-post:hover{background:#fee2e2!important}
+
+    /* ===================  ORDEN + PAGINACIÓN UI  =================== */
+    .grid-tools{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:.6em 0 1em}
+    .grid-tools .field{display:flex; align-items:center; gap:6px}
+    .grid-tools select,.grid-tools input[type="number"]{padding:6px 8px; border:1px solid var(--borde); border-radius:6px; background:var(--color-superficie); color:var(--color-texto)}
+    .pager{display:flex; align-items:center; gap:8px}
+    .pager .page-btn{padding:6px 10px; border:1px solid var(--borde); background:var(--sticky-bg); border-radius:6px; cursor:pointer}
+    .pager .page-btn[disabled]{opacity:.5; cursor:not-allowed}
+    .muted{color:var(--muted); font-size:12px}
+    #toggle-modo{position:sticky; top:8px; float:right; margin-bottom:8px; border:1px solid var(--borde); background:var(--sticky-bg); color:var(--color-texto); border-radius:8px; padding:6px 10px; cursor:pointer}
+
+    /* ===================  MODALES  =================== */
+    .modal{
+      display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; 
+      background-color:rgba(0,0,0,0.7); backdrop-filter:blur(4px);
+      animation: fadeIn 0.3s ease-out;
+    }
+    .modal-content{
+      background-color:var(--color-superficie); margin:2% auto; padding:0; border-radius:15px; 
+      max-height:90vh; overflow-y:auto; box-shadow:var(--sombra);
+      animation: slideIn 0.3s ease-out;
+    }
+    @keyframes fadeIn{ from{opacity:0} to{opacity:1} }
+    @keyframes slideIn{ from{transform:translateY(-50px); opacity:0} to{transform:translateY(0); opacity:1} }
+
+    .close-modal{
+      background:none; border:none; font-size:28px; cursor:pointer; 
+      opacity:0.8; transition:all 0.2s ease;
+    }
+    .close-modal:hover{ opacity:1; transform:scale(1.1); }
+
+    /* Estilos específicos del planificador */
+    .event-planner-content{ width:90%; max-width:900px; }
+    .employee-list{
+      max-height:200px; overflow-y:auto; padding:8px;
+    }
+    .employee-list::-webkit-scrollbar{ width:6px; }
+    .employee-list::-webkit-scrollbar-track{ background:var(--color-fondo); border-radius:3px; }
+    .employee-list::-webkit-scrollbar-thumb{ background:var(--muted); border-radius:3px; }
+    .employee-list::-webkit-scrollbar-thumb:hover{ background:var(--color-primario); }
+
+    .btn-preset:hover{
+      background:var(--color-primario) !important;
+      color:white !important;
+      border-color:var(--color-primario) !important;
+    }
+
+    .reset-shift-btn{
+      background:none; border:none; color:var(--color-info); cursor:pointer; 
+      font-size:16px; margin-left:8px; padding:2px 5px; border-radius:3px;
+      transition:background-color 0.2s;
+    }
+    .reset-shift-btn:hover{
+      background-color:color-mix(in srgb, var(--color-info) 20%, transparent);
+    }
+
+    /* ===================  TOOLTIPS  =================== */
+    .tooltip{position:relative; cursor:help}
+    .tooltip-content{visibility:hidden; opacity:0; position:absolute; bottom:125%; left:50%; transform:translateX(-50%);
+      background:#1f2937; color:#fff; padding:8px 12px; border-radius:6px; font-size:12px; white-space:nowrap; z-index:1000; box-shadow:0 4px 8px rgba(0,0,0,.15); transition:opacity .2s, visibility .2s}
+    .tooltip-content::after{content:""; position:absolute; top:100%; left:50%; margin-left:-5px; border:5px solid transparent; border-top-color:#1f2937}
+    .tooltip:hover .tooltip-content{visibility:visible; opacity:1}
+
+    /* Toast notifications */
+    .toast-container{
+      position:fixed; top:20px; right:20px; z-index:10000;
+    }
+    .toast{
+      background:var(--color-superficie); color:var(--color-texto); padding:12px 20px; 
+      margin-bottom:10px; border-radius:8px; border-left:4px solid var(--color-primario);
+      box-shadow:var(--sombra); min-width:300px; animation:slideInRight 0.3s ease;
+    }
+    .toast.success{ border-left-color:var(--color-exito); }
+    .toast.error{ border-left-color:#dc2626; }
+    .toast.warning{ border-left-color:#f59e0b; }
+    @keyframes slideInRight{ from{transform:translateX(100%); opacity:0} to{transform:translateX(0); opacity:1} }
+  </style>
+</head>
+<body>
+  <div class="container" id="container">
+    <button id="toggle-modo" title="Cambiar modo día/noche">🌓</button>
+    <a href="{{ url_for('index') }}" class="back-link">&larr; Volver a Gestión de Empleados</a>
+    <h1>Registro de Asistencia Mensual</h1>
+
+    <div class="panel">
+      <form action="{{ url_for('registrar_asistencia') }}" method="get" class="panel-form">
+        <input type="hidden" name="ano" value="{{ ano }}">
+        <input type="hidden" name="mes" value="{{ mes }}">
+        <div class="form-group">
+          <label for="query">Buscar Empleados (RUT, ID SAP o Nombres - separados por comas):</label>
+          <textarea name="query" id="query" placeholder="Ejemplos:
+12345678-9, 87654321-0
+EMP001, EMP002, EMP003
+Juan Pérez, María González
+O combinar: 12345678-9, EMP001, Juan"
+            style="width:100%; min-height:60px; padding:8px 12px; border:1px solid var(--borde); border-radius:6px; font-size:14px; resize:vertical; font-family:inherit;">{{ query or '' }}</textarea>
+          <small class="muted">💡 Puedes buscar múltiples empleados separando por comas, espacios o saltos de línea</small>
+        </div>
+        <button type="submit" class="btn btn-primary" style="height:42px;">Filtrar Servidor</button>
+        <button type="button" id="filter-client" class="btn btn-secondary" style="height:42px;">Filtrar Vista</button>
+      </form>
+
+      <!-- Controles de orden + paginación -->
+      <div class="grid-tools" id="grid-tools">
+        <div class="field">
+          <strong>Ordenar por:</strong>
+          <select id="sort-field" aria-label="Campo de orden">
+            <option value="nombre" selected>Empleado</option>
+            <option value="turno">Turno</option>
+            <option value="sap">ID SAP Local</option>
+          </select>
+          <select id="sort-dir" aria-label="Dirección de orden">
+            <option value="asc" selected>Ascendente</option>
+            <option value="desc">Descendente</option>
+          </select>
+          <button class="btn btn-info" id="apply-sort" type="button">Aplicar</button>
+        </div>
+        <div class="field">
+          <strong>Página:</strong>
+          <div class="pager">
+            <button class="page-btn" id="prev-page" type="button">◀</button>
+            <span class="muted" id="page-info">1 / 1</span>
+            <button class="page-btn" id="next-page" type="button">▶</button>
+          </div>
+        </div>
+        <div class="field">
+          <label class="muted" for="page-size">Filas por página</label>
+          <input id="page-size" type="number" min="10" step="10" value="50" style="width:72px">
+        </div>
+
+        <!-- Modo Enfoque + Ver todo -->
+        <div class="focus-visibility">
+          <label class="toggle-switch" title="Modo Enfoque">
+            <input type="checkbox" id="focus-mode-toggle">
+            <span class="toggle-slider"></span>
+          </label>
+          <span class="focus-mode-label">Enfoque</span>
+          <label><input type="checkbox" id="focus-show-all" checked> Ver asistencia completa</label>
+        </div>
+        <p class="focus-mode-description" style="flex-basis:100%">El modo Enfoque atenúa "Trabajado" y "Descanso". Activa "Ver asistencia completa" para mantener todos los códigos visibles.</p>
+      </div>
+    </div>
+
+    <form action="{{ url_for('guardar_asistencia') }}" method="post">
+      <div class="calendar-header">
+        <div class="calendar-nav">
+          <a href="{{ url_for('registrar_asistencia', ano=mes_anterior.ano, mes=mes_anterior.mes, query=query) }}" title="Mes Anterior">‹</a>
+        </div>
+        <h2>{{ nombre_mes }} {{ ano }}</h2>
+        <div class="calendar-nav">
+          <a href="{{ url_for('registrar_asistencia', ano=mes_siguiente.ano, mes=mes_siguiente.mes, query=query) }}" title="Mes Siguiente">›</a>
+        </div>
+      </div>
+
+      <input type="hidden" name="ano" value="{{ ano }}">
+      <input type="hidden" name="mes" value="{{ mes }}">
+
+      <div class="calendar-table-wrapper">
+        <table id="asistencia-table" aria-label="Tabla de asistencia mensual">
+          <thead>
+            <tr>
+              <th class="employee-name">Empleado (RUT / ID SAP / Turno)</th>
+              {% for dia in dias_del_mes %}
+              <th class="{{ 'holiday' if dia.strftime('%Y-%m-%d') in dias_festivos else '' }} {{ 'today' if dia == today else '' }}">
+                {{ dia.day }}<br><small>{{ ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'][dia.weekday()] }}</small>
+              </th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody id="tbody-empleados">
+            {% for empleado in empleados %}
+            <tr
+              data-nombre="{{ empleado.nombre_completo | trim | lower }}"
+              data-turno="{{ (empleado.turno_nombre or '') | trim | lower }}"
+              data-sap="{{ (empleado.id_sap_local or '') | trim | lower }}"
+              data-idx="{{ loop.index0 }}">
+              <td class="employee-name">
+                <strong>{{ empleado.nombre_completo }}</strong>
+                <button type="button" class="reset-shift-btn" data-empleado="{{ empleado.id }}" title="Restablecer turno original del mes">↻</button>
+                <br>
+                <small>
+                  RUT: {{ empleado.rut }} / SAP: {{ empleado.id_sap_local or 'N/A' }} / Turno: {{ empleado.turno_nombre or 'N/A' }}<br>
+                  <span style="color:#059669; font-weight:500">
+                    📅 Ingreso: {{ empleado.fecha_ingreso_obj.strftime('%d-%m-%Y') }}
+                    {% if empleado.fecha_egreso_obj %}| 📤 Egreso: {{ empleado.fecha_egreso_obj.strftime('%d-%m-%Y') }}{% endif %}
+                  </span>
+                </small>
+                <div class="attendance-summary" data-empleado="{{ empleado.id }}"></div>
+              </td>
+              {% for dia in dias_del_mes %}
+                {% set valor_actual = asistencia_grid[empleado.id].get(dia.day, '') %}
+                {% set dia_valido = dia >= empleado.fecha_ingreso_obj and (empleado.fecha_egreso_obj is none or dia <= empleado.fecha_egreso_obj) %}
+                {% if dia_valido %}
+                  <td class="{{ 'holiday' if dia.strftime('%Y-%m-%d') in dias_festivos else '' }} {{ 'today' if dia == today else '' }} {{ 'asistencia-' + valor_actual if valor_actual else '' }}">
+                    <select name="asistencia-{{ empleado.id }}-{{ dia.day }}" class="cell-select">
+                      <option value=""></option>
+                      {% for codigo in codigos_asistencia %}
+                      <option value="{{ codigo.codigo }}" {% if codigo.codigo == valor_actual %}selected{% endif %}>{{ codigo.codigo }}</option>
+                      {% endfor %}
+                    </select>
+                  </td>
+                {% else %}
+                  {% if dia < empleado.fecha_ingreso_obj %}
+                    <td class="no-aplica-pre" title="Anterior a fecha de ingreso ({{ empleado.fecha_ingreso_obj.strftime('%d-%m-%Y') }})"><span></span></td>
+                  {% elif empleado.fecha_egreso_obj and dia > empleado.fecha_egreso_obj %}
+                    <td class="no-aplica-post" title="Posterior a fecha de egreso ({{ empleado.fecha_egreso_obj.strftime('%d-%m-%Y') }})"><span style="color:#dc2626; font-size:12px; font-weight:bold;">FQTO</span></td>
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px">
+        <button type="submit" class="btn btn-success">Guardar Cambios de Asistencia</button>
+        <div style="display:flex; gap:10px">
+          <button type="button" id="event-planner-btn" class="btn btn-info">📅 Planificar Evento por Rango</button>
+          <a href="{{ url_for('reporte_asistencia', ano=ano, mes=mes) }}" class="btn btn-info" style="background-color:#f59e0b">📄 Reporte Parcial</a>
+          <a href="{{ url_for('exportar_asistencia', ano=ano, mes=mes, query=query) }}" class="btn btn-info">⬇️ Exportar Vista a Excel</a>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- MODAL DEL PLANIFICADOR DE EVENTOS COMPLETO -->
+  <div id="event-planner-modal" class="modal">
+    <div class="modal-content event-planner-content">
+      
+      <div class="event-planner-header" style="display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid var(--borde); background: linear-gradient(135deg, var(--color-primario), #0056b3); color: white; border-radius: 15px 15px 0 0;">
+        <h3 style="margin: 0; color: white; font-size: 1.5em;">📅 Planificar Evento por Rango</h3>
+        <button id="close-event-planner" class="close-modal" style="color: white;">&times;</button>
+      </div>
+      
+      <div class="event-planner-body" style="padding: 25px;">
+        
+        <!-- SECCIÓN DE BÚSQUEDA DE EMPLEADOS -->
+        <div class="form-section" style="margin-bottom: 25px; padding: 20px; border: 1px solid var(--borde); border-radius: 8px; background: var(--color-fondo);">
+          <h4 style="margin: 0 0 15px 0; color: var(--color-texto); display: flex; align-items: center; gap: 8px;">
+            👥 <span>Selección de Empleados</span>
+          </h4>
+          
+          <label for="employee-search" style="font-weight: 500; color: var(--color-texto); margin-bottom: 8px; display: block;">Búsqueda Masiva de Empleados:</label>
+          <textarea id="employee-search" placeholder="Buscar por RUT, ID SAP o nombres (separados por comas):&#10;12345678-9, EMP001, Juan Pérez&#10;87654321-0, EMP002&#10;María González, EMP003" 
+                    style="width: 100%; min-height: 80px; padding: 12px; border: 1px solid var(--borde); border-radius: 6px; font-size: 14px; resize: vertical; font-family: inherit; background-color: var(--color-superficie); color: var(--color-texto);"></textarea>
+          
+          <small style="color: var(--muted); font-size: 12px; margin: 8px 0; display: block;">
+            💡 Puedes buscar múltiples empleados separando por comas, espacios o saltos de línea
+          </small>
+          
+          <div style="margin: 15px 0; display: flex; gap: 10px;">
+            <button id="quick-select-search" class="btn btn-info" style="font-size: 12px;">🔍 Buscar y Seleccionar</button>
+            <button id="clear-search" class="btn btn-secondary" style="font-size: 12px;">🗑️ Limpiar Búsqueda</button>
+            <button id="select-all-visible" class="btn btn-success" style="font-size: 12px;">✅ Seleccionar Todos los Visibles</button>
+          </div>
+          
+          <!-- ÁREA DE SELECCIÓN DUAL -->
+          <div class="employee-selection-area" style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; margin-top: 15px; height: 250px;">
+            
+            <div class="available-employees" style="border: 1px solid var(--borde); border-radius: 8px; overflow: hidden; background: var(--color-superficie);">
+              <h5 style="margin: 0; padding: 12px; background: var(--color-fondo); font-size: 13px; font-weight: 600; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--borde);">
+                Empleados Disponibles <span id="available-count" class="badge" style="background: var(--color-info); color: white; padding: 2px 6px; border-radius: 12px; font-size: 11px;">0</span>
+              </h5>
+              <div id="available-employees-list" class="employee-list"></div>
+            </div>
+            
+            <div class="selection-controls" style="display: flex; flex-direction: column; justify-content: center; gap: 12px; align-items: center;">
+              <button id="select-employees" class="btn btn-primary" style="writing-mode: horizontal-tb; padding: 8px 12px; border-radius: 8px; font-size: 12px;">▶️ Agregar</button>
+              <button id="deselect-employees" class="btn btn-warning" style="writing-mode: horizontal-tb; padding: 8px 12px; border-radius: 8px; font-size: 12px;">◀️ Quitar</button>
+              <button id="select-all-employees" class="btn btn-success" style="writing-mode: horizontal-tb; padding: 6px 10px; border-radius: 8px; font-size: 11px;">⏩ Todo</button>
+              <button id="deselect-all-employees" class="btn btn-secondary" style="writing-mode: horizontal-tb; padding: 6px 10px; border-radius: 8px; font-size: 11px;">⏪ Nada</button>
+            </div>
+            
+            <div class="selected-employees" style="border: 1px solid var(--borde); border-radius: 8px; overflow: hidden; background: var(--color-superficie);">
+              <h5 style="margin: 0; padding: 12px; background: var(--color-exito); color: white; font-size: 13px; font-weight: 600; text-transform: uppercase; border-bottom: 1px solid var(--borde);">
+                Empleados Seleccionados <span id="selected-count" class="badge" style="background: rgba(255,255,255,0.3); color: white; padding: 2px 6px; border-radius: 12px; font-size: 11px;">0</span>
+              </h5>
+              <div id="selected-employees-list" class="employee-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN DE CONFIGURACIÓN DEL EVENTO -->
+        <div class="form-section" style="margin-bottom: 25px; padding: 20px; border: 1px solid var(--borde); border-radius: 8px; background: var(--color-fondo);">
+          <h4 style="margin: 0 0 15px 0; color: var(--color-texto); display: flex; align-items: center; gap: 8px;">
+            ⚙️ <span>Configuración del Evento</span>
+          </h4>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+              <label for="attendance-code" style="font-weight: 500; color: var(--color-texto); margin-bottom: 8px; display: block;">Código de Asistencia:</label>
+              <select id="attendance-code" style="width: 100%; padding: 10px; border: 1px solid var(--borde); border-radius: 6px; background: var(--color-superficie); color: var(--color-texto); font-size: 14px;">
+                <option value="">-- Seleccionar Código --</option>
+                <option value="V">V - Vacaciones</option>
+                <option value="LM">LM - Licencia Médica</option>
+                <option value="PP">PP - Permiso con Goce</option>
+                <option value="PNP">PNP - Permiso sin Goce</option>
+                <option value="MUT">MUT - Mutual</option>
+                <option value="PSN">PSN - Permiso Sindical</option>
+                <option value="PF">PF - Permiso Familiar</option>
+                <option value="F">F - Falta</option>
+              </select>
+            </div>
+            
+            <div>
+              <label style="font-weight: 500; color: var(--color-texto); margin-bottom: 8px; display: block;">Opciones:</label>
+              <div style="display: flex; align-items: center; gap: 15px; padding: 10px 0;">
+                <label style="display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--color-texto); cursor: pointer;">
+                  <input type="checkbox" id="overwrite-existing" style="margin: 0;">
+                  <span>🔄 Sobrescribir registros existentes</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN DE RANGO DE FECHAS -->
+        <div class="form-section" style="margin-bottom: 25px; padding: 20px; border: 1px solid var(--borde); border-radius: 8px; background: var(--color-fondo);">
+          <h4 style="margin: 0 0 15px 0; color: var(--color-texto); display: flex; align-items: center; gap: 8px;">
+            📅 <span>Rango de Fechas</span>
+          </h4>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">
+            <div>
+              <label for="date-from" style="font-weight: 500; color: var(--color-texto); margin-bottom: 8px; display: block;">Fecha Desde:</label>
+              <input type="date" id="date-from" style="width: 100%; padding: 10px; border: 1px solid var(--borde); border-radius: 6px; background: var(--color-superficie); color: var(--color-texto); font-size: 14px;">
+            </div>
+            <div>
+              <label for="date-to" style="font-weight: 500; color: var(--color-texto); margin-bottom: 8px; display: block;">Fecha Hasta:</label>
+              <input type="date" id="date-to" style="width: 100%; padding: 10px; border: 1px solid var(--borde); border-radius: 6px; background: var(--color-superficie); color: var(--color-texto); font-size: 14px;">
+            </div>
+          </div>
+          
+          <!-- BOTONES PREESTABLECIDOS -->
+          <div>
+            <label style="font-weight: 500; color: var(--color-texto); margin-bottom: 8px; display: block;">Presets de Fechas:</label>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button id="preset-today" class="btn-preset" style="padding: 6px 12px; font-size: 12px; border: 1px solid var(--borde); border-radius: 4px; background: var(--color-superficie); cursor: pointer; color: var(--color-texto);">📅 Hoy</button>
+              <button id="preset-tomorrow" class="btn-preset" style="padding: 6px 12px; font-size: 12px; border: 1px solid var(--borde); border-radius: 4px; background: var(--color-superficie); cursor: pointer; color: var(--color-texto);">➡️ Mañana</button>
+              <button id="preset-this-week" class="btn-preset" style="padding: 6px 12px; font-size: 12px; border: 1px solid var(--borde); border-radius: 4px; background: var(--color-superficie); cursor: pointer; color: var(--color-texto);">📅 Esta Semana</button>
+              <button id="preset-next-week" class="btn-preset" style="padding: 6px 12px; font-size: 12px; border: 1px solid var(--borde); border-radius: 4px; background: var(--color-superficie); cursor: pointer; color: var(--color-texto);">⏭️ Próxima Semana</button>
+              <button id="preset-month" class="btn-preset" style="padding: 6px 12px; font-size: 12px; border: 1px solid var(--borde); border-radius: 4px; background: var(--color-superficie); cursor: pointer; color: var(--color-texto);">📅 Todo el Mes</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- VISTA PREVIA -->
+        <div class="preview-section" style="margin-bottom: 20px; padding: 20px; border: 1px solid var(--borde); border-radius: 8px; background: var(--color-fondo);">
+          <h4 style="margin: 0 0 15px 0; color: var(--color-texto); display: flex; align-items: center; gap: 8px;">
+            👁️ <span>Vista Previa del Evento</span>
+          </h4>
+          <div id="event-preview" class="event-preview-area" style="border: 1px solid var(--borde); border-radius: 6px; padding: 20px; background: var(--color-superficie); min-height: 80px; font-size: 14px; color: var(--muted); text-align: center; line-height: 1.6;">
+            <div style="color: var(--muted); font-style: italic;">
+              📋 Selecciona empleados, código y fechas para ver la vista previa del evento
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- FOOTER DEL MODAL -->
+      <div class="event-planner-footer" style="display: flex; justify-content: space-between; align-items: center; padding: 20px; border-top: 1px solid var(--borde); background: var(--color-fondo); border-radius: 0 0 15px 15px;">
+        <div style="color: var(--muted); font-size: 13px;">
+          ⚠️ Los cambios serán aplicados inmediatamente y no se pueden deshacer
+        </div>
+        <div style="display: flex; gap: 12px;">
+          <button id="cancel-event-planning" class="btn btn-secondary">❌ Cancelar</button>
+          <button id="apply-event-planning" class="btn btn-success" disabled style="padding: 10px 20px; font-weight: 600;">✅ Aplicar Evento</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Container para notificaciones toast -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Cargar Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    /* ===================  MODO DÍA / NOCHE  =================== */
+    const toggleModo = document.getElementById('toggle-modo');
+    const bodyEl = document.body;
+    const modoGuardado = localStorage.getItem('modoOscuro') === 'true';
+    if (modoGuardado) bodyEl.classList.add('modo-oscuro');
+    toggleModo.addEventListener('click', () => {
+      bodyEl.classList.toggle('modo-oscuro');
+      localStorage.setItem('modoOscuro', bodyEl.classList.contains('modo-oscuro'));
+    });
+
+    /* ===================  ENFOQUE: VER TODO  =================== */
+    const focusToggle = document.getElementById('focus-mode-toggle');
+    const focusShowAll = document.getElementById('focus-show-all');
+    const container = document.getElementById('container');
+
+    function applyFocusClasses(){
+      container.classList.toggle('focus-mode', focusToggle.checked);
+      container.classList.toggle('show-all', focusShowAll.checked);
+      if(!focusToggle.checked){ container.classList.remove('focus-mode'); }
+    }
+    focusToggle.addEventListener('change', applyFocusClasses);
+    focusShowAll.addEventListener('change', applyFocusClasses);
+    applyFocusClasses();
+
+    /* ===================  ORDENAMIENTO + PAGINACIÓN  =================== */
+    const tbody = document.getElementById('tbody-empleados');
+    const rows = Array.from(tbody.querySelectorAll('tr')); // cache
+    const sortFieldSel = document.getElementById('sort-field');
+    const sortDirSel = document.getElementById('sort-dir');
+    const applySortBtn = document.getElementById('apply-sort');
+
+    const prevBtn = document.getElementById('prev-page');
+    const nextBtn = document.getElementById('next-page');
+    const pageInfo = document.getElementById('page-info');
+    const pageSizeInput = document.getElementById('page-size');
+
+    let page = 1;
+    let pageSize = Math.max(10, parseInt(pageSizeInput.value,10) || 50);
+    let currentOrder = { field: sortFieldSel.value, dir: sortDirSel.value };
+    let workingList = rows.slice(); // lista activa tras ordenar
+
+    function compare(a,b,field){
+      const va = a.dataset[field] || '';
+      const vb = b.dataset[field] || '';
+      // num vs texto: si es sap y ambos parecen números, compara número
+      if(field === 'sap' && va && vb && !isNaN(+va) && !isNaN(+vb)){
+        return (+va) - (+vb);
+      }
+      return va.localeCompare(vb,'es',{sensitivity:'base', numeric:true});
+    }
+
+    function sortRows(){
+      const {field,dir} = currentOrder;
+      workingList.sort((a,b)=>{
+        const c = compare(a,b,field);
+        return dir === 'asc' ? c : -c;
+      });
+    }
+
+    function renderPage(){
+      pageSize = Math.max(10, parseInt(pageSizeInput.value,10) || 50);
+      const total = workingList.length;
+      const totalPages = Math.max(1, Math.ceil(total / pageSize));
+      if(page > totalPages) page = totalPages;
+      const start = (page-1)*pageSize;
+      const end = Math.min(start+pageSize, total);
+
+      // Render eficiente
+      const frag = document.createDocumentFragment();
+      // Oculta todas temporalmente (evita repintados costosos)
+      rows.forEach(tr => tr.style.display = 'none');
+      for(let i=start; i<end; i++){
+        const tr = workingList[i];
+        tr.style.display = '';
+        frag.appendChild(tr);
+      }
+      tbody.appendChild(frag);
+
+      pageInfo.textContent = `${page} / ${totalPages}`;
+      prevBtn.disabled = page <= 1;
+      nextBtn.disabled = page >= totalPages;
+    }
+
+    function applyOrderAndRender(){
+      sortRows();
+      page = 1;
+      renderPage();
+    }
+
+    // Inicializa data-attrs faltantes (defensivo)
+    rows.forEach(tr=>{
+      tr.dataset.nombre = tr.dataset.nombre || '';
+      tr.dataset.turno = tr.dataset.turno || '';
+      tr.dataset.sap = tr.dataset.sap || '';
+    });
+
+    // Eventos
+    applySortBtn.addEventListener('click', ()=>{
+      currentOrder = { field: sortFieldSel.value, dir: sortDirSel.value };
+      applyOrderAndRender();
+    });
+    prevBtn.addEventListener('click', ()=>{ if(page>1){ page--; renderPage(); }});
+    nextBtn.addEventListener('click', ()=>{ page++; renderPage(); });
+    pageSizeInput.addEventListener('change', ()=>{ page = 1; renderPage(); });
+
+    // Orden y render inicial
+    applyOrderAndRender();
+
+    /* ===================  FILTRO CLIENTE BÁSICO  =================== */
+    const filterClientBtn = document.getElementById('filter-client');
+    const queryBox = document.getElementById('query');
+    filterClientBtn?.addEventListener('click', ()=>{
+      const tokens = (queryBox.value || '').toLowerCase().split(/[\s,;\n]+/).filter(Boolean);
+      if(tokens.length === 0){
+        workingList = rows.slice();
+      }else{
+        workingList = rows.filter(tr=>{
+          const full = (tr.dataset.nombre + ' ' + tr.dataset.turno + ' ' + tr.dataset.sap).toLowerCase();
+          return tokens.every(t => full.includes(t));
+        });
+      }
+      page = 1;
+      applyOrderAndRender();
+    });
+
+    /* ===================  RESUMEN CONTADORES  =================== */
+    (function buildCounters(){
+      const headerDays = Array.from(document.querySelectorAll('#asistencia-table thead th')).slice(1).length;
+      const codeClassPrefix = 'asistencia-';
+      const optionsSelector = 'select.cell-select';
+
+      rows.forEach(tr=>{
+        const summary = tr.querySelector('.attendance-summary');
+        if(!summary) return;
+
+        const counts = {};
+        for(const sel of tr.querySelectorAll(optionsSelector)){
+          const v = sel.value;
+          if(!v) continue;
+          counts[v] = (counts[v]||0) + 1;
+        }
+        const order = ['T','D','F','LM','V','PP','PNP','MUT','PSN','PF','FQTO'];
+        summary.innerHTML = order.filter(k=>counts[k]).map(k=>{
+          return `<span class="attendance-counter counter-${k}">${k}: ${counts[k]}</span>`;
+        }).join('') || `<span class="muted">Sin registros (${headerDays} días)</span>`;
+      });
+    })();
+
+    /* ===================  FUNCIONES DE UTILIDAD  =================== */
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span>${message}</span>
+          <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: inherit; cursor: pointer; margin-left: 10px; font-size: 16px;">&times;</button>
+        </div>
+      `;
+      
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.remove();
+        }
+      }, 5000);
+    }
+
+    // =================== PLANIFICADOR DE EVENTOS COMPLETO ===================
+
+    class EventPlanner {
+      constructor() {
+        this.modal = document.getElementById('event-planner-modal');
+        this.availableList = document.getElementById('available-employees-list');
+        this.selectedList = document.getElementById('selected-employees-list');
+        this.searchBox = document.getElementById('employee-search');
+        this.previewArea = document.getElementById('event-preview');
+        
+        this.availableEmployees = [];
+        this.selectedEmployees = [];
+        this.filteredEmployees = [];
+        
+        this.init();
+      }
+      
+      init() {
+        // Cargar empleados desde la tabla actual
+        this.loadEmployees();
+        
+        // Event listeners
+        document.getElementById('event-planner-btn').addEventListener('click', () => this.open());
+        document.getElementById('close-event-planner').addEventListener('click', () => this.close());
+        document.getElementById('cancel-event-planning').addEventListener('click', () => this.close());
+        
+        // Búsqueda
+        document.getElementById('quick-select-search').addEventListener('click', () => this.searchAndSelect());
+        document.getElementById('clear-search').addEventListener('click', () => this.clearSearch());
+        
+        // Controles de selección
+        document.getElementById('select-employees').addEventListener('click', () => this.moveToSelected());
+        document.getElementById('deselect-employees').addEventListener('click', () => this.moveToAvailable());
+        document.getElementById('select-all-employees').addEventListener('click', () => this.selectAll());
+        document.getElementById('deselect-all-employees').addEventListener('click', () => this.deselectAll());
+        document.getElementById('select-all-visible').addEventListener('click', () => this.selectAllVisible());
+        
+        // Presets de fechas
+        document.getElementById('preset-today').addEventListener('click', () => this.setDatePreset('today'));
+        document.getElementById('preset-tomorrow').addEventListener('click', () => this.setDatePreset('tomorrow'));
+        document.getElementById('preset-this-week').addEventListener('click', () => this.setDatePreset('this-week'));
+        document.getElementById('preset-next-week').addEventListener('click', () => this.setDatePreset('next-week'));
+        document.getElementById('preset-month').addEventListener('click', () => this.setDatePreset('month'));
+        
+        // Vista previa en tiempo real
+        ['attendance-code', 'date-from', 'date-to'].forEach(id => {
+          document.getElementById(id).addEventListener('change', () => this.updatePreview());
+        });
+        
+        // Aplicar evento
+        document.getElementById('apply-event-planning').addEventListener('click', () => this.applyEvent());
+        
+        // Cerrar modal al hacer click fuera
+        this.modal.addEventListener('click', (e) => {
+          if (e.target === this.modal) this.close();
+        });
+      }
+      
+      loadEmployees() {
+        // Cargar empleados desde la tabla de asistencia
+        const rows = document.querySelectorAll('#tbody-empleados tr');
+        this.availableEmployees = [];
+        
+        rows.forEach(row => {
+          const nameCell = row.querySelector('.employee-name strong');
+          if (nameCell) {
+            const fullText = nameCell.parentElement.textContent;
+            const name = nameCell.textContent.trim();
+            
+            // Extraer RUT y ID SAP
+            const rutMatch = fullText.match(/RUT:\s*([^\s\/]+)/);
+            const sapMatch = fullText.match(/SAP:\s*([^\s\/]+)/);
+            
+            const employee = {
+              id: parseInt(row.querySelector('select[name*="asistencia-"]')?.name.match(/\d+/)?.[0]) || 0,
+              name: name,
+              rut: rutMatch ? rutMatch[1] : '',
+              sap: sapMatch ? sapMatch[1] : ''
+            };
+            
+            this.availableEmployees.push(employee);
+          }
+        });
+        
+        this.filteredEmployees = [...this.availableEmployees];
+        this.renderLists();
+      }
+      
+      open() {
+        this.modal.style.display = 'block';
+        this.loadEmployees(); // Recargar por si hubo cambios
+        this.updatePreview();
+        document.body.style.overflow = 'hidden'; // Prevenir scroll del fondo
+      }
+      
+      close() {
+        this.modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        this.reset();
+      }
+      
+      reset() {
+        this.selectedEmployees = [];
+        this.filteredEmployees = [...this.availableEmployees];
+        this.searchBox.value = '';
+        document.getElementById('attendance-code').value = '';
+        document.getElementById('date-from').value = '';
+        document.getElementById('date-to').value = '';
+        document.getElementById('overwrite-existing').checked = false;
+        this.renderLists();
+        this.updatePreview();
+      }
+      
+      searchAndSelect() {
+        const query = this.searchBox.value.toLowerCase().trim();
+        if (!query) return;
+        
+        const tokens = query.split(/[\s,;\n]+/).filter(Boolean);
+        const matches = [];
+        
+        this.availableEmployees.forEach(emp => {
+          const searchText = `${emp.name} ${emp.rut} ${emp.sap}`.toLowerCase();
+          
+          if (tokens.some(token => searchText.includes(token))) {
+            matches.push(emp);
+            // Mover a seleccionados si no está ya
+            if (!this.selectedEmployees.find(s => s.id === emp.id)) {
+              this.selectedEmployees.push(emp);
+            }
+          }
+        });
+        
+        this.renderLists();
+        this.updatePreview();
+        
+        if (matches.length > 0) {
+          showToast(`🔍 Se encontraron y seleccionaron ${matches.length} empleados`, 'success');
+        } else {
+          showToast('🔍 No se encontraron empleados con esos criterios', 'warning');
+        }
+      }
+      
+      clearSearch() {
+        this.searchBox.value = '';
+        this.filteredEmployees = [...this.availableEmployees];
+        this.renderLists();
+      }
+      
+      selectAllVisible() {
+        this.filteredEmployees.forEach(emp => {
+          if (!this.selectedEmployees.find(s => s.id === emp.id)) {
+            this.selectedEmployees.push(emp);
+          }
+        });
+        this.renderLists();
+        this.updatePreview();
+      }
+      
+      moveToSelected() {
+        const checkedBoxes = this.availableList.querySelectorAll('input[type="checkbox"]:checked');
+        checkedBoxes.forEach(checkbox => {
+          const empId = parseInt(checkbox.value);
+          const emp = this.availableEmployees.find(e => e.id === empId);
+          if (emp && !this.selectedEmployees.find(s => s.id === empId)) {
+            this.selectedEmployees.push(emp);
+          }
+        });
+        this.renderLists();
+        this.updatePreview();
+      }
+      
+      moveToAvailable() {
+        const checkedBoxes = this.selectedList.querySelectorAll('input[type="checkbox"]:checked');
+        checkedBoxes.forEach(checkbox => {
+          const empId = parseInt(checkbox.value);
+          this.selectedEmployees = this.selectedEmployees.filter(e => e.id !== empId);
+        });
+        this.renderLists();
+        this.updatePreview();
+      }
+      
+      selectAll() {
+        this.selectedEmployees = [...this.availableEmployees];
+        this.renderLists();
+        this.updatePreview();
+      }
+      
+      deselectAll() {
+        this.selectedEmployees = [];
+        this.renderLists();
+        this.updatePreview();
+      }
+      
+      renderLists() {
+        // Renderizar lista de disponibles
+        const available = this.availableEmployees.filter(emp => 
+          !this.selectedEmployees.find(s => s.id === emp.id)
+        );
+        
+        this.availableList.innerHTML = available.map(emp => `
+          <div style="display: flex; align-items: center; padding: 6px; margin: 2px 0; border: 1px solid var(--borde); border-radius: 4px; background: var(--color-superficie); font-size: 13px;">
+            <input type="checkbox" value="${emp.id}" style="margin-right: 8px;">
+            <div style="flex: 1;">
+              <strong>${emp.name}</strong><br>
+              <small style="color: var(--muted);">RUT: ${emp.rut} | SAP: ${emp.sap}</small>
+            </div>
+          </div>
+        `).join('');
+        
+        // Renderizar lista de seleccionados
+        this.selectedList.innerHTML = this.selectedEmployees.map(emp => `
+          <div style="display: flex; align-items: center; padding: 6px; margin: 2px 0; border: 1px solid var(--color-exito); border-radius: 4px; background: color-mix(in srgb, var(--color-exito) 10%, var(--color-superficie)); font-size: 13px;">
+            <input type="checkbox" value="${emp.id}" style="margin-right: 8px;">
+            <div style="flex: 1;">
+              <strong>${emp.name}</strong><br>
+              <small style="color: var(--muted);">RUT: ${emp.rut} | SAP: ${emp.sap}</small>
+            </div>
+          </div>
+        `).join('');
+        
+        // Actualizar contadores
+        document.getElementById('available-count').textContent = available.length;
+        document.getElementById('selected-count').textContent = this.selectedEmployees.length;
+      }
+      
+      setDatePreset(preset) {
+        const today = new Date();
+        const dateFrom = document.getElementById('date-from');
+        const dateTo = document.getElementById('date-to');
+        
+        switch (preset) {
+          case 'today':
+            dateFrom.value = this.formatDate(today);
+            dateTo.value = this.formatDate(today);
+            break;
+            
+          case 'tomorrow':
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            dateFrom.value = this.formatDate(tomorrow);
+            dateTo.value = this.formatDate(tomorrow);
+            break;
+            
+          case 'this-week':
+            const startOfWeek = new Date(today);
+            const endOfWeek = new Date(today);
+            startOfWeek.setDate(today.getDate() - today.getDay() + 1); // Lunes
+            endOfWeek.setDate(startOfWeek.getDate() + 6); // Domingo
+            dateFrom.value = this.formatDate(startOfWeek);
+            dateTo.value = this.formatDate(endOfWeek);
+            break;
+            
+          case 'next-week':
+            const nextWeekStart = new Date(today);
+            const nextWeekEnd = new Date(today);
+            nextWeekStart.setDate(today.getDate() - today.getDay() + 8); // Próximo lunes
+            nextWeekEnd.setDate(nextWeekStart.getDate() + 6); // Próximo domingo
+            dateFrom.value = this.formatDate(nextWeekStart);
+            dateTo.value = this.formatDate(nextWeekEnd);
+            break;
+            
+          case 'month':
+            const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            dateFrom.value = this.formatDate(startOfMonth);
+            dateTo.value = this.formatDate(endOfMonth);
+            break;
+        }
+        
+        this.updatePreview();
+      }
+      
+      formatDate(date) {
+        return date.toISOString().split('T')[0];
+      }
+      
+      updatePreview() {
+        const code = document.getElementById('attendance-code').value;
+        const dateFrom = document.getElementById('date-from').value;
+        const dateTo = document.getElementById('date-to').value;
+        const overwrite = document.getElementById('overwrite-existing').checked;
+        
+        const selectedCount = this.selectedEmployees.length;
+        
+        let preview = '<div style="text-align: center; color: var(--muted);">';
+        
+        if (selectedCount === 0 || !code || !dateFrom || !dateTo) {
+          preview += '📋 Selecciona empleados, código y fechas para ver la vista previa';
+        } else {
+          // Calcular días
+          const start = new Date(dateFrom);
+          const end = new Date(dateTo);
+          const diffTime = Math.abs(end - start);
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+          
+          // Información del código
+          const codeNames = {
+            'V': 'Vacaciones', 'LM': 'Licencia Médica', 'PP': 'Permiso con Goce',
+            'PNP': 'Permiso sin Goce', 'MUT': 'Mutual', 'PSN': 'Permiso Sindical',
+            'PF': 'Permiso Familiar', 'F': 'Falta'
+          };
+          
+          preview += `
+            <div style="background: linear-gradient(135deg, var(--color-primario), #0056b3); color: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+              <h4 style="margin: 0 0 10px 0;">📅 Resumen del Evento</h4>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; font-size: 14px;">
+                <div><strong>👥 Empleados:</strong> ${selectedCount}</div>
+                <div><strong>📋 Código:</strong> ${code} - ${codeNames[code] || code}</div>
+                <div><strong>📅 Período:</strong> ${this.formatDateSpanish(start)} al ${this.formatDateSpanish(end)}</div>
+                <div><strong>🗓️ Días:</strong> ${diffDays} día${diffDays > 1 ? 's' : ''}</div>
+                <div><strong>📊 Total Registros:</strong> ${selectedCount * diffDays}</div>
+                <div><strong>🔄 Sobrescribir:</strong> ${overwrite ? 'Sí' : 'No'}</div>
+              </div>
+            </div>
+            
+            <div style="text-align: left; background: var(--color-fondo); padding: 15px; border-radius: 8px; border: 1px solid var(--borde);">
+              <h5 style="margin: 0 0 10px 0; color: var(--color-texto);">👥 Empleados Seleccionados:</h5>
+              <div style="max-height: 150px; overflow-y: auto; font-size: 13px; line-height: 1.4;">
+                ${this.selectedEmployees.map((emp, index) => 
+                  `<div style="margin: 3px 0; color: var(--color-texto);">
+                    ${index + 1}. <strong>${emp.name}</strong> 
+                    <span style="color: var(--muted);">(RUT: ${emp.rut})</span>
+                  </div>`
+                ).join('')}
+              </div>
+            </div>
+            
+            ${overwrite ? 
+              '<div style="background: #fff3cd; color: #856404; padding: 10px; border-radius: 6px; margin-top: 10px; font-size: 13px; border: 1px solid #ffeaa7;">⚠️ <strong>Advertencia:</strong> Se sobrescribirán registros existentes en el período seleccionado.</div>' 
+              : ''}
+          `;
+        }
+        
+        preview += '</div>';
+        this.previewArea.innerHTML = preview;
+        
+        // Habilitar/deshabilitar botón aplicar
+        const applyBtn = document.getElementById('apply-event-planning');
+        applyBtn.disabled = !(selectedCount > 0 && code && dateFrom && dateTo);
+      }
+      
+      formatDateSpanish(date) {
+        const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+        return date.toLocaleDateString('es-ES', options);
+      }
+      
+      async applyEvent() {
+        const code = document.getElementById('attendance-code').value;
+        const dateFrom = document.getElementById('date-from').value;
+        const dateTo = document.getElementById('date-to').value;
+        const overwrite = document.getElementById('overwrite-existing').checked;
+        
+        if (this.selectedEmployees.length === 0 || !code || !dateFrom || !dateTo) {
+          showToast('⚠️ Faltan datos requeridos para aplicar el evento', 'error');
+          return;
+        }
+        
+        // Confirmación
+        const empleadosCount = this.selectedEmployees.length;
+        const start = new Date(dateFrom);
+        const end = new Date(dateTo);
+        const diffDays = Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24)) + 1;
+        const totalRegistros = empleadosCount * diffDays;
+        
+        const confirmMessage = `¿Confirmar aplicación del evento?
+
+👥 Empleados: ${empleadosCount}
+📋 Código: ${code}
+📅 Período: ${this.formatDateSpanish(start)} al ${this.formatDateSpanish(end)}
+🗓️ Días: ${diffDays}
+📊 Total registros: ${totalRegistros}
+${overwrite ? '\n⚠️ Se sobrescribirán registros existentes' : ''}
+
+Esta acción no se puede deshacer.`;
+        
+        if (!confirm(confirmMessage)) {
+          return;
+        }
+        
+        // Preparar datos para envío
+        const eventData = {
+          empleados_ids: this.selectedEmployees.map(emp => emp.id),
+          codigo_asistencia: code,
+          fecha_desde: dateFrom,
+          fecha_hasta: dateTo,
+          sobrescribir: overwrite
+        };
+        
+        const applyBtn = document.getElementById('apply-event-planning');
+        const originalText = applyBtn.textContent;
+        
+        try {
+          applyBtn.disabled = true;
+          applyBtn.textContent = '⏳ Aplicando...';
+          
+          const response = await fetch('/aplicar_evento_rango', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(eventData)
+          });
+          
+          const result = await response.json();
+          
+          if (response.ok && result.status === 'success') {
+            showToast(`✅ Evento aplicado exitosamente: ${result.message}`, 'success');
+            
+            // Recargar la página para mostrar los cambios
+            setTimeout(() => {
+              window.location.reload();
+            }, 1500);
+            
+            this.close();
+            
+          } else {
+            throw new Error(result.message || 'Error desconocido al aplicar el evento');
+          }
+          
+        } catch (error) {
+          console.error('Error aplicando evento:', error);
+          showToast(`❌ Error al aplicar evento: ${error.message}`, 'error');
+          
+        } finally {
+          applyBtn.disabled = false;
+          applyBtn.textContent = originalText;
+        }
+      }
+    }
+
+    // =================== INICIALIZACIÓN ===================
+
+    // Inicializar el planificador cuando la página esté lista
+    let eventPlannerInitialized = false;
+
+    function initEventPlanner() {
+      if (!eventPlannerInitialized && document.getElementById('event-planner-modal')) {
+        try {
+          window.eventPlanner = new EventPlanner();
+          eventPlannerInitialized = true;
+          console.log('✅ Planificador de Eventos inicializado correctamente');
+        } catch (error) {
+          console.error('❌ Error inicializando planificador:', error);
+        }
+      }
+    }
+
+    // Múltiples puntos de inicialización para garantizar que funcione
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initEventPlanner);
+    } else {
+      initEventPlanner();
+    }
+
+    // También intentar inicializar después de un breve delay
+    setTimeout(initEventPlanner, 100);
+  </script>
+</body>
+</html>

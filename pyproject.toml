@@ -1,0 +1,6 @@
+[project]
+name = "control-asistencia"
+version = "1.0.0"
+
+[tool.flask]
+app = "app"

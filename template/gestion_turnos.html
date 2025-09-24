@@ -1,0 +1,2815 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Turnos y Calendarios</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    
+ <style>
+    :root {
+        --color-primario: #4f46e5;
+        --color-secundario: #f3f4f6;
+        --color-fondo: #f8fafc;
+        --color-superficie: #ffffff;
+        --color-texto: #1f2937;
+        --color-texto-suave: #6b7280;
+        --color-exito: #10b981;
+        --color-warning: #f59e0b;
+        --color-error: #ef4444;
+        --color-info: #3b82f6;
+        --color-borde: #e5e7eb;
+        --color-borde-suave: #f3f4f6;
+        --sombra-card: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        --sombra-hover: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --sombra-active: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        --radio-borde: 0.75rem;
+        --radio-borde-small: 0.5rem;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        color: var(--color-texto);
+        margin: 0;
+        padding: 1.5rem;
+        min-height: 100vh;
+    }
+
+    .container-fluid {
+        max-width: 1500px; /* Ancho máximo del contenedor */
+        margin: auto;
+        background-color: var(--color-superficie);
+        border-radius: var(--radio-borde);
+        box-shadow: var(--sombra-active);
+        padding: 2rem;
+        border: 1px solid var(--color-borde-suave);
+    }
+
+    /* Header mejorado */
+    header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 2rem;
+        border-bottom: 2px solid var(--color-borde);
+        margin-bottom: 2rem;
+    }
+
+    header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        background: linear-gradient(135deg, var(--color-primario), #6366f1);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 1rem;
+    }
+
+    /* Layout principal */
+    .main-layout {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    /* Select2 MEJORADO CON GRADIENTES */
+    .select2-container--bootstrap-5 .select2-selection {
+        border: 2px solid var(--color-borde) !important;
+        border-radius: var(--radio-borde-small) !important;
+        padding: 0.75rem 1rem !important;
+        font-size: 0.875rem;
+        height: auto !important;
+        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        color: var(--color-texto);
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+    .select2-container--bootstrap-5 .select2-selection__rendered {
+        line-height: normal;
+        padding-right: 2rem !important;
+    }
+    .select2-container--bootstrap-5.select2-container--focus .select2-selection,
+    .select2-container--bootstrap-5.select2-container--open .select2-selection {
+        border-color: var(--color-primario) !important;
+        box-shadow: 0 0 0 3px rgb(79 70 229 / 0.1) !important;
+    }
+    .select2-container--bootstrap-5 .select2-selection__arrow {
+        height: 100% !important;
+        top: 0 !important;
+        width: 1.5rem !important;
+        background: linear-gradient(135deg, var(--color-primario), #6366f1);
+        border-top-right-radius: var(--radio-borde-small) !important;
+        border-bottom-right-radius: var(--radio-borde-small) !important;
+        border-left: 2px solid var(--color-primario) !important;
+    }
+    .select2-container--bootstrap-5 .select2-selection__arrow b {
+        border-color: #fff transparent transparent transparent !important;
+        border-width: 6px 4px 0 4px !important;
+    }
+    .select2-container--bootstrap-5.select2-container--open .select2-selection__arrow b {
+        border-color: transparent transparent #fff transparent !important;
+        border-width: 0 4px 6px 4px !important;
+    }
+
+    /* Tarjeta de detalles del turno MEJORADA */
+    .turno-details-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+        border-radius: var(--radio-borde);
+        padding: 1.5rem;
+        border: 2px solid var(--color-borde);
+        box-shadow: var(--sombra-card);
+        margin-top: 1rem;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        transition: all 0.3s ease;
+    }
+
+    .turno-details-card:hover {
+        border-color: var(--color-primario);
+        box-shadow: var(--sombra-hover);
+        transform: translateY(-2px);
+    }
+
+    .turno-details-card h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+        color: var(--color-texto);
+    }
+
+    .turno-details-card .details-container {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .turno-details-card .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        color: var(--color-texto-suave);
+    }
+
+    .turno-details-card .detail-item strong {
+        color: var(--color-texto);
+        font-weight: 600;
+    }
+
+    /* Botones mejorados */
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: 2px solid transparent;
+        border-radius: var(--radio-borde-small);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-size: 0.875rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: width 0.3s, height 0.3s;
+    }
+
+    .btn:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .btn.btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--color-primario), #6366f1);
+        color: white;
+        border-color: var(--color-primario);
+        box-shadow: 0 4px 6px -1px rgb(79 70 229 / 0.3);
+    }
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #4338ca, #5b21b6);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 8px -1px rgb(79 70 229 / 0.4);
+        color: white;
+    }
+    
+    .btn-secondary {
+        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        color: var(--color-texto);
+        border-color: var(--color-borde);
+    }
+    .btn-secondary:hover {
+        background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+        transform: translateY(-1px);
+        color: var(--color-texto);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, var(--color-exito), #059669);
+        color: white;
+        border-color: var(--color-exito);
+        box-shadow: 0 4px 6px -1px rgb(16 185 129 / 0.3);
+    }
+    .btn-success:hover {
+        background: linear-gradient(135deg, #059669, #047857);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 8px -1px rgb(16 185 129 / 0.4);
+        color: white;
+    }
+
+    .btn-warning {
+        background: linear-gradient(135deg, var(--color-warning), #d97706);
+        color: white;
+        border-color: var(--color-warning);
+        box-shadow: 0 4px 6px -1px rgb(245 158 11 / 0.3);
+    }
+    .btn-warning:hover {
+        background: linear-gradient(135deg, #d97706, #b45309);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 8px -1px rgb(245 158 11 / 0.4);
+        color: white;
+    }
+
+    .btn-info {
+        background: linear-gradient(135deg, var(--color-info), #2563eb);
+        color: white;
+        border-color: var(--color-info);
+        box-shadow: 0 4px 6px -1px rgb(59 130 246 / 0.3);
+    }
+    .btn-info:hover {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 8px -1px rgb(59 130 246 / 0.4);
+        color: white;
+    }
+
+    .btn-excel {
+        background: linear-gradient(135deg, #16a34a, #15803d);
+        color: white;
+        border-color: #16a34a;
+        box-shadow: 0 4px 6px -1px rgb(22 163 74 / 0.3);
+    }
+    
+    .btn-excel:hover {
+        background: linear-gradient(135deg, #15803d, #166534);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 8px -1px rgb(22 163 74 / 0.4);
+        color: white;
+    }
+
+    .btn-pdf {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        color: white;
+        border-color: #dc2626;
+        box-shadow: 0 4px 6px -1px rgb(220 38 38 / 0.3);
+    }
+    
+    .btn-pdf:hover {
+        background: linear-gradient(135deg, #b91c1c, #991b1b);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 8px -1px rgb(220 38 38 / 0.4);
+        color: white;
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, var(--color-error), #dc2626);
+        color: white;
+        border-color: var(--color-error);
+        box-shadow: 0 4px 6px -1px rgb(239 68 68 / 0.3);
+    }
+
+    .btn-danger:hover {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 8px -1px rgb(239 68 68 / 0.4);
+        color: white;
+    }
+
+    /* Área del calendario mejorada */
+    .main-content {
+        background: var(--color-superficie);
+        border-radius: var(--radio-borde);
+        padding: 2rem;
+        border: 1px solid var(--color-borde);
+        box-shadow: var(--sombra-card);
+    }
+
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        border-radius: var(--radio-borde);
+        border: 1px solid var(--color-borde);
+    }
+    
+    .calendar-nav {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .calendar-nav .mes-ano {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--color-texto);
+        text-shadow: 0 1px 2px rgb(0 0 0 / 0.1);
+    }
+
+    .calendar-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: center;
+    }
+
+    /* Grupo de botones de exportación */
+    .export-group {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        background: linear-gradient(135deg, #ffffff, #f8fafc);
+        border-radius: var(--radio-borde-small);
+        border: 2px solid var(--color-borde);
+        box-shadow: var(--sombra-card);
+    }
+
+    .export-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--color-texto-suave);
+        margin-right: 0.5rem;
+    }
+
+    /* Grid del calendario mejorado */
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.75rem;
+    }
+
+    .calendar-day-header {
+        font-weight: 700;
+        font-size: 0.875rem;
+        text-align: center;
+        color: var(--color-texto-suave);
+        padding: 1rem 0.5rem;
+        background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+        border-radius: var(--radio-borde-small);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .calendar-day {
+        min-height: 90px;
+        padding: 0.75rem;
+        border: 2px solid var(--color-borde);
+        border-radius: var(--radio-borde-small);
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        background: linear-gradient(135deg, #ffffff, #f9fafb);
+    }
+    
+    .calendar-day:not(.empty):hover {
+        background: linear-gradient(135deg, #f0f2ff, #e0e7ff);
+        border-color: var(--color-primario);
+        transform: translateY(-2px);
+        box-shadow: var(--sombra-hover);
+    }
+    
+    .calendar-day.empty {
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        cursor: default;
+        opacity: 0.5;
+    }
+
+    .calendar-day .day-number {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--color-texto);
+    }
+
+    .calendar-day .day-code {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 0.75rem;
+        padding: 0.5rem;
+        border-radius: var(--radio-borde-small);
+        font-weight: 700;
+        font-size: 0.875rem;
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.1);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    .day-code.trabajo {
+        background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+        color: #065f46;
+    }
+    .day-code.descanso {
+        background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+        color: #374151;
+    }
+    .day-code.festivo {
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        color: #b91c1c;
+    }
+    
+    /* Leyenda mejorada */
+    .calendar-legend {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        border-radius: var(--radio-borde);
+        font-size: 0.875rem;
+    }
+    
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 500;
+    }
+    .legend-color {
+        width: 1.25rem;
+        height: 1.25rem;
+        border-radius: var(--radio-borde-small);
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.1);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    /* Notificaciones mejoradas */
+    .notification {
+        position: fixed;
+        top: 2rem;
+        right: 2rem;
+        padding: 1rem 1.5rem;
+        border-radius: var(--radio-borde);
+        color: white;
+        z-index: 1100;
+        opacity: 0;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-weight: 600;
+        box-shadow: var(--sombra-active);
+        backdrop-filter: blur(8px);
+        min-width: 300px;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        transform: translateX(100%);
+    }
+    
+    .notification.success {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(5, 150, 105, 0.95));
+    }
+
+    .notification.success::before {
+        content: "✅";
+    }
+    
+    .notification.error {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(220, 38, 38, 0.95));
+    }
+
+    .notification.error::before {
+        content: "❌";
+    }
+
+    .notification.warning {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.95), rgba(217, 119, 6, 0.95));
+    }
+
+    .notification.warning::before {
+        content: "⚠️";
+    }
+    
+    .notification.show {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    /* Estilos para modales mejorados */
+    .modal-content {
+        border: none;
+        border-radius: var(--radio-borde);
+        box-shadow: var(--sombra-active);
+        overflow: hidden;
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        border-bottom: 1px solid var(--color-borde);
+        padding: 1.5rem 2rem;
+    }
+
+    .modal-title {
+        font-weight: 700;
+        color: var(--color-texto);
+        font-size: 1.25rem;
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .modal-footer {
+        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        border-top: 1px solid var(--color-borde);
+        padding: 1.5rem 2rem;
+    }
+
+    /* Formularios mejorados */
+    .form-label {
+        font-weight: 600;
+        color: var(--color-texto);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-control {
+        border: 2px solid var(--color-borde);
+        border-radius: var(--radio-borde-small);
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+        width: 100%;
+    }
+
+    .form-control:focus {
+        border-color: var(--color-primario);
+        box-shadow: 0 0 0 3px rgb(79 70 229 / 0.1);
+        outline: none;
+    }
+
+    .form-control.is-invalid {
+        border-color: var(--color-error);
+        box-shadow: 0 0 0 3px rgb(239 68 68 / 0.1);
+    }
+
+    .form-control.is-valid {
+        border-color: var(--color-exito);
+        box-shadow: 0 0 0 3px rgb(16 185 129 / 0.1);
+    }
+
+    .form-text {
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+        color: var(--color-texto-suave);
+    }
+
+    .invalid-feedback, .valid-feedback {
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .invalid-feedback {
+        color: var(--color-error);
+    }
+
+    .valid-feedback {
+        color: var(--color-exito);
+    }
+
+    /* Rangos de meses */
+    .rango-meses {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .rango-meses input[type="month"] {
+        padding: 0.75rem;
+        border: 2px solid var(--color-borde);
+        border-radius: var(--radio-borde-small);
+        font-weight: 500;
+    }
+
+    .rango-meses input[type="month"]:focus {
+        border-color: var(--color-primario);
+        box-shadow: 0 0 0 3px rgb(79 70 229 / 0.1);
+    }
+    
+    .modo-avanzado {
+        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        padding: 1.5rem;
+        border-radius: var(--radio-borde);
+        margin-top: 1rem;
+        border: 1px solid var(--color-borde);
+    }
+
+    /* Estados de carga */
+    .btn.loading {
+        opacity: 0.7;
+        cursor: not-allowed;
+        position: relative;
+    }
+
+    .btn.loading::after {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        margin: auto;
+        border: 2px solid transparent;
+        border-top-color: currentColor;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    /* Mejoras visuales adicionales */
+    .pattern-display {
+        background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+        color: var(--color-primario);
+        font-family: 'Courier New', monospace;
+        font-weight: 700;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        display: inline-block;
+        margin: 0.5rem 0;
+        border: 1px solid rgba(79, 70, 229, 0.2);
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-badge.success {
+        background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+        color: #065f46;
+    }
+
+    .status-badge.warning {
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
+        color: #92400e;
+    }
+
+    .status-badge.error {
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        color: #b91c1c;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @keyframes highlight {
+        0% { transform: scale(0.9); opacity: 0.7; }
+        50% { transform: scale(1.05); opacity: 1; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-slide-in {
+        animation: slideIn 0.3s ease-out;
+    }
+
+    /* Grid del calendario mejorado */
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.75rem;
+    }
+
+    .calendar-day-header {
+        font-weight: 700;
+        font-size: 0.875rem;
+        text-align: center;
+        color: var(--color-texto-suave);
+        padding: 1rem 0.5rem;
+        background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+        border-radius: var(--radio-borde-small);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .calendar-day {
+        min-height: 90px;
+        padding: 0.75rem;
+        border: 2px solid var(--color-borde);
+        border-radius: var(--radio-borde-small);
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        background: linear-gradient(135deg, #ffffff, #f9fafb);
+    }
+    
+    .calendar-day:not(.empty):hover {
+        background: linear-gradient(135deg, #f0f2ff, #e0e7ff);
+        border-color: var(--color-primario);
+        transform: translateY(-2px);
+        box-shadow: var(--sombra-hover);
+    }
+    
+    .calendar-day.empty {
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        cursor: default;
+        opacity: 0.5;
+    }
+
+    .calendar-day .day-number {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--color-texto);
+    }
+
+    .calendar-day .day-code {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 0.75rem;
+        padding: 0.5rem;
+        border-radius: var(--radio-borde-small);
+        font-weight: 700;
+        font-size: 0.875rem;
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.1);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    .day-code.trabajo {
+        background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+        color: #065f46;
+    }
+    .day-code.descanso {
+        background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+        color: #374151;
+    }
+    .day-code.festivo {
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        color: #b91c1c;
+    }
+    
+    /* Leyenda mejorada */
+    .calendar-legend {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        border-radius: var(--radio-borde);
+        font-size: 0.875rem;
+    }
+    
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 500;
+    }
+    .legend-color {
+        width: 1.25rem;
+        height: 1.25rem;
+        border-radius: var(--radio-borde-small);
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.1);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    /* Notificaciones mejoradas */
+    .notification {
+        position: fixed;
+        top: 2rem;
+        right: 2rem;
+        padding: 1rem 1.5rem;
+        border-radius: var(--radio-borde);
+        color: white;
+        z-index: 1100;
+        opacity: 0;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-weight: 600;
+        box-shadow: var(--sombra-active);
+        backdrop-filter: blur(8px);
+        min-width: 300px;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        transform: translateX(100%);
+    }
+    
+    .notification.success {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(5, 150, 105, 0.95));
+    }
+
+    .notification.success::before {
+        content: "✅";
+    }
+    
+    .notification.error {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(220, 38, 38, 0.95));
+    }
+
+    .notification.error::before {
+        content: "❌";
+    }
+
+    .notification.warning {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.95), rgba(217, 119, 6, 0.95));
+    }
+
+    .notification.warning::before {
+        content: "⚠️";
+    }
+    
+    .notification.show {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    /* Estilos para modales mejorados */
+    .modal-content {
+        border: none;
+        border-radius: var(--radio-borde);
+        box-shadow: var(--sombra-active);
+        overflow: hidden;
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        border-bottom: 1px solid var(--color-borde);
+        padding: 1.5rem 2rem;
+    }
+
+    .modal-title {
+        font-weight: 700;
+        color: var(--color-texto);
+        font-size: 1.25rem;
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .modal-footer {
+        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        border-top: 1px solid var(--color-borde);
+        padding: 1.5rem 2rem;
+    }
+
+    /* Formularios mejorados */
+    .form-label {
+        font-weight: 600;
+        color: var(--color-texto);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-control {
+        border: 2px solid var(--color-borde);
+        border-radius: var(--radio-borde-small);
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+        width: 100%;
+    }
+
+    .form-control:focus {
+        border-color: var(--color-primario);
+        box-shadow: 0 0 0 3px rgb(79 70 229 / 0.1);
+        outline: none;
+    }
+
+    .form-control.is-invalid {
+        border-color: var(--color-error);
+        box-shadow: 0 0 0 3px rgb(239 68 68 / 0.1);
+    }
+
+    .form-control.is-valid {
+        border-color: var(--color-exito);
+        box-shadow: 0 0 0 3px rgb(16 185 129 / 0.1);
+    }
+
+    .form-text {
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+        color: var(--color-texto-suave);
+    }
+
+    .invalid-feedback, .valid-feedback {
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .invalid-feedback {
+        color: var(--color-error);
+    }
+
+    .valid-feedback {
+        color: var(--color-exito);
+    }
+
+    /* Rangos de meses */
+    .rango-meses {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .rango-meses input[type="month"] {
+        padding: 0.75rem;
+        border: 2px solid var(--color-borde);
+        border-radius: var(--radio-borde-small);
+        font-weight: 500;
+    }
+
+    .rango-meses input[type="month"]:focus {
+        border-color: var(--color-primario);
+        box-shadow: 0 0 0 3px rgb(79 70 229 / 0.1);
+    }
+    
+    .modo-avanzado {
+        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        padding: 1.5rem;
+        border-radius: var(--radio-borde);
+        margin-top: 1rem;
+        border: 1px solid var(--color-borde);
+    }
+
+    /* Estados de carga */
+    .btn.loading {
+        opacity: 0.7;
+        cursor: not-allowed;
+        position: relative;
+    }
+
+    .btn.loading::after {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        margin: auto;
+        border: 2px solid transparent;
+        border-top-color: currentColor;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    /* Mejoras visuales adicionales */
+    .pattern-display {
+        background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+        color: var(--color-primario);
+        font-family: 'Courier New', monospace;
+        font-weight: 700;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        display: inline-block;
+        margin: 0.5rem 0;
+        border: 1px solid rgba(79, 70, 229, 0.2);
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-badge.success {
+        background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+        color: #065f46;
+    }
+
+    .status-badge.warning {
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
+        color: #92400e;
+    }
+
+    .status-badge.error {
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        color: #b91c1c;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @keyframes highlight {
+        0% { transform: scale(0.9); opacity: 0.7; }
+        50% { transform: scale(1.05); opacity: 1; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-slide-in {
+        animation: slideIn 0.3s ease-out;
+    }
+
+    /* Grid del calendario mejorado */
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.75rem;
+    }
+
+    .calendar-day-header {
+        font-weight: 700;
+        font-size: 0.875rem;
+        text-align: center;
+        color: var(--color-texto-suave);
+        padding: 1rem 0.5rem;
+        background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+        border-radius: var(--radio-borde-small);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .calendar-day {
+        min-height: 90px;
+        padding: 0.75rem;
+        border: 2px solid var(--color-borde);
+        border-radius: var(--radio-borde-small);
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        background: linear-gradient(135deg, #ffffff, #f9fafb);
+    }
+    
+    .calendar-day:not(.empty):hover {
+        background: linear-gradient(135deg, #f0f2ff, #e0e7ff);
+        border-color: var(--color-primario);
+        transform: translateY(-2px);
+        box-shadow: var(--sombra-hover);
+    }
+    
+    .calendar-day.empty {
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        cursor: default;
+        opacity: 0.5;
+    }
+
+    .calendar-day .day-number {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--color-texto);
+    }
+
+    .calendar-day .day-code {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 0.75rem;
+        padding: 0.5rem;
+        border-radius: var(--radio-borde-small);
+        font-weight: 700;
+        font-size: 0.875rem;
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.1);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    .day-code.trabajo {
+        background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+        color: #065f46;
+    }
+    .day-code.descanso {
+        background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+        color: #374151;
+    }
+    .day-code.festivo {
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        color: #b91c1c;
+    }
+    
+    /* Leyenda mejorada */
+    .calendar-legend {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        border-radius: var(--radio-borde);
+        font-size: 0.875rem;
+    }
+    
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 500;
+    }
+    .legend-color {
+        width: 1.25rem;
+        height: 1.25rem;
+        border-radius: var(--radio-borde-small);
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.1);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    /* Notificaciones mejoradas */
+    .notification {
+        position: fixed;
+        top: 2rem;
+        right: 2rem;
+        padding: 1rem 1.5rem;
+        border-radius: var(--radio-borde);
+        color: white;
+        z-index: 1100;
+        opacity: 0;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-weight: 600;
+        box-shadow: var(--sombra-active);
+        backdrop-filter: blur(8px);
+        min-width: 300px;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        transform: translateX(100%);
+    }
+    
+    .notification.success {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(5, 150, 105, 0.95));
+    }
+
+    .notification.success::before {
+        content: "✅";
+    }
+    
+    .notification.error {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(220, 38, 38, 0.95));
+    }
+
+    .notification.error::before {
+        content: "❌";
+    }
+
+    .notification.warning {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.95), rgba(217, 119, 6, 0.95));
+    }
+
+    .notification.warning::before {
+        content: "⚠️";
+    }
+    
+    .notification.show {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    /* Estilos para modales mejorados */
+    .modal-content {
+        border: none;
+        border-radius: var(--radio-borde);
+        box-shadow: var(--sombra-active);
+        overflow: hidden;
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        border-bottom: 1px solid var(--color-borde);
+        padding: 1.5rem 2rem;
+    }
+
+    .modal-title {
+        font-weight: 700;
+        color: var(--color-texto);
+        font-size: 1.25rem;
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .modal-footer {
+        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        border-top: 1px solid var(--color-borde);
+        padding: 1.5rem 2rem;
+    }
+
+    /* Formularios mejorados */
+    .form-label {
+        font-weight: 600;
+        color: var(--color-texto);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-control {
+        border: 2px solid var(--color-borde);
+        border-radius: var(--radio-borde-small);
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+        width: 100%;
+    }
+
+    .form-control:focus {
+        border-color: var(--color-primario);
+        box-shadow: 0 0 0 3px rgb(79 70 229 / 0.1);
+        outline: none;
+    }
+
+    .form-control.is-invalid {
+        border-color: var(--color-error);
+        box-shadow: 0 0 0 3px rgb(239 68 68 / 0.1);
+    }
+
+    .form-control.is-valid {
+        border-color: var(--color-exito);
+        box-shadow: 0 0 0 3px rgb(16 185 129 / 0.1);
+    }
+
+    .form-text {
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+        color: var(--color-texto-suave);
+    }
+
+    .invalid-feedback, .valid-feedback {
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .invalid-feedback {
+        color: var(--color-error);
+    }
+
+    .valid-feedback {
+        color: var(--color-exito);
+    }
+
+    /* Rangos de meses */
+    .rango-meses {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .rango-meses input[type="month"] {
+        padding: 0.75rem;
+        border: 2px solid var(--color-borde);
+        border-radius: var(--radio-borde-small);
+        font-weight: 500;
+    }
+
+    .rango-meses input[type="month"]:focus {
+        border-color: var(--color-primario);
+        box-shadow: 0 0 0 3px rgb(79 70 229 / 0.1);
+    }
+    
+    .modo-avanzado {
+        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        padding: 1.5rem;
+        border-radius: var(--radio-borde);
+        margin-top: 1rem;
+        border: 1px solid var(--color-borde);
+    }
+
+    /* Estados de carga */
+    .btn.loading {
+        opacity: 0.7;
+        cursor: not-allowed;
+        position: relative;
+    }
+
+    .btn.loading::after {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        margin: auto;
+        border: 2px solid transparent;
+        border-top-color: currentColor;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    /* Mejoras visuales adicionales */
+    .pattern-display {
+        background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+        color: var(--color-primario);
+        font-family: 'Courier New', monospace;
+        font-weight: 700;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        display: inline-block;
+        margin: 0.5rem 0;
+        border: 1px solid rgba(79, 70, 229, 0.2);
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-badge.success {
+        background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+        color: #065f46;
+    }
+
+    .status-badge.warning {
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
+        color: #92400e;
+    }
+
+    .status-badge.error {
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        color: #b91c1c;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @keyframes highlight {
+        0% { transform: scale(0.9); opacity: 0.7; }
+        50% { transform: scale(1.05); opacity: 1; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-slide-in {
+        animation: slideIn 0.3s ease-out;
+    }
+
+    /* Grid del calendario mejorado */
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.75rem;
+    }
+
+    .calendar-day-header {
+        font-weight: 700;
+        font-size: 0.875rem;
+        text-align: center;
+        color: var(--color-texto-suave);
+        padding: 1rem 0.5rem;
+        background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+        border-radius: var(--radio-borde-small);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .calendar-day {
+        min-height: 90px;
+        padding: 0.75rem;
+        border: 2px solid var(--color-borde);
+        border-radius: var(--radio-borde-small);
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        background: linear-gradient(135deg, #ffffff, #f9fafb);
+    }
+    
+    .calendar-day:not(.empty):hover {
+        background: linear-gradient(135deg, #f0f2ff, #e0e7ff);
+        border-color: var(--color-primario);
+        transform: translateY(-2px);
+        box-shadow: var(--sombra-hover);
+    }
+    
+    .calendar-day.empty {
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        cursor: default;
+        opacity: 0.5;
+    }
+
+    .calendar-day .day-number {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--color-texto);
+    }
+
+    .calendar-day .day-code {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 0.75rem;
+        padding: 0.5rem;
+        border-radius: var(--radio-borde-small);
+        font-weight: 700;
+        font-size: 0.875rem;
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.1);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    .day-code.trabajo {
+        background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+        color: #065f46;
+    }
+    .day-code.descanso {
+        background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+        color: #374151;
+    }
+    .day-code.festivo {
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        color: #b91c1c;
+    }
+    
+    /* Leyenda mejorada */
+    .calendar-legend {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        border-radius: var(--radio-borde);
+        font-size: 0.875rem;
+    }
+    
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 500;
+    }
+    .legend-color {
+        width: 1.25rem;
+        height: 1.25rem;
+        border-radius: var(--radio-borde-small);
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.1);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    /* Notificaciones mejoradas */
+    .notification {
+        position: fixed;
+        top: 2rem;
+        right: 2rem;
+        padding: 1rem 1.5rem;
+        border-radius: var(--radio-borde);
+        color: white;
+        z-index: 1100;
+        opacity: 0;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-weight: 600;
+        box-shadow: var(--sombra-active);
+        backdrop-filter: blur(8px);
+        min-width: 300px;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        transform: translateX(100%);
+    }
+    
+    .notification.success {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(5, 150, 105, 0.95));
+    }
+
+    .notification.success::before {
+        content: "✅";
+    }
+    
+    .notification.error {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(220, 38, 38, 0.95));
+    }
+
+    .notification.error::before {
+        content: "❌";
+    }
+
+    .notification.warning {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.95), rgba(217, 119, 6, 0.95));
+    }
+
+    .notification.warning::before {
+        content: "⚠️";
+    }
+    
+    .notification.show {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    /* Estilos para modales mejorados */
+    .modal-content {
+        border: none;
+        border-radius: var(--radio-borde);
+        box-shadow: var(--sombra-active);
+        overflow: hidden;
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        border-bottom: 1px solid var(--color-borde);
+        padding: 1.5rem 2rem;
+    }
+
+    .modal-title {
+        font-weight: 700;
+        color: var(--color-texto);
+        font-size: 1.25rem;
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .modal-footer {
+        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        border-top: 1px solid var(--color-borde);
+        padding: 1.5rem 2rem;
+    }
+
+    /* Formularios mejorados */
+    .form-label {
+        font-weight: 600;
+        color: var(--color-texto);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-control {
+        border: 2px solid var(--color-borde);
+        border-radius: var(--radio-borde-small);
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+        width: 100%;
+    }
+
+    .form-control:focus {
+        border-color: var(--color-primario);
+        box-shadow: 0 0 0 3px rgb(79 70 229 / 0.1);
+        outline: none;
+    }
+
+    .form-control.is-invalid {
+        border-color: var(--color-error);
+        box-shadow: 0 0 0 3px rgb(239 68 68 / 0.1);
+    }
+
+    .form-control.is-valid {
+        border-color: var(--color-exito);
+        box-shadow: 0 0 0 3px rgb(16 185 129 / 0.1);
+    }
+
+    .form-text {
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+        color: var(--color-texto-suave);
+    }
+
+    .invalid-feedback, .valid-feedback {
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .invalid-feedback {
+        color: var(--color-error);
+    }
+
+    .valid-feedback {
+        color: var(--color-exito);
+    }
+
+    /* Rangos de meses */
+    .rango-meses {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .rango-meses input[type="month"] {
+        padding: 0.75rem;
+        border: 2px solid var(--color-borde);
+        border-radius: var(--radio-borde-small);
+        font-weight: 500;
+    }
+
+    .rango-meses input[type="month"]:focus {
+        border-color: var(--color-primario);
+        box-shadow: 0 0 0 3px rgb(79 70 229 / 0.1);
+    }
+    
+    .modo-avanzado {
+        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        padding: 1.5rem;
+        border-radius: var(--radio-borde);
+        margin-top: 1rem;
+        border: 1px solid var(--color-borde);
+    }
+
+    /* Estados de carga */
+    .btn.loading {
+        opacity: 0.7;
+        cursor: not-allowed;
+        position: relative;
+    }
+
+    .btn.loading::after {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        margin: auto;
+        border: 2px solid transparent;
+        border-top-color: currentColor;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    /* Mejoras visuales adicionales */
+    .pattern-display {
+        background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+        color: var(--color-primario);
+        font-family: 'Courier New', monospace;
+        font-weight: 700;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        display: inline-block;
+        margin: 0.5rem 0;
+        border: 1px solid rgba(79, 70, 229, 0.2);
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-badge.success {
+        background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+        color: #065f46;
+    }
+
+    .status-badge.warning {
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
+        color: #92400e;
+    }
+
+    .status-badge.error {
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        color: #b91c1c;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @keyframes highlight {
+        0% { transform: scale(0.9); opacity: 0.7; }
+        50% { transform: scale(1.05); opacity: 1; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-slide-in {
+        animation: slideIn 0.3s ease-out;
+    }
+
+    /* Responsive mejorado */
+    @media (max-width: 1024px) {
+        .container-fluid {
+            max-width: 960px; /* Reducimos el ancho para 1024px */
+        }
+        .calendar-nav .mes-ano {
+            font-size: 1.25rem;
+        }
+        .calendar-actions .btn {
+            font-size: 0.8rem;
+            padding: 0.6rem 1.2rem;
+        }
+        .main-layout {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        body {
+            padding: 1rem;
+        }
+        .container-fluid {
+            max-width: 100%;
+            padding: 1rem;
+        }
+        header {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+        }
+        .calendar-grid {
+            gap: 0.5rem;
+        }
+        .calendar-day {
+            min-height: 70px;
+            padding: 0.5rem;
+        }
+        .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+        }
+        .calendar-actions {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .export-group {
+            flex-direction: column;
+            width: 100%;
+        }
+    }
+</style>
+</head>
+<body>
+
+    <div class="notification" id="notification"></div>
+
+    <div class="container-fluid">
+        <header>
+            <h1><i class="fas fa-calendar-alt me-2"></i>Gestión de Turnos y Calendarios</h1>
+            <div class="header-actions">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#crearTurnoModal">
+                    <i class="fas fa-plus"></i>
+                    Nuevo Turno
+                </button>
+                <a href="/" class="btn btn-secondary">
+                    <i class="fas fa-users"></i>
+                    Ver Empleados
+                </a>
+                <a href="{{ url_for('gestion_sueldos_cargos') }}" class="btn btn-warning">
+                    <i class="fas fa-dollar-sign"></i>
+                    Gestión de Sueldos
+                </a>
+            </div>
+        </header>
+
+        <main class="main-layout">
+            <section class="main-content">
+                <div class="calendar-header">
+                    <div class="calendar-nav">
+                        <button class="btn btn-secondary" id="prev-month">
+                            <i class="fas fa-chevron-left"></i>
+                            Anterior
+                        </button>
+                        <span class="mes-ano" id="mes-ano-display"></span>
+                        <button class="btn btn-secondary" id="next-month">
+                            Siguiente
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+
+                    <div class="calendar-actions">
+                        <div class="me-3 d-flex align-items-center">
+                            <i class="fas fa-clock me-2"></i>
+                            <label for="turnos-selector" class="form-label me-2 mb-0">Seleccionar Turno:</label>
+                            <select id="turnos-selector" class="form-control" style="width:250px;">
+                                </select>
+                        </div>
+                        
+                        <button class="btn btn-warning" id="btn-aplicar-plantilla">
+                            <i class="fas fa-magic"></i>
+                            Aplicar Plantilla
+                        </button>
+                        <button class="btn btn-info" id="btn-aplicar-rango">
+                            <i class="fas fa-calendar-check"></i>
+                            Aplicar a Rango
+                        </button>
+                        <button class="btn btn-secondary" id="btn-copiar-mes">
+                            <i class="fas fa-copy"></i>
+                            Copiar Mes
+                        </button>
+                        
+                        <div style="height: 2rem; width: 1px; background-color: var(--color-borde); margin: 0 0.5rem;"></div>
+                        
+                        <div class="export-group">
+                            <span class="export-label">Exportar:</span>
+                            <button class="btn btn-excel" id="btn-export-excel">
+                                <i class="fas fa-file-excel"></i>
+                                Excel
+                            </button>
+                            <button class="btn btn-pdf" id="btn-export-pdf">
+                                <i class="fas fa-file-pdf"></i>
+                                PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="turno-details-container"></div>
+
+                <div class="calendar-grid" id="calendar-weekdays">
+                    <div class="calendar-day-header">Lun</div>
+                    <div class="calendar-day-header">Mar</div>
+                    <div class="calendar-day-header">Mié</div>
+                    <div class="calendar-day-header">Jue</div>
+                    <div class="calendar-day-header">Vie</div>
+                    <div class="calendar-day-header">Sáb</div>
+                    <div class="calendar-day-header">Dom</div>
+                </div>
+                <div class="calendar-grid" id="calendar-days">
+                    </div>
+
+                <div class="calendar-legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: linear-gradient(135deg, #d1fae5, #a7f3d0);"></div> 
+                        <span>Trabajo (T)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: linear-gradient(135deg, #f3f4f6, #e5e7eb);"></div> 
+                        <span>Descanso (D)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: linear-gradient(135deg, #fee2e2, #fecaca);"></div> 
+                        <span>Festivo (F)</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div class="modal fade" id="crearTurnoModal" tabindex="-1" aria-labelledby="crearTurnoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="crearTurnoModalLabel">
+                        <i class="fas fa-plus-circle me-2 text-primary"></i>
+                        Crear Nuevo Turno
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="form-crear-turno" method="POST" action="/crear_turno">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="nombre-turno" class="form-label">
+                                <i class="fas fa-tag me-1"></i>Nombre del Turno
+                            </label>
+                            <input type="text" class="form-control" id="nombre-turno" name="nombre" required
+                                   placeholder="Ej: Turno Mañana, Turno Noche, 14x14 Día">
+                            <div class="invalid-feedback">
+                                Por favor ingrese un nombre válido para el turno.
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="patron-turno" class="form-label">
+                                <i class="fas fa-sync-alt me-1"></i>Patrón de Rotación
+                            </label>
+                            <input type="text" class="form-control" id="patron-turno" name="patron" required 
+                                   placeholder="Ej: 6x1, 14x14, 21x7, 5x2" 
+                                   pattern="[0-9]+[xX][0-9]+"
+                                   title="Formato: números + x + número (ej: 6x1, 14x14)">
+                            <div class="form-text">
+                                <div class="d-flex align-items-start gap-2">
+                                    <i class="fas fa-info-circle text-info mt-1"></i>
+                                    <div>
+                                        <strong>Formato:</strong> [días trabajo] <strong>x</strong> [días descanso]<br>
+                                        <strong>Ejemplos válidos:</strong><br>
+                                        • <code class="pattern-display">6x1</code> - 6 días trabajo, 1 día descanso<br>
+                                        • <code class="pattern-display">14x14</code> - 14 días trabajo, 14 días descanso<br>
+                                        • <code class="pattern-display">21x7</code> - 21 días trabajo, 7 días descanso
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="invalid-feedback">
+                                Formato inválido. Use: número + x + número (ej: 6x1)
+                            </div>
+                            <div class="valid-feedback">
+                                <i class="fas fa-check-circle me-1"></i>Patrón válido
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="descripcion-turno" class="form-label">
+                                <i class="fas fa-align-left me-1"></i>Descripción <small class="text-muted">(opcional)</small>
+                            </label>
+                            <textarea class="form-control" id="descripcion-turno" name="descripcion" rows="3"
+                                      placeholder="Describe las características del turno, horarios, observaciones..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i>Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Guardar Turno
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="aplicarPlantillaModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-magic me-2 text-warning"></i>
+                        Aplicar Plantilla al Mes Actual
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-cog me-1"></i>Patrón: 
+                            <span class="pattern-display" id="patron-actual"></span>
+                        </label>
+                    </div>
+                    <div class="mb-3">
+                        <label for="inicio-ciclo" class="form-label">
+                            <i class="fas fa-play-circle me-1"></i>Iniciar ciclo en el día:
+                        </label>
+                        <input type="number" class="form-control" id="inicio-ciclo" min="1" max="31" value="1">
+                        <div class="form-text">
+                            <i class="fas fa-lightbulb me-1"></i>
+                            Especifica en qué día del mes debe comenzar el patrón de rotación.
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Cancelar
+                    </button>
+                    <button type="button" class="btn btn-primary" id="confirmar-plantilla">
+                        <i class="fas fa-magic me-1"></i>Aplicar Plantilla
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="aplicarRangoModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-calendar-check me-2 text-info"></i>
+                        Aplicar Plantilla a Rango de Meses
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-cog me-1"></i>Patrón: 
+                            <span class="pattern-display" id="patron-rango"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="rango-meses">
+                        <div>
+                            <label for="fecha-inicio" class="form-label">
+                                <i class="fas fa-calendar-plus me-1"></i>Desde:
+                            </label>
+                            <input type="month" class="form-control" id="fecha-inicio">
+                        </div>
+                        <div>
+                            <label for="fecha-fin" class="form-label">
+                                <i class="fas fa-calendar-minus me-1"></i>Hasta:
+                            </label>
+                            <input type="month" class="form-control" id="fecha-fin">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="inicio-ciclo-rango" class="form-label">
+                            <i class="fas fa-play-circle me-1"></i>Iniciar ciclo en el día:
+                        </label>
+                        <input type="number" class="form-control" id="inicio-ciclo-rango" min="1" max="31" value="1">
+                    </div>
+                    
+                    <div class="modo-avanzado">
+                        <h6><i class="fas fa-exclamation-triangle me-2 text-warning"></i>Meses con configuración existente</h6>
+                        <div id="meses-configurados">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                <span>Cargando información...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Cancelar
+                    </button>
+                    <button type="button" class="btn btn-primary" id="confirmar-rango">
+                        <i class="fas fa-calendar-check me-1"></i>Aplicar a Rango
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="exportarRangoModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-download me-2 text-success"></i>
+                        Seleccionar Rango para Exportar
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-calendar-alt me-1"></i>Seleccionar período:
+                        </label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="tipoExport" id="export-mes-actual" value="actual" checked>
+                            <label class="form-check-label" for="export-mes-actual">
+                                <i class="fas fa-calendar-day me-1 text-primary"></i>
+                                Solo mes actual (<span id="mes-actual-display"></span>)
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="tipoExport" id="export-rango" value="rango">
+                            <label class="form-check-label" for="export-rango">
+                                <i class="fas fa-calendar-week me-1 text-info"></i>
+                                Rango de meses personalizado
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div id="rango-export-controls" class="rango-meses" style="display: none;">
+                        <div>
+                            <label for="export-fecha-desde" class="form-label">
+                                <i class="fas fa-play me-1"></i>Desde:
+                            </label>
+                            <input type="month" class="form-control" id="export-fecha-desde">
+                        </div>
+                        <div>
+                            <label for="export-fecha-hasta" class="form-label">
+                                <i class="fas fa-stop me-1"></i>Hasta:
+                            </label>
+                            <input type="month" class="form-control" id="export-fecha-hasta">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <div class="status-badge success">
+                            <i class="fas fa-info-circle"></i>
+                            <span id="preview-export">Se exportará 1 mes</span>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-warning mt-3" style="display: none;" id="alert-rango-grande">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Nota:</strong> Exportar muchos meses puede generar archivos grandes y tomar más tiempo.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Cancelar
+                    </button>
+                    <button type="button" class="btn btn-excel" id="confirmar-export-excel">
+                        <i class="fas fa-file-excel me-1"></i>Exportar Excel
+                    </button>
+                    <button type="button" class="btn btn-pdf" id="confirmar-export-pdf">
+                        <i class="fas fa-file-pdf me-1"></i>Exportar PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- ESTADO DE LA APLICACIÓN ---
+            let currentDate = new Date({{ ano_actual }}, {{ mes_actual }} - 1, 1);
+            let selectedTurnoId = null;
+
+            // --- DATOS REALES (inyectados por Flask) ---
+            const turnos = {{ turnos|tojson|safe }};
+            const calendarioTurnos = {{ calendario_turnos|tojson|safe }};
+            
+            // Le asignamos un objeto de schedule a cada turno
+            turnos.forEach(t => {
+                t.schedule = calendarioTurnos[t.id] || {};
+                t.empleados = t.empleados_asignados || 0;
+            });
+            
+            // --- ELEMENTOS DEL DOM ---
+            const mesAnoDisplay = document.getElementById('mes-ano-display');
+            const calendarDaysContainer = document.getElementById('calendar-days');
+            const turnosSelector = $('#turnos-selector');
+            const turnoDetailsContainer = document.getElementById('turno-details-container');
+            const prevMonthBtn = document.getElementById('prev-month');
+            const nextMonthBtn = document.getElementById('next-month');
+            const aplicarPlantillaBtn = document.getElementById('btn-aplicar-plantilla');
+            const aplicarRangoBtn = document.getElementById('btn-aplicar-rango');
+            const copiarMesBtn = document.getElementById('btn-copiar-mes');
+            const confirmarPlantillaBtn = document.getElementById('confirmar-plantilla');
+            const confirmarRangoBtn = document.getElementById('confirmar-rango');
+            const notification = document.getElementById('notification');
+            const exportExcelBtn = document.getElementById('btn-export-excel');
+            const exportPdfBtn = document.getElementById('btn-export-pdf');
+
+            // --- INICIALIZACIÓN DE SELECT2 ---
+            turnosSelector.select2({
+                placeholder: "Selecciona un turno",
+                allowClear: true,
+                theme: "bootstrap-5",
+                dropdownParent: $('#turnos-selector').parent()
+            });
+
+            // --- FUNCIONES PRINCIPALES ---
+            
+            // Función para mostrar notificaciones mejorada
+            function showNotification(message, type = 'success') {
+                notification.innerHTML = `<span>${message}</span>`;
+                notification.className = `notification ${type}`;
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 4000);
+            }
+
+            // Función para mostrar estado de carga en botones
+            function setLoadingState(button, loading = true) {
+                if (loading) {
+                    button.classList.add('loading');
+                    button.disabled = true;
+                } else {
+                    button.classList.remove('loading');
+                    button.disabled = false;
+                }
+            }
+            
+            // Renderiza la tarjeta de detalles del turno
+            function renderTurnoDetails() {
+                turnoDetailsContainer.innerHTML = '';
+                const turnoActual = turnos.find(t => t.id == selectedTurnoId);
+                
+                if (turnoActual) {
+                    const statusClass = turnoActual.patron ? 'success' : 'warning';
+                    const statusText = turnoActual.patron ? 'Configurado' : 'Sin patrón';
+
+                    const detailsHtml = `
+                        <div class="turno-details-card animate-slide-in">
+                            <div class="details-container">
+                                <div class="detail-item">
+                                    <i class="fas fa-users me-1"></i>
+                                    <strong>${turnoActual.empleados}</strong> empleados asignados
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-sync-alt me-1"></i>
+                                    <strong>Patrón:</strong> 
+                                    <span class="pattern-display">${turnoActual.patron || 'Sin patrón'}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="status-badge ${statusClass}">
+                                        <i class="fas fa-${turnoActual.patron ? 'check-circle' : 'exclamation-triangle'}"></i>
+                                        ${statusText}
+                                    </span>
+                                </div>
+                            </div>
+                            <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); eliminarTurno(${turnoActual.id}, '${turnoActual.nombre}')">
+                                <i class="fas fa-trash me-1"></i>Eliminar Turno
+                            </button>
+                        </div>
+                    `;
+                    turnoDetailsContainer.innerHTML = detailsHtml;
+                }
+            }
+
+            // Renderiza el calendario para el mes y año actual
+            function renderCalendar() {
+                calendarDaysContainer.innerHTML = '';
+                const month = currentDate.getMonth();
+                const year = currentDate.getFullYear();
+                
+                mesAnoDisplay.innerHTML = `<i class="fas fa-calendar me-2"></i>${currentDate.toLocaleDateString('es-ES', { month: 'long' }).toUpperCase()} ${year}`;
+
+                const firstDayOfMonth = new Date(year, month, 1);
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                
+                let startingDay = firstDayOfMonth.getDay();
+                if (startingDay === 0) startingDay = 7; 
+                startingDay--;
+
+                // Celdas vacías al principio
+                for (let i = 0; i < startingDay; i++) {
+                    const emptyCell = document.createElement('div');
+                    emptyCell.className = 'calendar-day empty';
+                    calendarDaysContainer.appendChild(emptyCell);
+                }
+                
+                // Celdas de los días del mes
+                const turnoActual = turnos.find(t => t.id == selectedTurnoId);
+                const monthKey = `${year}-${month}`;
+                const schedule = turnoActual ? (turnoActual.schedule[monthKey] || {}) : {};
+
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dayCell = document.createElement('div');
+                    dayCell.className = 'calendar-day animate-slide-in';
+                    dayCell.innerHTML = `<div class="day-number">${day}</div>`;
+                    
+                    const code = schedule[day];
+                    if (code) {
+                        const codeDiv = document.createElement('div');
+                        codeDiv.className = `day-code ${code === 'T' ? 'trabajo' : code === 'D' ? 'descanso' : 'festivo'}`;
+                        codeDiv.textContent = code;
+                        dayCell.appendChild(codeDiv);
+                    }
+                    
+                    dayCell.addEventListener('click', () => toggleDayCode(day));
+                    
+                    calendarDaysContainer.appendChild(dayCell);
+                }
+            }
+            
+            function toggleDayCode(day) {
+                const turnoActual = turnos.find(t => t.id == selectedTurnoId);
+                if (!turnoActual) {
+                    showNotification('Por favor, selecciona un turno primero.', 'error');
+                    return;
+                }
+                
+                const monthKey = `${currentDate.getFullYear()}-${currentDate.getMonth()}`;
+
+                if (!turnoActual.schedule[monthKey]) {
+                    turnoActual.schedule[monthKey] = {};
+                }
+                
+                const currentCode = turnoActual.schedule[monthKey][day];
+                
+                if (!currentCode) {
+                    turnoActual.schedule[monthKey][day] = 'T';
+                } else if (currentCode === 'T') {
+                    turnoActual.schedule[monthKey][day] = 'D';
+                } else if (currentCode === 'D') {
+                    turnoActual.schedule[monthKey][day] = 'F';
+                } else {
+                    delete turnoActual.schedule[monthKey][day];
+                }
+                
+                renderCalendar();
+            }
+
+            // Funciones de exportación mejoradas
+            function mostrarModalExportacion() {
+                if (!selectedTurnoId) {
+                    showNotification('Por favor, selecciona un turno primero.', 'error');
+                    return;
+                }
+
+                const mesActual = currentDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+                document.getElementById('mes-actual-display').textContent = mesActual;
+
+                const mesActualValue = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`;
+                document.getElementById('export-fecha-desde').value = mesActualValue;
+                document.getElementById('export-fecha-hasta').value = mesActualValue;
+
+                document.getElementById('export-mes-actual').checked = true;
+                document.getElementById('rango-export-controls').style.display = 'none';
+                actualizarPreviewExport();
+
+                const exportModal = new bootstrap.Modal(document.getElementById('exportarRangoModal'));
+                exportModal.show();
+            }
+
+            function actualizarPreviewExport() {
+                const tipoExport = document.querySelector('input[name="tipoExport"]:checked').value;
+                let preview = '';
+                let mostrarAlerta = false;
+
+                if (tipoExport === 'actual') {
+                    preview = 'Se exportará 1 mes';
+                } else {
+                    const fechaDesde = document.getElementById('export-fecha-desde').value;
+                    const fechaHasta = document.getElementById('export-fecha-hasta').value;
+
+                    if (fechaDesde && fechaHasta) {
+                        const inicio = new Date(fechaDesde + '-01');
+                        const fin = new Date(fechaHasta + '-01');
+                        
+                        if (inicio <= fin) {
+                            let diferenciaMeses = (fin.getFullYear() - inicio.getFullYear()) * 12;
+                            diferenciaMeses += fin.getMonth() - inicio.getMonth() + 1;
+                            
+                            preview = `Se exportarán ${diferenciaMeses} mes${diferenciaMeses === 1 ? '' : 'es'}`;
+                            mostrarAlerta = diferenciaMeses > 6;
+                        } else {
+                            preview = 'La fecha inicial debe ser anterior a la final';
+                        }
+                    } else {
+                        preview = 'Seleccione ambas fechas';
+                    }
+                }
+
+                document.getElementById('preview-export').textContent = preview;
+                document.getElementById('alert-rango-grande').style.display = mostrarAlerta ? 'block' : 'none';
+            }
+
+            function realizarExportacion(tipo) {
+                const tipoExport = document.querySelector('input[name="tipoExport"]:checked').value;
+                let params = new URLSearchParams();
+
+                if (tipoExport === 'actual') {
+                    params.append('ano', currentDate.getFullYear());
+                    params.append('mes', currentDate.getMonth() + 1);
+                } else {
+                    const fechaDesde = document.getElementById('export-fecha-desde').value;
+                    const fechaHasta = document.getElementById('export-fecha-hasta').value;
+
+                    if (!fechaDesde || !fechaHasta) {
+                        showNotification('Por favor, selecciona ambas fechas.', 'error');
+                        return;
+                    }
+
+                    const inicio = new Date(fechaDesde + '-01');
+                    const fin = new Date(fechaHasta + '-01');
+
+                    if (inicio > fin) {
+                        showNotification('La fecha inicial debe ser anterior a la fecha final.', 'error');
+                        return;
+                    }
+
+                    params.append('fecha_desde', fechaDesde);
+                    params.append('fecha_hasta', fechaHasta);
+                }
+
+                bootstrap.Modal.getInstance(document.getElementById('exportarRangoModal')).hide();
+
+                const ruta = tipo === 'excel' ? '/exportar_calendario_excel' : '/exportar_calendario_pdf';
+                const boton = tipo === 'excel' ? exportExcelBtn : exportPdfBtn;
+                
+                setLoadingState(boton, true);
+                showNotification(`Preparando archivo ${tipo.toUpperCase()}...`, 'success');
+
+                const link = document.createElement('a');
+                link.href = `${ruta}?${params.toString()}`;
+                if (tipo === 'pdf') {
+                    link.target = '_blank';
+                }
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                setTimeout(() => {
+                    setLoadingState(boton, false);
+                    const mensaje = tipo === 'excel' 
+                        ? 'Archivo Excel descargado exitosamente.' 
+                        : 'Archivo PDF listo para visualizar.';
+                    showNotification(mensaje, 'success');
+                }, 2000);
+            }
+
+            // --- EVENT LISTENERS ---
+            prevMonthBtn.addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                renderCalendar();
+            });
+
+            nextMonthBtn.addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                renderCalendar();
+            });
+
+            turnosSelector.on('select2:select', function (e) {
+                selectedTurnoId = e.params.data.id;
+                renderTurnoDetails();
+                renderCalendar();
+            });
+
+            aplicarPlantillaBtn.addEventListener('click', () => {
+                const turnoActual = turnos.find(t => t.id == selectedTurnoId);
+                if (!turnoActual) {
+                    showNotification('Por favor, selecciona un turno primero.', 'error');
+                    return;
+                }
+                
+                if (!turnoActual.patron) {
+                    showNotification('Este turno no tiene un patrón definido.', 'error');
+                    return;
+                }
+                
+                document.getElementById('patron-actual').textContent = turnoActual.patron;
+                const aplicarPlantillaModal = new bootstrap.Modal(document.getElementById('aplicarPlantillaModal'));
+                aplicarPlantillaModal.show();
+            });
+
+            aplicarRangoBtn.addEventListener('click', () => {
+                const turnoActual = turnos.find(t => t.id == selectedTurnoId);
+                if (!turnoActual) {
+                    showNotification('Por favor, selecciona un turno primero.', 'error');
+                    return;
+                }
+                
+                if (!turnoActual.patron) {
+                    showNotification('Este turno no tiene un patrón definido.', 'error');
+                    return;
+                }
+                
+                const ahora = new Date();
+                const mesActual = `${ahora.getFullYear()}-${(ahora.getMonth() + 1).toString().padStart(2, '0')}`;
+                const mesSiguiente = new Date(ahora.getFullYear(), ahora.getMonth() + 1, 1);
+                const mesSiguienteFormatted = `${mesSiguiente.getFullYear()}-${(mesSiguiente.getMonth() + 1).toString().padStart(2, '0')}`;
+                
+                document.getElementById('fecha-inicio').value = mesActual;
+                document.getElementById('fecha-fin').value = mesSiguienteFormatted;
+                document.getElementById('patron-rango').textContent = turnoActual.patron;
+                
+                cargarMesesConfigurados(turnoActual.id);
+                
+                const aplicarRangoModal = new bootstrap.Modal(document.getElementById('aplicarRangoModal'));
+                aplicarRangoModal.show();
+            });
+
+            exportExcelBtn.addEventListener('click', mostrarModalExportacion);
+            exportPdfBtn.addEventListener('click', mostrarModalExportacion);
+
+            document.addEventListener('change', function(e) {
+                if (e.target.name === 'tipoExport') {
+                    const rangoControls = document.getElementById('rango-export-controls');
+                    if (e.target.value === 'rango') {
+                        rangoControls.style.display = 'grid';
+                    } else {
+                        rangoControls.style.display = 'none';
+                    }
+                    actualizarPreviewExport();
+                }
+
+                if (e.target.id === 'export-fecha-desde' || e.target.id === 'export-fecha-hasta') {
+                    actualizarPreviewExport();
+                }
+            });
+
+            document.getElementById('confirmar-export-excel').addEventListener('click', () => realizarExportacion('excel'));
+            document.getElementById('confirmar-export-pdf').addEventListener('click', () => realizarExportacion('pdf'));
+
+            confirmarPlantillaBtn.addEventListener('click', aplicarPlantilla);
+            confirmarRangoBtn.addEventListener('click', aplicarPlantillaRango);
+            copiarMesBtn.addEventListener('click', copiarMesAnterior);
+
+            // --- FUNCIONES DE INTERACCIÓN CON EL SERVIDOR MEJORADAS ---
+            function guardarCambios() {
+                if (!selectedTurnoId) {
+                    showNotification('Por favor, selecciona un turno primero.', 'error');
+                    return;
+                }
+
+                const turnoActual = turnos.find(t => t.id == selectedTurnoId);
+                const monthKey = `${currentDate.getFullYear()}-${currentDate.getMonth()}`;
+                const calendarioParaGuardar = turnoActual.schedule[monthKey] || {};
+
+                setLoadingState(guardarCambiosBtn, true);
+
+                fetch('/guardar_calendario_turno', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        turno_id: selectedTurnoId,
+                        ano: currentDate.getFullYear(),
+                        mes: currentDate.getMonth() + 1,
+                        calendario: calendarioParaGuardar
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    setLoadingState(guardarCambiosBtn, false);
+                    if (data.status === 'success') {
+                        showNotification(data.message, 'success');
+                    } else {
+                        showNotification('Error al guardar: ' + data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    setLoadingState(guardarCambiosBtn, false);
+                    console.error('Error:', error);
+                    showNotification('Error de conexión al guardar los cambios.', 'error');
+                });
+            }
+
+            function aplicarPlantilla() {
+                if (!selectedTurnoId) {
+                    showNotification('Por favor, selecciona un turno primero.', 'error');
+                    return;
+                }
+
+                const turnoActual = turnos.find(t => t.id == selectedTurnoId);
+                const inicioCiclo = parseInt(document.getElementById('inicio-ciclo').value) || 1;
+
+                if (!turnoActual.patron || !turnoActual.patron.match(/^[0-9]+[xX][0-9]+$/)) {
+                    showNotification('El patrón del turno es inválido. Debe ser formato: número + x + número (ej: 6x1)', 'error');
+                    return;
+                }
+
+                setLoadingState(confirmarPlantillaBtn, true);
+
+                fetch('/aplicar_plantilla_turno', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        turno_id: selectedTurnoId,
+                        patron: turnoActual.patron.toLowerCase(),
+                        ano: currentDate.getFullYear(),
+                        mes: currentDate.getMonth() + 1,
+                        inicio_ciclo: inicioCiclo
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    setLoadingState(confirmarPlantillaBtn, false);
+                    if (data.status === 'success') {
+                        bootstrap.Modal.getInstance(document.getElementById('aplicarPlantillaModal')).hide();
+                        
+                        const monthKey = `${currentDate.getFullYear()}-${currentDate.getMonth()}`;
+                        if (!turnoActual.schedule[monthKey]) {
+                            turnoActual.schedule[monthKey] = {};
+                        }
+                        
+                        Object.assign(turnoActual.schedule[monthKey], data.calendario);
+                        renderCalendar();
+                        showNotification(data.message, 'success');
+                    } else {
+                        showNotification('Error al aplicar plantilla: ' + data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    setLoadingState(confirmarPlantillaBtn, false);
+                    console.error('Error:', error);
+                    showNotification('Error de conexión al aplicar la plantilla.', 'error');
+                });
+            }
+
+            function aplicarPlantillaRango() {
+                if (!selectedTurnoId) {
+                    showNotification('Por favor, selecciona un turno primero.', 'error');
+                    return;
+                }
+
+                const turnoActual = turnos.find(t => t.id == selectedTurnoId);
+                const fechaInicio = document.getElementById('fecha-inicio').value;
+                const fechaFin = document.getElementById('fecha-fin').value;
+                const inicioCiclo = parseInt(document.getElementById('inicio-ciclo-rango').value) || 1;
+
+                if (!fechaInicio || !fechaFin) {
+                    showNotification('Por favor, selecciona un rango de fechas válido.', 'error');
+                    return;
+                }
+
+                if (!turnoActual.patron || !turnoActual.patron.match(/^[0-9]+[xX][0-9]+$/)) {
+                    showNotification('El patrón del turno es inválido. Debe ser formato: número + x + número (ej: 6x1)', 'error');
+                    return;
+                }
+
+                setLoadingState(confirmarRangoBtn, true);
+                showNotification('Aplicando plantilla a rango de meses...', 'success');
+
+                fetch('/aplicar_plantilla_rango', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        turno_id: selectedTurnoId,
+                        patron: turnoActual.patron.toLowerCase(),
+                        fecha_inicio: fechaInicio,
+                        fecha_fin: fechaFin,
+                        inicio_ciclo: inicioCiclo
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    setLoadingState(confirmarRangoBtn, false);
+                    
+                    if (data.status === 'success') {
+                        console.log(`✅ Registros guardados: ${data.registros_guardados}`);
+                        
+                        bootstrap.Modal.getInstance(document.getElementById('aplicarRangoModal')).hide();
+                        
+                        showNotification(data.message + '. Recargando la página...', 'success');
+                        setTimeout(() => {
+                           location.reload();
+                        }, 2000);
+                        
+                    } else {
+                        showNotification('Error al aplicar plantilla: ' + data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    setLoadingState(confirmarRangoBtn, false);
+                    console.error('❌ Error:', error);
+                    showNotification('Error de conexión al aplicar la plantilla.', 'error');
+                });
+            }
+
+            function cargarMesesConfigurados(turnoId) {
+                fetch(`/obtener_meses_con_calendario/${turnoId}`)
+                .then(response => response.json())
+                .then(meses => {
+                    const contenedor = document.getElementById('meses-configurados');
+                    if (meses.length === 0) {
+                        contenedor.innerHTML = '<p class="text-muted"><i class="fas fa-info-circle me-2"></i>No hay meses configurados para este turno.</p>';
+                    } else {
+                        let html = '<p><i class="fas fa-exclamation-triangle me-2 text-warning"></i>Meses con configuración existente (se sobrescribirán):</p><div class="row g-2">';
+                        meses.forEach(mes => {
+                            const [ano, mesNum] = mes.split('-');
+                            const nombreMes = new Date(ano, mesNum - 1).toLocaleString('es-ES', { month: 'long' });
+                            html += `
+                                <div class="col-md-6">
+                                    <div class="alert alert-warning py-2 mb-0">
+                                        <i class="fas fa-calendar me-2"></i>
+                                        <strong>${nombreMes} ${ano}</strong>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        html += '</div>';
+                        contenedor.innerHTML = html;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al cargar meses configurados:', error);
+                    document.getElementById('meses-configurados').innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Error al cargar meses configurados.
+                        </div>
+                    `;
+                });
+            }
+            
+            window.eliminarTurno = function(id, nombre) {
+                if (confirm(`¿Estás seguro de que quieres eliminar el turno "${nombre}"? Esta acción no se puede deshacer.`)) {
+                    fetch(`/eliminar_turno/${id}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            showNotification(data.message, 'success');
+                            setTimeout(() => location.reload(), 1500);
+                        } else {
+                            showNotification('Error: ' + data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showNotification('Error de conexión al eliminar el turno.', 'error');
+                    });
+                }
+            }
+
+            function copiarMesAnterior() {
+                if (!selectedTurnoId) {
+                    showNotification('Por favor, selecciona un turno primero.', 'error');
+                    return;
+                }
+
+                const mesAnterior = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+                
+                setLoadingState(copiarMesBtn, true);
+
+                fetch('/copiar_calendario_mes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        turno_id: selectedTurnoId,
+                        ano_origen: mesAnterior.getFullYear(),
+                        mes_origen: mesAnterior.getMonth() + 1,
+                        ano_destino: currentDate.getFullYear(),
+                        mes_destino: currentDate.getMonth() + 1
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    setLoadingState(copiarMesBtn, false);
+                    if (data.status === 'success') {
+                        showNotification(data.message, 'success');
+                        setTimeout(() => {
+                            location.reload();
+                        }, 2000);
+                    } else {
+                        const turnoActual = turnos.find(t => t.id == selectedTurnoId);
+                        const tienePatron = turnoActual && turnoActual.patron;
+                        
+                        let errorMessage = data.message;
+                        if (tienePatron) {
+                            errorMessage += ' ¿Desea aplicar el patrón automáticamente?';
+                            if (confirm(errorMessage)) {
+                                aplicarPlantilla();
+                            }
+                        } else {
+                            showNotification(errorMessage, 'error');
+                        }
+                    }
+                })
+                .catch(error => {
+                    setLoadingState(copiarMesBtn, false);
+                    console.error('Error:', error);
+                    showNotification('Error de conexión al copiar el mes.', 'error');
+                });
+            }
+            
+            // Función para mostrar modal de importar Excel
+            window.mostrarImportarExcel = function() {
+                showNotification('Función de importar Excel próximamente disponible.', 'warning');
+            }
+
+            // --- INICIALIZACIÓN ---
+            // Cargar turnos en el selector
+            turnos.forEach(t => {
+                turnosSelector.append(new Option(t.nombre, t.id, false, false));
+            });
+
+            // Seleccionar el primer turno por defecto
+            if (turnos.length > 0) {
+                selectedTurnoId = turnos[0].id;
+                turnosSelector.val(selectedTurnoId).trigger('change');
+            }
+
+            renderCalendar();
+            renderTurnoDetails();
+        });
+    </script>
+</body>
+</html>
