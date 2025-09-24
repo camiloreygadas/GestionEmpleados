@@ -509,16 +509,7 @@ def agregar_empleado():
         nuevo_empleado_id = cursor.lastrowid
         
         conn.commit()
-        
-        registrar_auditoria(
-            empleado_id=nuevo_empleado_id,
-            usuario=session.get('user_email', 'sistema'),
-            tipo_cambio='system',
-            descripcion='Empleado creado en el sistema',
-            ip=request.remote_addr,
-            user_agent=request.headers.get('User-Agent')
-        )
-        
+      
         flash('Empleado agregado con éxito.', 'success')
         
     except Exception as e:
